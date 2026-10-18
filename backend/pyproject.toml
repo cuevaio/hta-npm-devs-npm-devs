@@ -14,6 +14,7 @@ dev = [
     "pytest>=8.3",
     "httpx2>=2.13",
     "testcontainers[postgres]>=4.9",
+    "polars>=2.0.0",
 ]
 
 [tool.pytest.ini_options]

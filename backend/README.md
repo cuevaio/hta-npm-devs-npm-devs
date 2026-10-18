@@ -70,3 +70,13 @@ tools/wizard-gcp.sh
 Asistente paso a paso (#10): proyecto y facturación, Cloud SQL Postgres 16 + PostGIS, Secret Manager, imagen en Artifact Registry y Cloud Run con una sola instancia (ADR 0005). Es idempotente: volver a correrlo reutiliza lo que existe y redespliega la imagen del commit actual. Los valores locales quedan en `.env.gcp`, ignorado por git.
 
 En Cloud Run, el backend recibe `DATABASE_URL` (conexión por socket a Cloud SQL) y `API_KEY` desde Secret Manager.
+
+## Datos y replay
+
+Las rutas de vehículo, flota y replay leen de Postgres; al arrancar con `DATABASE_URL` la app aplica las migraciones de `migrations/` (registradas en `schema_migrations`) y el replay queda en pausa. Para cargar la salida del pipeline de `data/` (nunca se copia al repositorio):
+
+```bash
+uv run python scripts/load_demo_data.py --source ../data/out --database-url "$DATABASE_URL"
+```
+
+Es idempotente (recarga desde cero). Días 1–12 van a `telemetry_reading` como historia y los días 13–19 a `telemetry_source`, que el replay reproduce.

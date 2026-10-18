@@ -1,0 +1,11 @@
+freight_id,trip_id,alias,driver_id,client,cargo,corridor,sentido,origin_terminal,dest_terminal,planned_departure,provenance
+F-102,T07-V01,T07,D-08,Lácteos Pampa,Textil en fardos,K01-K14,vuelta,K14,K01,2020-04-01T19:58:40Z,synthetic_demo
+F-106,T03-V01,T03,D-01,Agroexport Sur,Perfiles de acero,K01-K14,ida,K01,K14,2020-04-03T19:34:51Z,synthetic_demo
+F-108,T07-V02,T07,D-08,Agroexport Sur,Textil en fardos,K01-K14,ida,K01,K14,2020-04-04T19:21:31Z,synthetic_demo
+F-114,T03-V02,T03,D-01,Aceros del Norte,Abarrotes paletizados,K01-K14,vuelta,K14,K01,2020-04-06T16:54:19Z,synthetic_demo
+F-117,T07-V03,T07,D-08,Lácteos Pampa,Textil en fardos,K01-K14,vuelta,K14,K01,2020-04-07T18:26:34Z,synthetic_demo
+F-122,T03-V03,T03,D-01,Agroexport Sur,Textil en fardos,K01-K14,ida,K01,K14,2020-04-09T19:28:43Z,synthetic_demo
+F-124,T07-V04,T07,D-07,Distribuidora Andina,Abarrotes paletizados,K01-K14,ida,K01,K14,2020-04-10T19:33:25Z,synthetic_demo
+F-129,T03-V04,T03,D-01,Lácteos Pampa,Lácteos refrigerados,K01-K14,vuelta,K14,K01,2020-04-12T20:49:23Z,synthetic_demo
+F-132,T07-V05,T07,D-09,Lácteos Pampa,Textil en fardos,K01-K14,vuelta,K14,K01,2020-04-13T18:48:20Z,synthetic_demo
+F-137,T03-V05,T03,D-01,Agroexport Sur,Textil en fardos,K01-K14,ida,K01,K14,2020-04-15T18:04:29Z,synthetic_demo

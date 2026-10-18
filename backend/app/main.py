@@ -1,6 +1,8 @@
+import asyncio
 import hmac
 import os
-from datetime import UTC, datetime
+from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Annotated, Callable
 
 import psycopg
@@ -9,6 +11,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader
 
 from . import examples as ex
+from . import reads
+from .db import migrate
+from .replay import Clock, ReplayEngine, system_clock
 from .schemas import (
     AlertList, Bottlenecks, ControlReplayRequest, Envelope, ErrorBody, FleetOverview, FuelAnalysis,
     Provenance, ReplayState, TimeRange, TripStatus, VehicleStatus,
@@ -40,17 +45,13 @@ def example_response(model, body: dict) -> dict:
     }
 
 
+REAL_PROVENANCE = [Provenance.fead_observed, Provenance.synthetic_demo]
+
 NOT_FOUND = {404: {"model": ErrorBody, "description": "Alias o viaje desconocido"}}
 AUTH_ERRORS = {
     401: {"model": ErrorBody, "description": "X-API-Key ausente o incorrecta"},
     503: {"model": ErrorBody, "description": "API_KEY no configurada en el servidor"},
 }
-
-
-def _vehicle(alias: str) -> VehicleStatus:
-    if alias not in ex.VEHICLE_STATUS:
-        raise HTTPException(status_code=404, detail=f"Vehículo desconocido: {alias}")
-    return ex.VEHICLE_STATUS[alias]
 
 
 def _trip_id(trip_id: str) -> str:
@@ -63,13 +64,28 @@ def create_app(
     database_url: str | None = None,
     api_key: str | None = None,
     cors_origins: list[str] | None = None,
+    clock: Clock = system_clock,
+    tick_interval: float = 1.0,
 ) -> FastAPI:
     database_url = database_url or os.environ.get("DATABASE_URL")
     api_key = api_key or os.environ.get("API_KEY") or None
     if cors_origins is None:
         cors_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 
+    engine = ReplayEngine(database_url, clock) if database_url else None
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        task = None
+        if engine:
+            await asyncio.to_thread(migrate, database_url)  # el replay arranca en pausa
+            task = asyncio.create_task(engine.run(tick_interval))
+        yield
+        if task:
+            task.cancel()
+
     app = FastAPI(
+        lifespan=lifespan,
         title="Fleet Intelligence · Domain API",
         version="0.1.0",
         description=(
@@ -80,8 +96,7 @@ def create_app(
         ),
     )
     app.state.api_key = api_key
-    app.state.replay = ex.INITIAL_REPLAY
-    app.state.replay_updated_at = ex.UPDATED_AT
+    app.state.replay_engine = engine
 
     app.add_middleware(
         CORSMiddleware,
@@ -104,12 +119,23 @@ def create_app(
 
     # --- Handlers compartidos por las rutas públicas y las de tools ---
 
+    def need_engine() -> ReplayEngine:
+        if engine is None:
+            raise HTTPException(status_code=503, detail="database unavailable: DATABASE_URL not set")
+        return engine
+
     def fleet() -> dict:
-        return envelope(ex.FLEET, ex.PROVENANCE, TimeRange(from_=ex.T0, to=ex.NOW))
+        need_engine()
+        data, desde, hasta, updated = reads.fleet_overview(database_url)
+        return envelope(data, REAL_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
 
     def vehicle(alias: str) -> dict:
-        v = _vehicle(alias)
-        return envelope(v, ex.PROVENANCE, TimeRange(from_=ex.T0, to=v.hora_evento))
+        need_engine()
+        found = reads.vehicle_status(database_url, alias)
+        if found is None:
+            raise HTTPException(status_code=404, detail=f"Vehículo desconocido: {alias}")
+        data, desde, hasta, updated = found
+        return envelope(data, REAL_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
 
     def trip(trip_id: str) -> dict:
         t = ex.TRIPS[_trip_id(trip_id)]
@@ -127,16 +153,19 @@ def create_app(
         return envelope(AlertList(alertas=[ex.ALERTA]), ex.PROVENANCE_ALERTS, TimeRange(from_=ex.T0, to=ex.NOW))
 
     def replay_state() -> dict:
-        r: ReplayState = app.state.replay
-        return envelope(r, [Provenance.fead_observed], TimeRange(from_=r.inicio, to=r.fin), app.state.replay_updated_at)
+        r, updated = need_engine().state()
+        return envelope(r, [Provenance.fead_observed], TimeRange(from_=r.inicio, to=r.fin), updated)
 
-    ex_fleet = fleet()
-    ex_vehicle = vehicle("T03")
+    # Ejemplos del contrato (OpenAPI y mock): no dependen de la base.
+    v_ex = ex.VEHICLE_STATUS["T03"]
+    ex_fleet = envelope(ex.FLEET, ex.PROVENANCE, TimeRange(from_=ex.T0, to=ex.NOW))
+    ex_vehicle = envelope(v_ex, ex.PROVENANCE, TimeRange(from_=ex.T0, to=v_ex.hora_evento))
     ex_trip = trip("V-001")
     ex_fuel = fuel("V-001")
     ex_bottlenecks = bottlenecks("V-001")
     ex_alerts = alerts()
-    ex_replay = replay_state()
+    r_ex = ex.INITIAL_REPLAY
+    ex_replay = envelope(r_ex, [Provenance.fead_observed], TimeRange(from_=r_ex.inicio, to=r_ex.fin), ex.UPDATED_AT)
 
     public = APIRouter(prefix="/v1", tags=["dashboard (público)"])
     tools = APIRouter(prefix="/v1/tools", tags=["tools (X-API-Key)"], dependencies=[Depends(require_api_key)])
@@ -173,23 +202,22 @@ def create_app(
     add(tools, "/get_alerts", "get_alerts", lambda: alerts(), AlertList, ex_alerts, "Tool get_alerts", AUTH_ERRORS)
 
     def control_replay(body: ControlReplayRequest) -> dict:
-        r: ReplayState = app.state.replay
+        eng = need_engine()
         if body.action == "play":
-            r = r.model_copy(update={"estado": "playing"})
+            eng.play()
         elif body.action == "pause":
-            r = r.model_copy(update={"estado": "paused"})
+            eng.pause()
         elif body.action == "set_speed":
             if body.speed is None:
                 raise HTTPException(status_code=422, detail="set_speed requiere speed")
-            r = r.model_copy(update={"velocidad": body.speed})
+            eng.set_speed(body.speed)
         else:
             if body.to_event_time is None:
                 raise HTTPException(status_code=422, detail="seek requiere to_event_time")
+            r, _ = eng.state()
             if not r.inicio <= body.to_event_time <= r.fin:
                 raise HTTPException(status_code=422, detail="to_event_time fuera del rango del replay")
-            r = r.model_copy(update={"hora_replay": body.to_event_time})
-        app.state.replay = r
-        app.state.replay_updated_at = datetime.now(UTC)
+            eng.seek(body.to_event_time)
         return replay_state()
 
     tools.add_api_route(
