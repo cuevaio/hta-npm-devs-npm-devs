@@ -12,6 +12,16 @@ python -m http.server 8787
 
 Hace falta un servidor (no `file://`) porque la página carga `assets/tokens.css` por ruta relativa.
 
+## Tests
+
+```sh
+npm ci
+npx playwright install chromium   # una vez
+npm test
+```
+
+Playwright levanta el servidor estático y verifica que la landing carga sin errores. Las dependencias de `package.json` son solo para los tests: la landing sigue sin build.
+
 ## Qué hay acá
 
 | Archivo | Qué es |
