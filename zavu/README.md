@@ -1,42 +1,47 @@
-# Zavu · agente de soporte "Ada"
+# Zavu · agente Fleet Intelligence
 
-Zavu Function con un agente (`defineAgent`) y dos herramientas (`lookup_order`, `escalate`).
-Corre en Zavu Cloud; esta carpeta es autocontenida y se despliega desde aquí.
+Zavu Function con el agente de WhatsApp del gestor de flota (`defineAgent`, español, solo WhatsApp, sin voz) y las 6 tools de lectura de la Domain API: `get_fleet_overview`, `get_vehicle_status`, `get_trip_status`, `get_fuel_analysis`, `get_operational_bottlenecks`, `get_alerts`. `control_replay` no está aquí (solo MCP).
+
+Cada tool hace un único `fetch` a `GET ${DOMAIN_API_URL}/v1/tools/<tool>` con `X-API-Key` y devuelve el sobre tal cual (ADR 0004). Si falta configuración o la API responde 4xx/5xx, devuelve `{ error, status, detail }` y el agente dice que no tiene el dato. El prompt limita el agente a la flota, separa Hechos de Hipótesis, declara procedencia y hora (UTC+8) y aclara que es un replay.
 
 ## Requisitos
 
 - Node 18+ (probado con 22)
-- Acceso al proyecto de Zavu (`.zavu/config.json`) y sesión iniciada: `npx zavudev login`
-- [Bun](https://bun.sh), solo para `npx zavudev fn invoke`
+- Acceso al proyecto de Zavu (`.zavu/config.json`, no editar) y sesión iniciada: `npx zavudev login`
 
-## Puesta en marcha
+## Variables
+
+| Variable | Qué es |
+|---|---|
+| `SENDER_ID` | Sender de Zavu del agente |
+| `DOMAIN_API_URL` | URL base de la Domain API, sin `/v1` |
+| `DOMAIN_API_KEY` | API key de servicio (`X-API-Key`) |
+
+## Tests
 
 ```sh
 npm ci
-npx tsc -p .          # chequeo de tipos, no genera archivos
-cp .env.example .env  # completar SENDER_ID para pruebas locales
+npm run typecheck
+npm test   # levanta Prism desde ../backend/openapi.json en el puerto 4011 y lo apaga al final
 ```
 
-## Probar y desplegar
+## Desplegar
 
 ```sh
-npx zavudev fn invoke --tool lookup_order --args '{"order_id":"ORD-001"}'
-npx zavudev fn secrets set SENDER_ID <senderId>   # una vez por función
+npx zavudev fn secrets set SENDER_ID <senderId>
+npx zavudev fn secrets set DOMAIN_API_URL <url>
+npx zavudev fn secrets set DOMAIN_API_KEY <clave>
 npx zavudev deploy
 ```
 
-## Qué hay aquí
+Para apuntar a Cloud Run cuando exista el tracer, usa su URL como `DOMAIN_API_URL` y la API key real como `DOMAIN_API_KEY`, y vuelve a ejecutar `fn secrets set`. Con el simulado, basta una URL pública de Prism (`backend/scripts/mock-api.sh`).
+
+## Archivos
 
 | Archivo | Qué es |
 |---|---|
-| `index.ts` | Prompt del agente, canales, voz y herramientas |
-| `.zavu/config.json` | Vincula la carpeta con la función en Zavu. **No borrar ni editar**: sin el `functionId` no se puede desplegar |
-| `.env.example` | Variables para pruebas locales. `.env` está en `.gitignore` |
-
-Solo se despliega lo que `index.ts` importa por ruta relativa, y nunca archivos fuera de esta carpeta (`../`).
-
-## Pendiente
-
-- `lookup_order` devuelve datos fijos (`"shipped"`): conectar al backend real antes de exponerlo a clientes.
-- `escalate` solo hace `console.log`: falta notificar a una persona.
-- El prompt es de soporte genérico en inglés; adaptarlo al caso del transportista.
+| `index.ts` | `defineAgent` y un `defineTool` por tool |
+| `prompt.ts` | Prompt del agente |
+| `tools.ts` | `TOOL_DEFS` y `callDomainApi` (módulos importados por ruta relativa: Zavu solo despliega lo que `index.ts` importa, nunca `../`) |
+| `test/` | vitest contra Prism |
+| `.zavu/config.json` | Vincula la carpeta con la función. **No borrar ni editar** |
