@@ -3,7 +3,7 @@ import { readSnapshot } from "./api/client";
 import { FleetMap } from "./components/FleetMap";
 import { ProvenanceChips } from "./components/Provenance";
 import { VehicleList } from "./components/VehicleList";
-import { horaUtc8 } from "./format";
+import { horaLima } from "./format";
 import { usePolling } from "./usePolling";
 
 export function App() {
@@ -21,14 +21,14 @@ export function App() {
             <span className={`chip replay-${snap.replay.data.estado}`}>
               {snap.replay.data.estado === "playing" ? "Replay en curso" : "Replay en pausa"}
             </span>
-            <span className="dato">Hora de replay {horaUtc8(snap.replay.data.hora_replay)}</span>
+            <span className="dato">Hora de replay {horaLima(snap.replay.data.hora_replay)}</span>
             <span className="dato">Velocidad {snap.replay.data.velocidad}x</span>
             <ProvenanceChips items={snap.fleet.provenance} />
           </div>
         )}
       </header>
       <p className="banner" role="note">
-        Replay de telemetría real de una flota en China (FEAD, abril 2020); fletes, conductores y mensajes sintéticos. No es tiempo real.
+        Replay de una flota simulada sobre carreteras reales de Perú: telemetría, fletes, conductores y mensajes sintéticos. No es tiempo real.
       </p>
       {poll.status === "error" && (
         <p className="alert" role="alert">No se pudo leer la Domain API</p>

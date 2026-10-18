@@ -26,6 +26,10 @@ TELEMETRY = ["alias", "event_time", "lat", "lon", "speed_kmh", "rpm", "fuel_rate
 TRIPS = ["trip_id", "alias", "corridor", "sentido", "origin_terminal", "dest_terminal", "t_start", "t_end"]
 FREIGHTS = ["trip_id", "freight_id", "alias", "driver_id", "client", "cargo", "corridor", "sentido",
             "origin_terminal", "dest_terminal", "planned_departure", "provenance"]
+# Columnas que solo trae la flota de Perú (ADR 0012); se cargan si están.
+TRIPS_EXTRA = ["km", "liters"]
+FREIGHTS_EXTRA = ["client_ruc", "tonnage_t", "gre_remitente", "gre_transportista", "tarifa_pen", "igv_pen",
+                  "total_pen", "detraccion_pen", "fuel_liters", "fuel_cost_pen"]
 DRIVERS = ["driver_id", "name", "provenance"]
 PASSES = ["trip_id", "alias", "corridor", "sentido", "h3_cell", "t_start", "t_end", "day", "km", "liters",
           "l_per_100km", "in_baseline"]
@@ -55,6 +59,10 @@ def _copy(conn: psycopg.Connection, table: str, df: pl.DataFrame, columns: list[
     with conn.cursor().copy(f"COPY {table} ({', '.join(columns)}) FROM STDIN WITH (FORMAT csv, HEADER true)") as cp:
         cp.write(buf.getvalue())
     return df.height
+
+
+def _with_extra(df: pl.DataFrame, columns: list[str], extra: list[str]) -> list[str]:
+    return columns + [c for c in extra if c in df.columns]
 
 
 def _telemetry_files(source: Path) -> list[Path]:
@@ -92,8 +100,9 @@ def load(source: Path, database_url: str, replay_start: datetime = REPLAY_START)
         aliases |= set(trips["alias"].unique())
         conn.execute("INSERT INTO vehicles (alias) SELECT unnest(%s::text[]) ON CONFLICT DO NOTHING", (sorted(aliases),))
         _copy(conn, "drivers", pl.read_csv(source / "drivers.csv"), DRIVERS)
-        _copy(conn, "trips", trips, TRIPS)
-        _copy(conn, "freights", _utc(pl.read_csv(source / "freights.csv"), "planned_departure"), FREIGHTS)
+        _copy(conn, "trips", trips, _with_extra(trips, TRIPS, TRIPS_EXTRA))
+        freights = _utc(pl.read_csv(source / "freights.csv", infer_schema_length=None), "planned_departure")
+        _copy(conn, "freights", freights, _with_extra(freights, FREIGHTS, FREIGHTS_EXTRA))
         _copy(conn, "passes", _utc(pl.read_csv(source / "passes_demo.csv"), "t_start", "t_end"), PASSES)
         _copy(conn, "baselines", pl.read_csv(source / "baseline.csv"), BASELINES)
         _copy(conn, "driver_reports", _utc(pl.read_csv(source / "driver_reports.csv"), "reported_at"), REPORTS)

@@ -6,7 +6,7 @@ import { callTool, type DomainApiEnv } from "./domain-api";
 type ControlReplayBody = components["schemas"]["ControlReplayRequest"];
 
 const REPLAY =
-  "Los datos son un replay de telemetría histórica de FEAD, nunca tiempo real. " +
+  "Los datos son un replay de telemetría histórica de una flota simulada en Perú, nunca tiempo real. " +
   "La respuesta es un sobre con procedencia, rango de tiempo y updated_at.";
 
 const tripId = z.string().describe("Identificador del viaje, p. ej. V-001");

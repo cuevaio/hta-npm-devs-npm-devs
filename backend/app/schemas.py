@@ -191,3 +191,68 @@ class ControlReplayRequest(BaseModel):
     action: Literal["play", "pause", "seek", "set_speed"]
     speed: float | None = Field(None, gt=0, description="Requerido con set_speed")
     to_event_time: AwareDatetime | None = Field(None, description="Requerido con seek (hora del evento, UTC)")
+
+
+EstadoFlete = Literal["programado", "en_curso", "finalizado"]
+
+
+class FleteDetalle(BaseModel):
+    """Flete con su capa comercial (soles). Combustible y margen solo cuando el viaje ya terminó en el replay."""
+
+    flete_id: str
+    viaje_id: str
+    vehiculo: str
+    conductor: str | None
+    cliente: str
+    ruc_cliente: str | None = Field(description="RUC ficticio de la demo")
+    carga: str
+    toneladas: float | None
+    corredor: str
+    sentido: Sentido
+    origen: str
+    destino: str
+    salida: AwareDatetime
+    llegada: AwareDatetime | None = Field(description="Solo si el viaje ya terminó")
+    estado: EstadoFlete
+    gre_remitente: str | None
+    gre_transportista: str | None
+    tarifa_pen: float | None = Field(description="Flete sin IGV")
+    igv_pen: float | None
+    total_pen: float | None
+    detraccion_pen: float | None = Field(description="4 % del total si supera S/ 400")
+    km: float | None
+    litros: float | None
+    l_100km: float | None
+    combustible_pen: float | None
+    margen_pen: float | None = Field(description="Tarifa sin IGV menos combustible")
+
+
+class AgregadoFletes(BaseModel):
+    """Totales de los fletes finalizados de un grupo (corredor, cliente, vehículo o día)."""
+
+    clave: str
+    fletes: int
+    toneladas: float
+    ingresos_pen: float
+    combustible_pen: float
+    margen_pen: float
+    margen_pct: float | None
+    l_100km: float | None
+
+
+class ResumenFletes(AgregadoFletes):
+    en_curso: int
+    programados: int
+    igv_pen: float
+    detraccion_pen: float
+    litros: float
+    km: float
+
+
+class FreightBoard(BaseModel):
+    resumen: ResumenFletes
+    por_corredor: list[AgregadoFletes]
+    por_cliente: list[AgregadoFletes]
+    por_vehiculo: list[AgregadoFletes]
+    por_dia: list[AgregadoFletes] = Field(description="clave = día (YYYY-MM-DD, hora de Lima) de llegada")
+    fletes: list[FleteDetalle]

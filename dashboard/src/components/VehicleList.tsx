@@ -1,5 +1,5 @@
 import type { Snapshot } from "../api/client";
-import { ESTADO, horaUtc8, isStale } from "../format";
+import { ESTADO, horaLima, isStale } from "../format";
 
 type Props = {
   snapshot: Snapshot;
@@ -29,7 +29,7 @@ export function VehicleList({ snapshot, selected, onSelect }: Props) {
                 {stale && <span className="chip chip-stale">Desactualizado</span>}
               </span>
               <span className="dato">
-                {v.velocidad_kmh.toFixed(1)} km/h · {horaUtc8(v.hora_evento)}
+                {v.velocidad_kmh.toFixed(1)} km/h · {horaLima(v.hora_evento)}
               </span>
               {trip ? (
                 <span className="trip">

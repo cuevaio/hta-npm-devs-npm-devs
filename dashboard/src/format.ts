@@ -14,10 +14,10 @@ export const PROCEDENCIA: Record<Provenance, string> = {
   model_inferred: "Calculado por el sistema",
 };
 
-/** UTC en la base, UTC+8 (China) en pantalla (D33). */
-export function horaUtc8(iso: string): string {
-  const d = new Date(new Date(iso).getTime() + 8 * 3600_000);
-  return `${d.toISOString().slice(0, 16).replace("T", " ")} UTC+8`;
+/** UTC en la base, hora de Lima (UTC−5, sin horario de verano) en pantalla (ADR 0012). */
+export function horaLima(iso: string): string {
+  const d = new Date(new Date(iso).getTime() - 5 * 3600_000);
+  return `${d.toISOString().slice(0, 16).replace("T", " ")} hora de Lima`;
 }
 
 export const STALE_MS = 5 * 60_000;

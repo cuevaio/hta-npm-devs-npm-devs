@@ -60,7 +60,7 @@ def test_t07_gasta_mas_que_sus_pares_en_el_replay(out):
     j = p.join(b, on=["corridor", "sentido", "h3_cell"]).with_columns(
         (pl.col("l_per_100km") / pl.col("median_l_per_100km")).alias("r"))
     r = {(a, base): v for a, base, v in j.group_by("alias", "in_baseline").agg(pl.col("r").median()).iter_rows()}
-    assert r[("T07", False)] > 1.10 and r[("T07", True)] < 1.05
+    assert r[("T07", False)] > 1.15 and r[("T07", True)] < 1.05
     assert r[("T03", False)] < 1.03
 
 

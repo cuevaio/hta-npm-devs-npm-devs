@@ -13,13 +13,13 @@ test("lista los vehículos del replay con su estado en palabras", async ({ page 
   await expect(t03).toContainText("En viaje");
   await expect(page.locator('button.vehicle[data-alias="T28"]')).toContainText("Detenido");
   await expect(page.locator('button.vehicle[data-alias="T04"]')).toContainText("Ralentí");
-  await expect(t03).toContainText("UTC+8");
+  await expect(t03).toContainText("hora de Lima");
 });
 
 test("el viaje V-001 muestra corredor y sentido", async ({ page }) => {
   const t03 = page.locator('button.vehicle[data-alias="T03"]');
   await expect(t03).toContainText("V-001");
-  await expect(t03).toContainText("Harbin-Guangzhou");
+  await expect(t03).toContainText("LIM-AQP");
   await expect(t03).toContainText("sentido ida");
 });
 
@@ -32,7 +32,7 @@ test("el mapa tiene un marcador por vehículo y la selección lo resalta", async
 });
 
 test("muestra la procedencia y el aviso de replay", async ({ page }) => {
-  await expect(page.getByText("FEAD real reproducida")).toBeVisible();
+  await expect(page.getByText("Calculado por el sistema")).toBeVisible();
   await expect(page.getByText("Sintético", { exact: true })).toBeVisible();
   await expect(page.getByRole("note")).toContainText("No es tiempo real");
 });

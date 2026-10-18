@@ -18,13 +18,13 @@ def test_a_reading_without_position_is_loaded_replayed_and_keeps_the_last_known_
 
     from app.main import create_app
 
-    base = (REPO / "data/fixtures/telemetry.csv").read_text(encoding="utf-8")
+    base = (FIXTURES / "telemetry.csv").read_text(encoding="utf-8")
     extra = (FIXTURES / "telemetry_sin_posicion.csv").read_text(encoding="utf-8").split("\n", 1)[1]
     (source_dir / "telemetry.csv").unlink()
     (source_dir / "telemetry.csv").write_text(base + extra, encoding="utf-8")
     load(source_dir, database_url, REPLAY_START)
     api = TestClient(create_app(database_url, api_key="secreta", clock=clock))
-    known = next(r for r in csv.DictReader(open(REPO / "data/fixtures/telemetry.csv"))
+    known = next(r for r in csv.DictReader(open(FIXTURES / "telemetry.csv"))
                  if r["alias"] == "T07" and r["event_time"] == "2020-04-01T20:31:00Z")
 
     api.post(CONTROL, headers=KEY, json={"action": "seek", "to_event_time": "2020-04-01T20:31:00.7Z"})

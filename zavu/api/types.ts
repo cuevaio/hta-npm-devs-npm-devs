@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/freights": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tablero de fletes: ingresos, combustible y margen */
+        get: operations["read_freights"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/replay": {
         parameters: {
             query?: never;
@@ -246,6 +263,28 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AgregadoFletes
+         * @description Totales de los fletes finalizados de un grupo (corredor, cliente, vehículo o día).
+         */
+        AgregadoFletes: {
+            /** Clave */
+            clave: string;
+            /** Combustible Pen */
+            combustible_pen: number;
+            /** Fletes */
+            fletes: number;
+            /** Ingresos Pen */
+            ingresos_pen: number;
+            /** L 100Km */
+            l_100km: number | null;
+            /** Margen Pct */
+            margen_pct: number | null;
+            /** Margen Pen */
+            margen_pen: number;
+            /** Toneladas */
+            toneladas: number;
+        };
         /** AlertList */
         AlertList: {
             /** Alertas */
@@ -411,6 +450,27 @@ export interface components {
              */
             updated_at: string;
         };
+        /** Envelope[FreightBoard] */
+        Envelope_FreightBoard_: {
+            data: components["schemas"]["FreightBoard"];
+            /**
+             * Is Replay
+             * @description Siempre true en la demo: los datos son un replay, nunca tiempo real
+             */
+            is_replay: boolean;
+            /**
+             * Provenance
+             * @description Procedencia de los datos de la respuesta
+             */
+            provenance: components["schemas"]["Provenance"][];
+            time_range: components["schemas"]["TimeRange"];
+            /**
+             * Updated At
+             * Format: date-time
+             * @description Hora de última actualización (UTC)
+             */
+            updated_at: string;
+        };
         /** Envelope[FuelAnalysis] */
         Envelope_FuelAnalysis_: {
             data: components["schemas"]["FuelAnalysis"];
@@ -527,6 +587,105 @@ export interface components {
             /** Origen */
             origen: string;
         };
+        /**
+         * FleteDetalle
+         * @description Flete con su capa comercial (soles). Combustible y margen solo cuando el viaje ya terminó en el replay.
+         */
+        FleteDetalle: {
+            /** Carga */
+            carga: string;
+            /** Cliente */
+            cliente: string;
+            /** Combustible Pen */
+            combustible_pen: number | null;
+            /** Conductor */
+            conductor: string | null;
+            /** Corredor */
+            corredor: string;
+            /** Destino */
+            destino: string;
+            /**
+             * Detraccion Pen
+             * @description 4 % del total si supera S/ 400
+             */
+            detraccion_pen: number | null;
+            /**
+             * Estado
+             * @enum {string}
+             */
+            estado: "programado" | "en_curso" | "finalizado";
+            /** Flete Id */
+            flete_id: string;
+            /** Gre Remitente */
+            gre_remitente: string | null;
+            /** Gre Transportista */
+            gre_transportista: string | null;
+            /** Igv Pen */
+            igv_pen: number | null;
+            /** Km */
+            km: number | null;
+            /** L 100Km */
+            l_100km: number | null;
+            /** Litros */
+            litros: number | null;
+            /**
+             * Llegada
+             * @description Solo si el viaje ya terminó
+             */
+            llegada: string | null;
+            /**
+             * Margen Pen
+             * @description Tarifa sin IGV menos combustible
+             */
+            margen_pen: number | null;
+            /** Origen */
+            origen: string;
+            /**
+             * Ruc Cliente
+             * @description RUC ficticio de la demo
+             */
+            ruc_cliente: string | null;
+            /**
+             * Salida
+             * Format: date-time
+             */
+            salida: string;
+            /**
+             * Sentido
+             * @enum {string}
+             */
+            sentido: "ida" | "vuelta";
+            /**
+             * Tarifa Pen
+             * @description Flete sin IGV
+             */
+            tarifa_pen: number | null;
+            /** Toneladas */
+            toneladas: number | null;
+            /** Total Pen */
+            total_pen: number | null;
+            /** Vehiculo */
+            vehiculo: string;
+            /** Viaje Id */
+            viaje_id: string;
+        };
+        /** FreightBoard */
+        FreightBoard: {
+            /** Fletes */
+            fletes: components["schemas"]["FleteDetalle"][];
+            /** Por Cliente */
+            por_cliente: components["schemas"]["AgregadoFletes"][];
+            /** Por Corredor */
+            por_corredor: components["schemas"]["AgregadoFletes"][];
+            /**
+             * Por Dia
+             * @description clave = día (YYYY-MM-DD, hora de Lima) de llegada
+             */
+            por_dia: components["schemas"]["AgregadoFletes"][];
+            /** Por Vehiculo */
+            por_vehiculo: components["schemas"]["AgregadoFletes"][];
+            resumen: components["schemas"]["ResumenFletes"];
+        };
         /** FuelAnalysis */
         FuelAnalysis: {
             /** Anomalias */
@@ -638,6 +797,37 @@ export interface components {
             recibido_en: string;
             /** Texto */
             texto: string;
+        };
+        /** ResumenFletes */
+        ResumenFletes: {
+            /** Clave */
+            clave: string;
+            /** Combustible Pen */
+            combustible_pen: number;
+            /** Detraccion Pen */
+            detraccion_pen: number;
+            /** En Curso */
+            en_curso: number;
+            /** Fletes */
+            fletes: number;
+            /** Igv Pen */
+            igv_pen: number;
+            /** Ingresos Pen */
+            ingresos_pen: number;
+            /** Km */
+            km: number;
+            /** L 100Km */
+            l_100km: number | null;
+            /** Litros */
+            litros: number;
+            /** Margen Pct */
+            margen_pct: number | null;
+            /** Margen Pen */
+            margen_pen: number;
+            /** Programados */
+            programados: number;
+            /** Toneladas */
+            toneladas: number;
         };
         /**
          * TimeRange
@@ -811,11 +1001,11 @@ export interface operations {
                      *               "id": "A-001",
                      *               "tramos": [
                      *                 {
-                     *                   "h3": "86309a0efffffff",
+                     *                   "h3": "868e6a177ffffff",
                      *                   "sentido": "ida"
                      *                 },
                      *                 {
-                     *                   "h3": "86309a0c7ffffff",
+                     *                   "h3": "868e6a8dfffffff",
                      *                   "sentido": "ida"
                      *                 }
                      *               ],
@@ -828,14 +1018,13 @@ export interface operations {
                      *             "reporte_conductor": {
                      *               "procedencia": "human_reported",
                      *               "recibido_en": "2020-04-14T02:40:00Z",
-                     *               "texto": "Hay obras en el paso de Nanling, estamos parados hace media hora"
+                     *               "texto": "Hay obras en la Panamericana Sur a la altura de Chala, estamos parados hace media hora"
                      *             }
                      *           }
                      *         ]
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred",
                      *         "human_reported"
@@ -878,8 +1067,8 @@ export interface operations {
                      *             "estado": "en_viaje",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 28.19,
-                     *               "lon": 113.02
+                     *               "lat": -14.83,
+                     *               "lon": -74.94
                      *             },
                      *             "velocidad_kmh": 72.5,
                      *             "viaje_id": "V-001"
@@ -889,8 +1078,8 @@ export interface operations {
                      *             "estado": "en_viaje",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 30.57,
-                     *               "lon": 114.3
+                     *               "lat": -14.07,
+                     *               "lon": -75.73
                      *             },
                      *             "velocidad_kmh": 64,
                      *             "viaje_id": "V-002"
@@ -900,8 +1089,8 @@ export interface operations {
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 45.75,
-                     *               "lon": 126.63
+                     *               "lat": -15.49,
+                     *               "lon": -70.13
                      *             },
                      *             "velocidad_kmh": 0
                      *           },
@@ -910,8 +1099,8 @@ export interface operations {
                      *             "estado": "ralenti",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 34.75,
-                     *               "lon": 113.62
+                     *               "lat": -15.85,
+                     *               "lon": -74.25
                      *             },
                      *             "velocidad_kmh": 0
                      *           },
@@ -920,8 +1109,8 @@ export interface operations {
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 23.13,
-                     *               "lon": 113.26
+                     *               "lat": -12.06,
+                     *               "lon": -75.21
                      *             },
                      *             "velocidad_kmh": 0
                      *           },
@@ -930,8 +1119,8 @@ export interface operations {
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 45.8,
-                     *               "lon": 126.53
+                     *               "lat": -12.05,
+                     *               "lon": -77.09
                      *             },
                      *             "velocidad_kmh": 0
                      *           }
@@ -940,7 +1129,6 @@ export interface operations {
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred"
                      *       ],
@@ -952,6 +1140,158 @@ export interface operations {
                      *     }
                      */
                     "application/json": components["schemas"]["Envelope_FleetOverview_"];
+                };
+            };
+        };
+    };
+    read_freights: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "data": {
+                     *         "fletes": [
+                     *           {
+                     *             "carga": "Perfiles de acero",
+                     *             "cliente": "Aceros del Norte S.A.",
+                     *             "combustible_pen": 2062.28,
+                     *             "conductor": "Hugo Montalvo",
+                     *             "corredor": "LIM-AQP",
+                     *             "destino": "LIM",
+                     *             "detraccion_pen": 197.77,
+                     *             "estado": "finalizado",
+                     *             "flete_id": "F-101",
+                     *             "gre_remitente": "T001-00031415",
+                     *             "gre_transportista": "V001-00000101",
+                     *             "igv_pen": 754.2,
+                     *             "km": 1009.4,
+                     *             "l_100km": 47.51,
+                     *             "litros": 479.6,
+                     *             "llegada": "2020-04-14T06:02:00Z",
+                     *             "margen_pen": 2127.72,
+                     *             "origen": "AQP",
+                     *             "ruc_cliente": "20481234565",
+                     *             "salida": "2020-04-13T14:18:00Z",
+                     *             "sentido": "vuelta",
+                     *             "tarifa_pen": 4190,
+                     *             "toneladas": 24.4,
+                     *             "total_pen": 4944.2,
+                     *             "vehiculo": "T07",
+                     *             "viaje_id": "T07-V11"
+                     *           },
+                     *           {
+                     *             "carga": "Perfiles de acero",
+                     *             "cliente": "Aceros del Norte S.A.",
+                     *             "conductor": "Marcos Quispe",
+                     *             "corredor": "LIM-AQP",
+                     *             "destino": "AQP",
+                     *             "detraccion_pen": 197.77,
+                     *             "estado": "en_curso",
+                     *             "flete_id": "F-102",
+                     *             "gre_remitente": "T001-00031415",
+                     *             "gre_transportista": "V001-00000102",
+                     *             "igv_pen": 754.2,
+                     *             "origen": "LIM",
+                     *             "ruc_cliente": "20481234565",
+                     *             "salida": "2020-04-14T01:30:00Z",
+                     *             "sentido": "ida",
+                     *             "tarifa_pen": 4190,
+                     *             "toneladas": 24.4,
+                     *             "total_pen": 4944.2,
+                     *             "vehiculo": "T03",
+                     *             "viaje_id": "T03-V12"
+                     *           }
+                     *         ],
+                     *         "por_cliente": [
+                     *           {
+                     *             "clave": "Aceros del Norte S.A.",
+                     *             "combustible_pen": 2062.28,
+                     *             "fletes": 1,
+                     *             "ingresos_pen": 4190,
+                     *             "l_100km": 47.51,
+                     *             "margen_pct": 50.8,
+                     *             "margen_pen": 2127.72,
+                     *             "toneladas": 24.4
+                     *           }
+                     *         ],
+                     *         "por_corredor": [
+                     *           {
+                     *             "clave": "LIM-AQP",
+                     *             "combustible_pen": 2062.28,
+                     *             "fletes": 1,
+                     *             "ingresos_pen": 4190,
+                     *             "l_100km": 47.51,
+                     *             "margen_pct": 50.8,
+                     *             "margen_pen": 2127.72,
+                     *             "toneladas": 24.4
+                     *           }
+                     *         ],
+                     *         "por_dia": [
+                     *           {
+                     *             "clave": "2020-04-14",
+                     *             "combustible_pen": 2062.28,
+                     *             "fletes": 1,
+                     *             "ingresos_pen": 4190,
+                     *             "l_100km": 47.51,
+                     *             "margen_pct": 50.8,
+                     *             "margen_pen": 2127.72,
+                     *             "toneladas": 24.4
+                     *           }
+                     *         ],
+                     *         "por_vehiculo": [
+                     *           {
+                     *             "clave": "T07",
+                     *             "combustible_pen": 2062.28,
+                     *             "fletes": 1,
+                     *             "ingresos_pen": 4190,
+                     *             "l_100km": 47.51,
+                     *             "margen_pct": 50.8,
+                     *             "margen_pen": 2127.72,
+                     *             "toneladas": 24.4
+                     *           }
+                     *         ],
+                     *         "resumen": {
+                     *           "clave": "total",
+                     *           "combustible_pen": 2062.28,
+                     *           "detraccion_pen": 197.77,
+                     *           "en_curso": 1,
+                     *           "fletes": 1,
+                     *           "igv_pen": 754.2,
+                     *           "ingresos_pen": 4190,
+                     *           "km": 1009.4,
+                     *           "l_100km": 47.51,
+                     *           "litros": 479.6,
+                     *           "margen_pct": 50.8,
+                     *           "margen_pen": 2127.72,
+                     *           "programados": 0,
+                     *           "toneladas": 24.4
+                     *         }
+                     *       },
+                     *       "is_replay": true,
+                     *       "provenance": [
+                     *         "synthetic_demo",
+                     *         "model_inferred"
+                     *       ],
+                     *       "time_range": {
+                     *         "from": "2020-04-14T00:00:00Z",
+                     *         "to": "2020-04-14T03:30:00Z"
+                     *       },
+                     *       "updated_at": "2020-04-14T03:30:00Z"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["Envelope_FreightBoard_"];
                 };
             };
         };
@@ -982,7 +1322,7 @@ export interface operations {
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed"
+                     *         "synthetic_demo"
                      *       ],
                      *       "time_range": {
                      *         "from": "2020-04-13T00:00:00Z",
@@ -1026,7 +1366,7 @@ export interface operations {
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed"
+                     *         "synthetic_demo"
                      *       ],
                      *       "time_range": {
                      *         "from": "2020-04-13T00:00:00Z",
@@ -1094,11 +1434,11 @@ export interface operations {
                      *               "id": "A-001",
                      *               "tramos": [
                      *                 {
-                     *                   "h3": "86309a0efffffff",
+                     *                   "h3": "868e6a177ffffff",
                      *                   "sentido": "ida"
                      *                 },
                      *                 {
-                     *                   "h3": "86309a0c7ffffff",
+                     *                   "h3": "868e6a8dfffffff",
                      *                   "sentido": "ida"
                      *                 }
                      *               ],
@@ -1111,14 +1451,13 @@ export interface operations {
                      *             "reporte_conductor": {
                      *               "procedencia": "human_reported",
                      *               "recibido_en": "2020-04-14T02:40:00Z",
-                     *               "texto": "Hay obras en el paso de Nanling, estamos parados hace media hora"
+                     *               "texto": "Hay obras en la Panamericana Sur a la altura de Chala, estamos parados hace media hora"
                      *             }
                      *           }
                      *         ]
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred",
                      *         "human_reported"
@@ -1179,8 +1518,8 @@ export interface operations {
                      *             "estado": "en_viaje",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 28.19,
-                     *               "lon": 113.02
+                     *               "lat": -14.83,
+                     *               "lon": -74.94
                      *             },
                      *             "velocidad_kmh": 72.5,
                      *             "viaje_id": "V-001"
@@ -1190,8 +1529,8 @@ export interface operations {
                      *             "estado": "en_viaje",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 30.57,
-                     *               "lon": 114.3
+                     *               "lat": -14.07,
+                     *               "lon": -75.73
                      *             },
                      *             "velocidad_kmh": 64,
                      *             "viaje_id": "V-002"
@@ -1201,8 +1540,8 @@ export interface operations {
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 45.75,
-                     *               "lon": 126.63
+                     *               "lat": -15.49,
+                     *               "lon": -70.13
                      *             },
                      *             "velocidad_kmh": 0
                      *           },
@@ -1211,8 +1550,8 @@ export interface operations {
                      *             "estado": "ralenti",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 34.75,
-                     *               "lon": 113.62
+                     *               "lat": -15.85,
+                     *               "lon": -74.25
                      *             },
                      *             "velocidad_kmh": 0
                      *           },
@@ -1221,8 +1560,8 @@ export interface operations {
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 23.13,
-                     *               "lon": 113.26
+                     *               "lat": -12.06,
+                     *               "lon": -75.21
                      *             },
                      *             "velocidad_kmh": 0
                      *           },
@@ -1231,8 +1570,8 @@ export interface operations {
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
-                     *               "lat": 45.8,
-                     *               "lon": 126.53
+                     *               "lat": -12.05,
+                     *               "lon": -77.09
                      *             },
                      *             "velocidad_kmh": 0
                      *           }
@@ -1241,7 +1580,6 @@ export interface operations {
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred"
                      *       ],
@@ -1304,11 +1642,11 @@ export interface operations {
                      *             "id": "A-001",
                      *             "tramos": [
                      *               {
-                     *                 "h3": "86309a0efffffff",
+                     *                 "h3": "868e6a177ffffff",
                      *                 "sentido": "ida"
                      *               },
                      *               {
-                     *                 "h3": "86309a0c7ffffff",
+                     *                 "h3": "868e6a8dfffffff",
                      *                 "sentido": "ida"
                      *               }
                      *             ],
@@ -1332,7 +1670,7 @@ export interface operations {
                      *             "ralenti_min": 0,
                      *             "sobreconsumo": false,
                      *             "tramo": {
-                     *               "h3": "86309a0f7ffffff",
+                     *               "h3": "868e6a027ffffff",
                      *               "sentido": "ida"
                      *             }
                      *           },
@@ -1347,7 +1685,7 @@ export interface operations {
                      *             "ralenti_min": 4,
                      *             "sobreconsumo": true,
                      *             "tramo": {
-                     *               "h3": "86309a0efffffff",
+                     *               "h3": "868e6a177ffffff",
                      *               "sentido": "ida"
                      *             }
                      *           },
@@ -1362,7 +1700,7 @@ export interface operations {
                      *             "ralenti_min": 21,
                      *             "sobreconsumo": true,
                      *             "tramo": {
-                     *               "h3": "86309a0c7ffffff",
+                     *               "h3": "868e6a8dfffffff",
                      *               "sentido": "ida"
                      *             }
                      *           },
@@ -1371,7 +1709,7 @@ export interface operations {
                      *             "ralenti_min": 0,
                      *             "sobreconsumo": false,
                      *             "tramo": {
-                     *               "h3": "86309a0dfffffff",
+                     *               "h3": "868e6a8efffffff",
                      *               "sentido": "ida"
                      *             }
                      *           }
@@ -1380,7 +1718,6 @@ export interface operations {
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred"
                      *       ],
@@ -1473,13 +1810,13 @@ export interface operations {
                      *             "impacto_min": 20,
                      *             "inicio": "2020-04-14T02:20:00Z",
                      *             "posicion": {
-                     *               "lat": 28.19,
-                     *               "lon": 113.02
+                     *               "lat": -14.83,
+                     *               "lon": -74.94
                      *             },
                      *             "reporte_conductor": {
                      *               "procedencia": "human_reported",
                      *               "recibido_en": "2020-04-14T02:40:00Z",
-                     *               "texto": "Hay obras en el paso de Nanling, estamos parados hace media hora"
+                     *               "texto": "Hay obras en la Panamericana Sur a la altura de Chala, estamos parados hace media hora"
                      *             },
                      *             "tipo": "ralenti_prolongado"
                      *           }
@@ -1489,7 +1826,6 @@ export interface operations {
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred",
                      *         "human_reported"
@@ -1563,26 +1899,25 @@ export interface operations {
                     /**
                      * @example {
                      *       "data": {
-                     *         "conductor": "Wang Lei (sintético)",
-                     *         "corredor": "Harbin-Guangzhou",
-                     *         "distancia_km": 1840.5,
+                     *         "conductor": "Marcos Quispe (sintético)",
+                     *         "corredor": "LIM-AQP",
+                     *         "distancia_km": 520.4,
                      *         "estado": "en_curso",
                      *         "flete": {
                      *           "carga": "Autopartes",
                      *           "cliente": "Cliente Demo S.A.",
-                     *           "destino": "Guangzhou",
+                     *           "destino": "AQP",
                      *           "id": "F-101",
-                     *           "origen": "Harbin"
+                     *           "origen": "LIM"
                      *         },
                      *         "inicio": "2020-04-13T18:00:00Z",
-                     *         "progreso_pct": 53.2,
+                     *         "progreso_pct": 51.6,
                      *         "sentido": "ida",
                      *         "vehiculo_alias": "T03",
                      *         "viaje_id": "V-001"
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred"
                      *       ],
@@ -1656,13 +1991,13 @@ export interface operations {
                      * @example {
                      *       "data": {
                      *         "alias": "T03",
-                     *         "conductor": "Wang Lei (sintético)",
-                     *         "corredor": "Harbin-Guangzhou",
+                     *         "conductor": "Marcos Quispe (sintético)",
+                     *         "corredor": "LIM-AQP",
                      *         "estado": "en_viaje",
                      *         "hora_evento": "2020-04-14T03:30:00Z",
                      *         "posicion": {
-                     *           "lat": 28.19,
-                     *           "lon": 113.02
+                     *           "lat": -14.83,
+                     *           "lon": -74.94
                      *         },
                      *         "sentido": "ida",
                      *         "ultima_alerta_id": "AL-001",
@@ -1671,7 +2006,6 @@ export interface operations {
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred"
                      *       ],
@@ -1743,26 +2077,25 @@ export interface operations {
                     /**
                      * @example {
                      *       "data": {
-                     *         "conductor": "Wang Lei (sintético)",
-                     *         "corredor": "Harbin-Guangzhou",
-                     *         "distancia_km": 1840.5,
+                     *         "conductor": "Marcos Quispe (sintético)",
+                     *         "corredor": "LIM-AQP",
+                     *         "distancia_km": 520.4,
                      *         "estado": "en_curso",
                      *         "flete": {
                      *           "carga": "Autopartes",
                      *           "cliente": "Cliente Demo S.A.",
-                     *           "destino": "Guangzhou",
+                     *           "destino": "AQP",
                      *           "id": "F-101",
-                     *           "origen": "Harbin"
+                     *           "origen": "LIM"
                      *         },
                      *         "inicio": "2020-04-13T18:00:00Z",
-                     *         "progreso_pct": 53.2,
+                     *         "progreso_pct": 51.6,
                      *         "sentido": "ida",
                      *         "vehiculo_alias": "T03",
                      *         "viaje_id": "V-001"
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred"
                      *       ],
@@ -1836,13 +2169,13 @@ export interface operations {
                      *             "impacto_min": 20,
                      *             "inicio": "2020-04-14T02:20:00Z",
                      *             "posicion": {
-                     *               "lat": 28.19,
-                     *               "lon": 113.02
+                     *               "lat": -14.83,
+                     *               "lon": -74.94
                      *             },
                      *             "reporte_conductor": {
                      *               "procedencia": "human_reported",
                      *               "recibido_en": "2020-04-14T02:40:00Z",
-                     *               "texto": "Hay obras en el paso de Nanling, estamos parados hace media hora"
+                     *               "texto": "Hay obras en la Panamericana Sur a la altura de Chala, estamos parados hace media hora"
                      *             },
                      *             "tipo": "ralenti_prolongado"
                      *           }
@@ -1852,7 +2185,6 @@ export interface operations {
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred",
                      *         "human_reported"
@@ -1915,11 +2247,11 @@ export interface operations {
                      *             "id": "A-001",
                      *             "tramos": [
                      *               {
-                     *                 "h3": "86309a0efffffff",
+                     *                 "h3": "868e6a177ffffff",
                      *                 "sentido": "ida"
                      *               },
                      *               {
-                     *                 "h3": "86309a0c7ffffff",
+                     *                 "h3": "868e6a8dfffffff",
                      *                 "sentido": "ida"
                      *               }
                      *             ],
@@ -1943,7 +2275,7 @@ export interface operations {
                      *             "ralenti_min": 0,
                      *             "sobreconsumo": false,
                      *             "tramo": {
-                     *               "h3": "86309a0f7ffffff",
+                     *               "h3": "868e6a027ffffff",
                      *               "sentido": "ida"
                      *             }
                      *           },
@@ -1958,7 +2290,7 @@ export interface operations {
                      *             "ralenti_min": 4,
                      *             "sobreconsumo": true,
                      *             "tramo": {
-                     *               "h3": "86309a0efffffff",
+                     *               "h3": "868e6a177ffffff",
                      *               "sentido": "ida"
                      *             }
                      *           },
@@ -1973,7 +2305,7 @@ export interface operations {
                      *             "ralenti_min": 21,
                      *             "sobreconsumo": true,
                      *             "tramo": {
-                     *               "h3": "86309a0c7ffffff",
+                     *               "h3": "868e6a8dfffffff",
                      *               "sentido": "ida"
                      *             }
                      *           },
@@ -1982,7 +2314,7 @@ export interface operations {
                      *             "ralenti_min": 0,
                      *             "sobreconsumo": false,
                      *             "tramo": {
-                     *               "h3": "86309a0dfffffff",
+                     *               "h3": "868e6a8efffffff",
                      *               "sentido": "ida"
                      *             }
                      *           }
@@ -1991,7 +2323,6 @@ export interface operations {
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred"
                      *       ],
@@ -2046,13 +2377,13 @@ export interface operations {
                      * @example {
                      *       "data": {
                      *         "alias": "T03",
-                     *         "conductor": "Wang Lei (sintético)",
-                     *         "corredor": "Harbin-Guangzhou",
+                     *         "conductor": "Marcos Quispe (sintético)",
+                     *         "corredor": "LIM-AQP",
                      *         "estado": "en_viaje",
                      *         "hora_evento": "2020-04-14T03:30:00Z",
                      *         "posicion": {
-                     *           "lat": 28.19,
-                     *           "lon": 113.02
+                     *           "lat": -14.83,
+                     *           "lon": -74.94
                      *         },
                      *         "sentido": "ida",
                      *         "ultima_alerta_id": "AL-001",
@@ -2061,7 +2392,6 @@ export interface operations {
                      *       },
                      *       "is_replay": true,
                      *       "provenance": [
-                     *         "fead_observed",
                      *         "synthetic_demo",
                      *         "model_inferred"
                      *       ],

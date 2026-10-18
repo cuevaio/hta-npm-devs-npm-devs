@@ -48,6 +48,7 @@ def make_fixture(
     fr = synthetic["freights"].filter(pl.col("alias").is_in(used))
     trip_ids = fr["trip_id"].to_list()
     fr.write_csv(out / "freights.csv")
+    trips.filter(pl.col("trip_id").is_in(trip_ids)).write_csv(out / "trips.csv")
     synthetic["drivers"].filter(pl.col("driver_id").is_in(fr["driver_id"].to_list())).write_csv(out / "drivers.csv")
     synthetic["driver_reports"].filter(pl.col("trip_id").is_in(trip_ids)).write_csv(out / "driver_reports.csv")
 

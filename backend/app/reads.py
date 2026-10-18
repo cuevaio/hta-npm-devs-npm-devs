@@ -80,3 +80,12 @@ def vehicle_status(database_url: str, alias: str) -> tuple[VehicleStatus, dateti
     row = rows[0]
     data = VehicleStatus(**_resumen(row), corredor=row["corridor"], sentido=row["sentido"], conductor=row["conductor"])
     return data, min(st["inicio"], row["event_time"]), row["event_time"], st["updated_at"]
+
+
+def telemetry_provenance(database_url: str) -> list[str]:
+    """Procedencia de la telemetría cargada (la carga reemplaza todo, así que basta una muestra de cada tabla)."""
+    with psycopg.connect(database_url) as conn:
+        rows = conn.execute(
+            "(SELECT provenance FROM telemetry_reading LIMIT 1) UNION (SELECT provenance FROM telemetry_source LIMIT 1)"
+        ).fetchall()
+    return sorted({r[0] for r in rows})

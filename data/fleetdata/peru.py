@@ -107,7 +107,7 @@ def perfiles(rng: random.Random) -> dict[str, Perfil]:
     out["T04"].ralenti_en_paradas = True
     # T07 empieza a rendir peor en el replay: el sobreconsumo que la demo detecta (sin reporte que lo explique).
     out["T07"].camion = replace(out["T07"].camion, condicion=1.0)
-    out["T07"].condicion_replay = 1.18
+    out["T07"].condicion_replay = 1.28
     out["T03"].camion = replace(out["T03"].camion, condicion=0.98)
     return out
 
