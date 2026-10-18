@@ -1,0 +1,89 @@
+/* ===========================================================================
+   CUADRA · tokens de diseño
+   Fuente de verdad: docs/brand/IDENTIDAD-VISUAL.md
+   No redefinir valores fuera de este archivo. Si un color no está acá,
+   no existe en la marca.
+   =========================================================================== */
+
+:root {
+  /* --- Tinta: el papel del producto ------------------------------------- */
+  --cuadra-tinta:        #07090F;  /* fondo base */
+  --cuadra-tinta-2:      #0E121B;  /* superficie elevada: tarjeta, panel */
+  --cuadra-tinta-3:      #141926;  /* superficie sobre superficie */
+  --cuadra-tinta-pozo:   #04060B;  /* huecos: visor, stage, media */
+  --cuadra-linea:        #222A3B;  /* retícula visible, borde 1px */
+  --cuadra-linea-suave:  #1A2030;  /* separador interno */
+
+  /* --- Texto ------------------------------------------------------------ */
+  --cuadra-fg:           #EDF1F8;  /* texto principal */
+  --cuadra-fg-dim:       #848FA6;  /* texto secundario, etiquetas */
+  --cuadra-fg-mute:      #5B6578;  /* texto deshabilitado */
+
+  /* --- Veredictos: color = estado, nunca decoración --------------------- */
+  --cuadra-sello:        #00D8B4;  /* aceptado / cuadró */
+  --cuadra-sello-fondo:  rgba(0,216,180,.12);
+  --cuadra-sello-borde:  rgba(0,216,180,.38);
+  --cuadra-observa:      #F5A524;  /* falta una pieza concreta */
+  --cuadra-observa-fondo:rgba(245,165,36,.12);
+  --cuadra-rechazo:      #E5484D;  /* la evidencia exigida no existe */
+  --cuadra-rechazo-fondo:rgba(229,72,77,.12);
+
+  /* Texto que va encima del acento (siempre tinta, nunca blanco) */
+  --cuadra-sobre-acento: #04060B;
+
+  /* --- Tipografía ------------------------------------------------------- */
+  --cuadra-display: 'Archivo Black', Impact, 'Haettenschweiler', system-ui, sans-serif;
+  --cuadra-body:    'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --cuadra-mono:    'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  /* Escala tipográfica: fluida entre 400px y 1240px de viewport */
+  --cuadra-t-mega:   clamp(46px, 11vw, 148px);   /* display/0.84/-0.045em/UPPER */
+  --cuadra-t-h1:     clamp(34px, 6.4vw, 72px);   /* display/0.90/-0.038em/UPPER */
+  --cuadra-t-h2:     clamp(26px, 4vw, 40px);     /* display/0.95/-0.03em/UPPER  */
+  --cuadra-t-h3:     20px;                        /* body 700/1.25/-0.012em      */
+  --cuadra-t-lede:   clamp(16px, 1.7vw, 19px);   /* body 400/1.55                */
+  --cuadra-t-body:   16px;                        /* body 400/1.6                */
+  --cuadra-t-dato:   17px;                        /* mono 500/1.4/tabular        */
+  --cuadra-t-micro:  13px;                        /* body 400/1.5                */
+  --cuadra-t-label:  11px;                        /* mono 500/0.22em/UPPER       */
+
+  /* --- Retícula y espacio: u = módulo del símbolo ----------------------- */
+  --cuadra-u:    8px;    /* unidad base */
+  --cuadra-s-1:  8px;
+  --cuadra-s-2:  16px;
+  --cuadra-s-3:  24px;
+  --cuadra-s-4:  32px;
+  --cuadra-s-6:  48px;
+  --cuadra-s-8:  64px;
+  --cuadra-s-11: 88px;   /* aire vertical entre secciones */
+  --cuadra-ancho: 1240px;
+
+  /* --- Forma: el cuadrado se lee a escuadra ----------------------------- */
+  --cuadra-radio: 0;     /* sin excepciones en marca; ver §9 del manual */
+  --cuadra-borde: 1px solid var(--cuadra-linea);
+
+  /* --- Movimiento: cada módulo llega a su casilla y se queda ------------ */
+  --cuadra-ease-asiento: cubic-bezier(.16,.84,.26,1);
+  --cuadra-dur-rapido:   180ms;
+  --cuadra-dur-medio:    380ms;
+  --cuadra-dur-asiento:  2800ms;  /* secuencia completa de conciliación */
+
+  color-scheme: dark;
+}
+
+/* Cuadra es una marca de tinta: un solo mundo visual, sin tema claro.
+   Los soportes claros (documento impreso, PDF al cliente) usan la
+   inversión controlada de abajo, no un tema del navegador. */
+.cuadra-papel {
+  --cuadra-tinta:       #EDF1F8;
+  --cuadra-tinta-2:     #FFFFFF;
+  --cuadra-tinta-3:     #E3E8F2;
+  --cuadra-tinta-pozo:  #D7DEEC;
+  --cuadra-linea:       #C3CBDB;
+  --cuadra-linea-suave: #DDE3EE;
+  --cuadra-fg:          #07090F;
+  --cuadra-fg-dim:      #4A5468;
+  --cuadra-fg-mute:     #7A8497;
+  --cuadra-sello:       #00806E;   /* acento oscurecido para contraste sobre claro */
+  color-scheme: light;
+}
