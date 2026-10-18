@@ -1,18 +1,23 @@
 import { expect, test } from "@playwright/test";
 
-const SECCIONES = ["hero", "problema", "como-funciona", "diferenciador", "procedencia", "cta"];
+const SECCIONES = ["hero", "problema", "como-funciona", "ejemplo", "arquitectura", "mcp", "procedencia", "cta"];
 
-test("describe Fleet Intelligence con el titular y las seis secciones", async ({ page }) => {
+test("describe Fleet Intelligence con el titular y las ocho secciones", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (err) => errors.push(err.message));
   await page.goto("/");
 
   await expect(page).toHaveTitle(/Fleet Intelligence/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Sabe por qué tu flota gasta más combustible, antes de que cueste.",
+    "Un agente de IA que lee la montaña antes de que tu flota la suba.",
   );
   for (const id of SECCIONES) await expect(page.locator(`section#${id}`)).toHaveCount(1);
-  await expect(page.locator("#diferenciador")).toContainText("T07");
+  await expect(page.locator("#problema")).toContainText("4.800 msnm");
+  await expect(page.locator("#ejemplo")).toContainText("T04");
+  await expect(page.locator("#ejemplo")).toContainText("Ticlio");
+  await expect(page.locator("#como-funciona")).toContainText("WhatsApp");
+  await expect(page.locator("#arquitectura")).toContainText("LangGraph");
+  await expect(page.locator("#mcp")).toContainText("solo lectura");
   expect(errors).toEqual([]);
 });
 

@@ -1,7 +1,7 @@
 # web · landing de Fleet Intelligence
 
-Página única y estática, sin build. HTML, CSS y un Canvas ("tramo vs pares"). Solo español.
-Secciones (por `id`): `hero`, `problema`, `como-funciona`, `diferenciador` (caso T07 en Nanling), `procedencia` y `cta`.
+Página única y estática, sin build. HTML, CSS y un Canvas (perfil de altitud vs combustible). Solo español.
+Secciones (por `id`): `hero`, `problema`, `como-funciona` (el agente y sus cuatro dimensiones), `ejemplo` (caso T04 en Ticlio, ilustrativo), `arquitectura`, `mcp`, `procedencia` y `cta`.
 
 ## Correr en local
 
