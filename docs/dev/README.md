@@ -11,13 +11,14 @@ El producto que construimos está descrito en [`docs/product/PRODUCT_CONTEXT_FLE
 
 ## Equipo
 
-| Persona | Contacto | Responsabilidad |
-|---|---|---|
-| Joseph Robles | — | Grilling, mapa de dependencias, coordinación, infraestructura GCP, Zavu + agente + MCP + alertas |
-| Juan Montreuil | juanmontreuil71@gmail.com | Datos FEAD + replay + backend FastAPI + línea base de combustible |
-| Lian Pinto | lianpinto2416@gmail.com | Exclusivamente la web (`web/`) |
+| Persona | GitHub | Contacto | Responsabilidad | Carpetas |
+|---|---|---|---|---|
+| Joseph Robles | @JosephRobles23 | — | Grilling, mapa de dependencias, coordinación, harness de tests, infraestructura GCP, Zavu + agente + MCP + alertas, e2e | `mcp/`, `zavu/`, `e2e/` |
+| Juan Montreuil | @JuanMontreuil08 | juanmontreuil71@gmail.com | Datos FEAD, replay, Domain API (FastAPI), línea base de combustible | `backend/`, `data/` |
+| Lian Pinto | @KevinPinto123 | lianpinto2416@gmail.com | Dashboard | `dashboard/` |
+| Ismael | @Ismaelrojas0112 | — | Landing page | `web/` |
 
-Regla de propiedad: **`web/` es de Lian.** Nadie más la edita sin coordinarlo, y Lian no toca código fuera de `web/`. La web consume el backend solo a través de los contratos de API que acordemos en el mapa.
+Regla de propiedad: **cada carpeta tiene un solo dueño** y nadie edita una carpeta ajena sin coordinarlo. `dashboard/` es de Lian y `web/` (landing) de Ismael. La ruta del webhook de reportes del conductor vive en `backend/` pero la implementa Joseph (#17), coordinando con Juan. El dashboard, el MCP y Zavu consumen el backend solo a través del contrato OpenAPI (#12).
 
 ## Flujo de trabajo: worktrees, sin PRs
 
