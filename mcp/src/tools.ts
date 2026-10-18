@@ -91,6 +91,23 @@ export function createServer(env: DomainApiEnv): McpServer {
   );
 
   server.registerTool(
+    "get_vehicle_metrics",
+    {
+      description:
+        "Historial de un vehículo con una fila por día (hora de Lima) o por viaje, listo para gráficos de barras: " +
+        "km, litros, L/100 km, tramos con sobreconsumo, exceso y % de consumo frente a sus pares, horas en movimiento, " +
+        `horas de ralentí, e ingresos, combustible y margen en soles. Solo incluye lo ya reproducido. ${REPLAY}`,
+      inputSchema: z.object({
+        alias: z.string().describe("Alias del vehículo, p. ej. T07"),
+        desde: z.iso.date().optional().describe("Primer día (YYYY-MM-DD, hora de Lima); por defecto, el primer viaje"),
+        hasta: z.iso.date().optional().describe("Último día (YYYY-MM-DD, hora de Lima); por defecto, la hora del replay"),
+        agrupar_por: z.enum(["dia", "viaje"]).optional().describe("Una fila por día (por defecto) o por viaje"),
+      }),
+    },
+    adapt("get_vehicle_metrics"),
+  );
+
+  server.registerTool(
     "get_alerts",
     {
       description: `Alertas vigentes de la flota (sobreconsumo, cuellos de botella) con su procedencia. ${REPLAY}`,

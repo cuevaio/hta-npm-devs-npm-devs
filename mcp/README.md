@@ -20,7 +20,7 @@ npm test            # vitest dentro del runtime de Workers (@cloudflare/vitest-p
 
 SDK: `createMcpHandler` de `agents/mcp/server` con `@modelcontextprotocol/server` v2 (sin estado, sin Durable Objects). Endpoint Streamable HTTP en `/mcp`; `/health` es público.
 
-Siete adaptadores delgados de la Domain API (ADR 0004), que devuelven el sobre tal cual (procedencia, rango de tiempo, `updated_at`). Son un replay, nunca tiempo real.
+Ocho adaptadores delgados de la Domain API (ADR 0004), que devuelven el sobre tal cual (procedencia, rango de tiempo, `updated_at`). Son un replay, nunca tiempo real.
 
 | Tool | Entrada | Ruta de la Domain API |
 |---|---|---|
@@ -30,6 +30,7 @@ Siete adaptadores delgados de la Domain API (ADR 0004), que devuelven el sobre t
 | `get_fuel_analysis` | `trip_id` | `GET /v1/tools/get_fuel_analysis` |
 | `get_operational_bottlenecks` | `trip_id` | `GET /v1/tools/get_operational_bottlenecks` |
 | `get_alerts` | - | `GET /v1/tools/get_alerts` |
+| `get_vehicle_metrics` | `alias`, `desde?`, `hasta?` (YYYY-MM-DD, hora de Lima), `agrupar_por?` (dia, viaje) | `GET /v1/tools/get_vehicle_metrics` |
 | `control_replay` | `action` (play, pause, seek, set_speed), `speed?`, `to_event_time?` | `POST /v1/tools/control_replay` |
 
 Un error de la Domain API (p. ej. 404 por alias desconocido) vuelve como resultado con `isError: true` y el `detail` original.

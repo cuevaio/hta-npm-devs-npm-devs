@@ -174,6 +174,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/tools/get_vehicle_metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tool get_vehicle_metrics (historial por día o por viaje, para gráficos) */
+        get: operations["get_vehicle_metrics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/tools/get_vehicle_status": {
         parameters: {
             query?: never;
@@ -251,6 +268,23 @@ export interface paths {
         };
         /** Estado de un vehículo */
         get: operations["read_vehicle"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/vehicles/{alias}/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Métricas históricas de un vehículo por día o por viaje */
+        get: operations["read_vehicle_metrics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -534,6 +568,27 @@ export interface components {
              */
             updated_at: string;
         };
+        /** Envelope[VehicleMetrics] */
+        Envelope_VehicleMetrics_: {
+            data: components["schemas"]["VehicleMetrics"];
+            /**
+             * Is Replay
+             * @description Siempre true en la demo: los datos son un replay, nunca tiempo real
+             */
+            is_replay: boolean;
+            /**
+             * Provenance
+             * @description Procedencia de los datos de la respuesta
+             */
+            provenance: components["schemas"]["Provenance"][];
+            time_range: components["schemas"]["TimeRange"];
+            /**
+             * Updated At
+             * Format: date-time
+             * @description Hora de última actualización (UTC)
+             */
+            updated_at: string;
+        };
         /** Envelope[VehicleStatus] */
         Envelope_VehicleStatus_: {
             data: components["schemas"]["VehicleStatus"];
@@ -723,6 +778,81 @@ export interface components {
             /** P90 L */
             p90_l: number;
         };
+        /**
+         * MetricasPeriodo
+         * @description Métricas de un vehículo en un día (hora de Lima) o en un viaje. Solo cuenta lo ocurrido hasta la hora de replay.
+         */
+        MetricasPeriodo: {
+            /**
+             * Clave
+             * @description Día (YYYY-MM-DD, hora de Lima) o identificador del viaje
+             */
+            clave: string;
+            /** Combustible Pen */
+            combustible_pen: number;
+            /**
+             * Corredor
+             * @description Solo al agrupar por viaje
+             */
+            corredor?: string | null;
+            /**
+             * Exceso L
+             * @description Litros sobre la mediana de los pares (tramos con línea base)
+             */
+            exceso_l: number;
+            /** Horas En Movimiento */
+            horas_en_movimiento: number;
+            /**
+             * Ingresos Pen
+             * @description Tarifa sin IGV de los fletes finalizados (al día de llegada)
+             */
+            ingresos_pen: number;
+            /**
+             * Km
+             * @description Km recorridos en pasadas por tramos
+             */
+            km: number;
+            /** L 100Km */
+            l_100km: number | null;
+            /**
+             * Litros
+             * @description Consumo observado en esas pasadas
+             */
+            litros: number;
+            /**
+             * Litros Linea Base
+             * @description Suma de la mediana de los pares en los tramos con línea base
+             */
+            litros_linea_base: number;
+            /** Margen Pen */
+            margen_pen: number;
+            /**
+             * Ralenti H
+             * @description Horas con motor encendido y vehículo detenido
+             */
+            ralenti_h: number;
+            /**
+             * Sentido
+             * @description Solo al agrupar por viaje
+             */
+            sentido?: ("ida" | "vuelta") | null;
+            /**
+             * Tramos
+             * @description Pasadas por tramos
+             */
+            tramos: number;
+            /** Tramos Con Linea Base */
+            tramos_con_linea_base: number;
+            /** Tramos Sobreconsumo */
+            tramos_sobreconsumo: number;
+            /** Viajes Finalizados */
+            viajes_finalizados: number;
+            /**
+             * Vs Pares Pct
+             * @description Consumo frente a sus pares en los tramos con línea base; +28 = 28 % más
+             */
+            vs_pares_pct: number | null;
+        };
         /** Pasada */
         Pasada: {
             /** Consumo Observado L */
@@ -905,6 +1035,30 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** VehicleMetrics */
+        VehicleMetrics: {
+            /**
+             * Agrupar Por
+             * @enum {string}
+             */
+            agrupar_por: "dia" | "viaje";
+            /** Alias */
+            alias: string;
+            /**
+             * Desde
+             * @description Primer día del rango (YYYY-MM-DD, hora de Lima)
+             */
+            desde: string;
+            /** Filas */
+            filas: components["schemas"]["MetricasPeriodo"][];
+            /**
+             * Hasta
+             * @description Último día del rango (YYYY-MM-DD, hora de Lima), recortado a la hora de replay
+             */
+            hasta: string;
+            /** @description Totales del rango; clave = 'total' */
+            resumen: components["schemas"]["MetricasPeriodo"];
         };
         /** VehicleStatus */
         VehicleStatus: {
@@ -1991,6 +2145,147 @@ export interface operations {
             };
         };
     };
+    get_vehicle_metrics: {
+        parameters: {
+            query: {
+                /** @description Alias del vehículo, p. ej. T03 */
+                alias: string;
+                /** @description Primer día (YYYY-MM-DD, hora de Lima); por defecto, el primer viaje */
+                desde?: string | null;
+                /** @description Último día (YYYY-MM-DD, hora de Lima); se recorta a la hora de replay */
+                hasta?: string | null;
+                /** @description Una fila por día o por viaje */
+                agrupar_por?: "dia" | "viaje";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "data": {
+                     *         "agrupar_por": "dia",
+                     *         "alias": "T07",
+                     *         "desde": "2020-04-13",
+                     *         "filas": [
+                     *           {
+                     *             "clave": "2020-04-13",
+                     *             "combustible_pen": 1296.45,
+                     *             "exceso_l": 11.2,
+                     *             "horas_en_movimiento": 13.6,
+                     *             "ingresos_pen": 3850,
+                     *             "km": 812.4,
+                     *             "l_100km": 37.11,
+                     *             "litros": 301.5,
+                     *             "litros_linea_base": 284,
+                     *             "margen_pen": 2553.55,
+                     *             "ralenti_h": 0.42,
+                     *             "tramos": 118,
+                     *             "tramos_con_linea_base": 112,
+                     *             "tramos_sobreconsumo": 3,
+                     *             "viajes_finalizados": 1,
+                     *             "vs_pares_pct": 4.1
+                     *           },
+                     *           {
+                     *             "clave": "2020-04-14",
+                     *             "combustible_pen": 0,
+                     *             "exceso_l": 66.1,
+                     *             "horas_en_movimiento": 10.9,
+                     *             "ingresos_pen": 0,
+                     *             "km": 640.2,
+                     *             "l_100km": 47.77,
+                     *             "litros": 305.8,
+                     *             "litros_linea_base": 232.6,
+                     *             "margen_pen": 0,
+                     *             "ralenti_h": 0.35,
+                     *             "tramos": 93,
+                     *             "tramos_con_linea_base": 90,
+                     *             "tramos_sobreconsumo": 21,
+                     *             "viajes_finalizados": 0,
+                     *             "vs_pares_pct": 28.4
+                     *           }
+                     *         ],
+                     *         "hasta": "2020-04-14",
+                     *         "resumen": {
+                     *           "clave": "total",
+                     *           "combustible_pen": 1296.45,
+                     *           "exceso_l": 77.3,
+                     *           "horas_en_movimiento": 24.5,
+                     *           "ingresos_pen": 3850,
+                     *           "km": 1452.6,
+                     *           "l_100km": 41.81,
+                     *           "litros": 607.3,
+                     *           "litros_linea_base": 516.6,
+                     *           "margen_pen": 2553.55,
+                     *           "ralenti_h": 0.77,
+                     *           "tramos": 211,
+                     *           "tramos_con_linea_base": 202,
+                     *           "tramos_sobreconsumo": 24,
+                     *           "viajes_finalizados": 1,
+                     *           "vs_pares_pct": 15
+                     *         }
+                     *       },
+                     *       "is_replay": true,
+                     *       "provenance": [
+                     *         "synthetic_demo",
+                     *         "model_inferred"
+                     *       ],
+                     *       "time_range": {
+                     *         "from": "2020-04-13T00:00:00Z",
+                     *         "to": "2020-04-14T03:30:00Z"
+                     *       },
+                     *       "updated_at": "2020-04-14T03:30:00Z"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["Envelope_VehicleMetrics_"];
+                };
+            };
+            /** @description X-API-Key ausente o incorrecta */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Alias o viaje desconocido */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description API_KEY no configurada en el servidor */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+        };
+    };
     get_vehicle_status: {
         parameters: {
             query: {
@@ -2427,6 +2722,129 @@ export interface operations {
                      *     }
                      */
                     "application/json": components["schemas"]["Envelope_VehicleStatus_"];
+                };
+            };
+            /** @description Alias o viaje desconocido */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorBody"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_vehicle_metrics: {
+        parameters: {
+            query?: {
+                /** @description Primer día (YYYY-MM-DD, hora de Lima); por defecto, el primer viaje */
+                desde?: string | null;
+                /** @description Último día (YYYY-MM-DD, hora de Lima); se recorta a la hora de replay */
+                hasta?: string | null;
+                /** @description Una fila por día o por viaje */
+                agrupar_por?: "dia" | "viaje";
+            };
+            header?: never;
+            path: {
+                alias: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "data": {
+                     *         "agrupar_por": "dia",
+                     *         "alias": "T07",
+                     *         "desde": "2020-04-13",
+                     *         "filas": [
+                     *           {
+                     *             "clave": "2020-04-13",
+                     *             "combustible_pen": 1296.45,
+                     *             "exceso_l": 11.2,
+                     *             "horas_en_movimiento": 13.6,
+                     *             "ingresos_pen": 3850,
+                     *             "km": 812.4,
+                     *             "l_100km": 37.11,
+                     *             "litros": 301.5,
+                     *             "litros_linea_base": 284,
+                     *             "margen_pen": 2553.55,
+                     *             "ralenti_h": 0.42,
+                     *             "tramos": 118,
+                     *             "tramos_con_linea_base": 112,
+                     *             "tramos_sobreconsumo": 3,
+                     *             "viajes_finalizados": 1,
+                     *             "vs_pares_pct": 4.1
+                     *           },
+                     *           {
+                     *             "clave": "2020-04-14",
+                     *             "combustible_pen": 0,
+                     *             "exceso_l": 66.1,
+                     *             "horas_en_movimiento": 10.9,
+                     *             "ingresos_pen": 0,
+                     *             "km": 640.2,
+                     *             "l_100km": 47.77,
+                     *             "litros": 305.8,
+                     *             "litros_linea_base": 232.6,
+                     *             "margen_pen": 0,
+                     *             "ralenti_h": 0.35,
+                     *             "tramos": 93,
+                     *             "tramos_con_linea_base": 90,
+                     *             "tramos_sobreconsumo": 21,
+                     *             "viajes_finalizados": 0,
+                     *             "vs_pares_pct": 28.4
+                     *           }
+                     *         ],
+                     *         "hasta": "2020-04-14",
+                     *         "resumen": {
+                     *           "clave": "total",
+                     *           "combustible_pen": 1296.45,
+                     *           "exceso_l": 77.3,
+                     *           "horas_en_movimiento": 24.5,
+                     *           "ingresos_pen": 3850,
+                     *           "km": 1452.6,
+                     *           "l_100km": 41.81,
+                     *           "litros": 607.3,
+                     *           "litros_linea_base": 516.6,
+                     *           "margen_pen": 2553.55,
+                     *           "ralenti_h": 0.77,
+                     *           "tramos": 211,
+                     *           "tramos_con_linea_base": 202,
+                     *           "tramos_sobreconsumo": 24,
+                     *           "viajes_finalizados": 1,
+                     *           "vs_pares_pct": 15
+                     *         }
+                     *       },
+                     *       "is_replay": true,
+                     *       "provenance": [
+                     *         "synthetic_demo",
+                     *         "model_inferred"
+                     *       ],
+                     *       "time_range": {
+                     *         "from": "2020-04-13T00:00:00Z",
+                     *         "to": "2020-04-14T03:30:00Z"
+                     *       },
+                     *       "updated_at": "2020-04-14T03:30:00Z"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["Envelope_VehicleMetrics_"];
                 };
             };
             /** @description Alias o viaje desconocido */

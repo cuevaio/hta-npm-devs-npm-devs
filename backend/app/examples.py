@@ -6,7 +6,7 @@ from .schemas import (
     AgregadoFletes, FleteDetalle, FreightBoard, ResumenFletes,
     Alerta, Anomalia, Bottlenecks, CuelloDeBotella, Flete, FleetOverview, FuelAnalysis, LineaBase,
     Pasada, Posicion, Provenance, ReplayState, ReporteConductor, TimeRange, Tramo, TripStatus,
-    VehicleStatus, VehiculoResumen,
+    MetricasPeriodo, VehicleMetrics, VehicleStatus, VehiculoResumen,
 )
 
 
@@ -164,4 +164,24 @@ FREIGHT_BOARD = FreightBoard(
     por_vehiculo=[AgregadoFletes(clave="T07", **_AGG)],
     por_dia=[AgregadoFletes(clave="2020-04-14", **_AGG)],
     fletes=[_FLETE_FIN, _FLETE_CURSO],
+)
+
+_DIA_13 = MetricasPeriodo(
+    clave="2020-04-13", viajes_finalizados=1, km=812.4, litros=301.5, l_100km=37.11, tramos=118,
+    tramos_con_linea_base=112, tramos_sobreconsumo=3, litros_linea_base=284.0, exceso_l=11.2, vs_pares_pct=4.1,
+    horas_en_movimiento=13.6, ralenti_h=0.42, ingresos_pen=3850.0, combustible_pen=1296.45, margen_pen=2553.55,
+)
+_DIA_14 = _DIA_13.model_copy(update=dict(
+    clave="2020-04-14", viajes_finalizados=0, km=640.2, litros=305.8, l_100km=47.77, tramos=93,
+    tramos_con_linea_base=90, tramos_sobreconsumo=21, litros_linea_base=232.6, exceso_l=66.1, vs_pares_pct=28.4,
+    horas_en_movimiento=10.9, ralenti_h=0.35, ingresos_pen=0.0, combustible_pen=0.0, margen_pen=0.0,
+))
+VEHICLE_METRICS = VehicleMetrics(
+    alias="T07", agrupar_por="dia", desde="2020-04-13", hasta="2020-04-14",
+    resumen=_DIA_13.model_copy(update=dict(
+        clave="total", km=1452.6, litros=607.3, l_100km=41.81, tramos=211, tramos_con_linea_base=202,
+        tramos_sobreconsumo=24, litros_linea_base=516.6, exceso_l=77.3, vs_pares_pct=15.0,
+        horas_en_movimiento=24.5, ralenti_h=0.77,
+    )),
+    filas=[_DIA_13, _DIA_14],
 )

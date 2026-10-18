@@ -2,8 +2,8 @@ import asyncio
 import hmac
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime
-from typing import Annotated, Callable
+from datetime import date, datetime
+from typing import Annotated, Callable, Literal
 
 import psycopg
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query, Request, Security
@@ -15,12 +15,13 @@ from psycopg_pool import PoolTimeout
 from . import examples as ex
 from . import freights as freights_mod
 from . import fuel as fuel_mod
+from . import metrics as metrics_mod
 from . import reads
 from .db import STATEMENT_TIMEOUT_MS, close_pools, migrate, read_url
 from .replay import Clock, ReplayEngine, system_clock
 from .schemas import (
     AlertList, Bottlenecks, ControlReplayRequest, Envelope, ErrorBody, FleetOverview, FreightBoard, FuelAnalysis,
-    Provenance, ReplayState, TimeRange, TripStatus, VehicleStatus,
+    Provenance, ReplayState, TimeRange, TripStatus, VehicleMetrics, VehicleStatus,
 )
 
 # Previews y producción del dashboard y la landing en Vercel (ADR 0011).
@@ -177,6 +178,16 @@ def create_app(
         data, desde, hasta, updated = found
         return envelope(data, [*real(), Provenance.model_inferred], TimeRange(from_=desde, to=hasta), updated)
 
+    def metrics(alias: str, desde: date | None, hasta: date | None, agrupar_por: str) -> dict:
+        need_engine()
+        if desde and hasta and desde > hasta:
+            raise HTTPException(status_code=422, detail="desde no puede ser posterior a hasta")
+        found = metrics_mod.vehicle_metrics(reads_url, alias, desde, hasta, agrupar_por)
+        if found is None:
+            raise HTTPException(status_code=404, detail=f"Vehículo desconocido: {alias}")
+        data, inicio, fin, updated = found
+        return envelope(data, [*real(), Provenance.model_inferred], TimeRange(from_=inicio, to=fin), updated)
+
     def bottlenecks(trip_id: str) -> dict:
         t = ex.TRIPS[_trip_id(trip_id)]
         return envelope(ex.BOTTLENECKS[trip_id], ex.PROVENANCE_ALERTS, TimeRange(from_=t.inicio, to=ex.NOW))
@@ -205,12 +216,16 @@ def create_app(
     r_ex = ex.INITIAL_REPLAY
     ex_replay = envelope(r_ex, [Provenance.synthetic_demo], TimeRange(from_=r_ex.inicio, to=r_ex.fin), ex.UPDATED_AT)
     ex_freights = envelope(ex.FREIGHT_BOARD, FREIGHT_PROVENANCE, TimeRange(from_=ex.T0, to=ex.NOW))
+    ex_metrics = envelope(ex.VEHICLE_METRICS, ex.PROVENANCE, TimeRange(from_=ex.REPLAY_START, to=ex.NOW))
 
     public = APIRouter(prefix="/v1", tags=["dashboard (público)"])
     tools = APIRouter(prefix="/v1/tools", tags=["tools (X-API-Key)"], dependencies=[Depends(require_api_key)])
 
     Alias = Annotated[str, Query(description="Alias del vehículo, p. ej. T03")]
     TripId = Annotated[str, Query(description="Identificador del viaje, p. ej. V-001")]
+    Desde = Annotated[date | None, Query(description="Primer día (YYYY-MM-DD, hora de Lima); por defecto, el primer viaje")]
+    Hasta = Annotated[date | None, Query(description="Último día (YYYY-MM-DD, hora de Lima); se recorta a la hora de replay")]
+    AgruparPor = Annotated[Literal["dia", "viaje"], Query(description="Una fila por día o por viaje")]
 
     def add(router: APIRouter, path: str, op: str, fn: Callable, model, example: dict, summary: str, errors: dict):
         router.add_api_route(
@@ -221,6 +236,11 @@ def create_app(
     # Públicas (lecturas del dashboard)
     add(public, "/fleet", "read_fleet", lambda: fleet(), FleetOverview, ex_fleet, "Vista general de la flota", {})
     add(public, "/vehicles/{alias}", "read_vehicle", lambda alias: vehicle(alias), VehicleStatus, ex_vehicle, "Estado de un vehículo", NOT_FOUND)
+    def read_metrics(alias: str, desde: Desde = None, hasta: Hasta = None, agrupar_por: AgruparPor = "dia"):
+        return metrics(alias, desde, hasta, agrupar_por)
+
+    add(public, "/vehicles/{alias}/metrics", "read_vehicle_metrics", read_metrics, VehicleMetrics, ex_metrics,
+        "Métricas históricas de un vehículo por día o por viaje", NOT_FOUND)
     add(public, "/trips/{trip_id}", "read_trip", lambda trip_id: trip(trip_id), TripStatus, ex_trip, "Estado de un viaje", NOT_FOUND)
     add(public, "/trips/{trip_id}/fuel", "read_trip_fuel", lambda trip_id: fuel(trip_id), FuelAnalysis, ex_fuel, "Análisis de combustible de un viaje", NOT_FOUND)
     add(public, "/trips/{trip_id}/bottlenecks", "read_trip_bottlenecks", lambda trip_id: bottlenecks(trip_id), Bottlenecks, ex_bottlenecks, "Cuellos de botella de un viaje", NOT_FOUND)
@@ -233,12 +253,16 @@ def create_app(
     def tool_trip(trip_id: TripId): return trip(trip_id)
     def tool_fuel(trip_id: TripId): return fuel(trip_id)
     def tool_bottlenecks(trip_id: TripId): return bottlenecks(trip_id)
+    def tool_metrics(alias: Alias, desde: Desde = None, hasta: Hasta = None, agrupar_por: AgruparPor = "dia"):
+        return metrics(alias, desde, hasta, agrupar_por)
 
     add(tools, "/get_fleet_overview", "get_fleet_overview", lambda: fleet(), FleetOverview, ex_fleet, "Tool get_fleet_overview", AUTH_ERRORS)
     add(tools, "/get_vehicle_status", "get_vehicle_status", tool_vehicle, VehicleStatus, ex_vehicle, "Tool get_vehicle_status", {**NOT_FOUND, **AUTH_ERRORS})
     add(tools, "/get_trip_status", "get_trip_status", tool_trip, TripStatus, ex_trip, "Tool get_trip_status", {**NOT_FOUND, **AUTH_ERRORS})
     add(tools, "/get_fuel_analysis", "get_fuel_analysis", tool_fuel, FuelAnalysis, ex_fuel, "Tool get_fuel_analysis (desglose por tramo y sentido)", {**NOT_FOUND, **AUTH_ERRORS})
     add(tools, "/get_operational_bottlenecks", "get_operational_bottlenecks", tool_bottlenecks, Bottlenecks, ex_bottlenecks, "Tool get_operational_bottlenecks", {**NOT_FOUND, **AUTH_ERRORS})
+    add(tools, "/get_vehicle_metrics", "get_vehicle_metrics", tool_metrics, VehicleMetrics, ex_metrics,
+        "Tool get_vehicle_metrics (historial por día o por viaje, para gráficos)", {**NOT_FOUND, **AUTH_ERRORS})
     add(tools, "/get_alerts", "get_alerts", lambda: alerts(), AlertList, ex_alerts, "Tool get_alerts", AUTH_ERRORS)
 
     def control_replay(body: ControlReplayRequest) -> dict:
