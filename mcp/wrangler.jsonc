@@ -3,5 +3,10 @@
   "name": "fleet-mcp",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    // URL base de la Domain API (Cloud Run), sin barra final. Placeholder: cambiar antes de desplegar.
+    "DOMAIN_API_URL": "https://domain-api.example.com"
+  }
+  // Secretos (no van en el repo): `wrangler secret put MCP_API_KEY` y `wrangler secret put DOMAIN_API_KEY`.
 }

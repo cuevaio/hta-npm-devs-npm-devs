@@ -1,0 +1,7 @@
+# Copiar a .dev.vars para `npm run dev`. No subir .dev.vars.
+# Key que deben presentar los clientes MCP.
+MCP_API_KEY=cambia-esto
+# Key de servicio con la que el Worker llama a la Domain API (X-API-Key).
+DOMAIN_API_KEY=cambia-esto
+# Opcional en local (sobrescribe vars.DOMAIN_API_URL), p. ej. el servidor simulado Prism.
+# DOMAIN_API_URL=http://localhost:4010
