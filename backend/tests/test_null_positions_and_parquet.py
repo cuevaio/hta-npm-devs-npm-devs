@@ -27,7 +27,7 @@ def test_a_reading_without_position_is_loaded_replayed_and_keeps_the_last_known_
     known = next(r for r in csv.DictReader(open(REPO / "data/fixtures/telemetry.csv"))
                  if r["alias"] == "T07" and r["event_time"] == "2020-04-01T20:31:00Z")
 
-    api.post(CONTROL, headers=KEY, json={"action": "seek", "to_event_time": "2020-04-01T20:31:01Z"})
+    api.post(CONTROL, headers=KEY, json={"action": "seek", "to_event_time": "2020-04-01T20:31:00.7Z"})
 
     data = api.get("/v1/vehicles/T07").json()["data"]
     assert data["hora_evento"].startswith("2020-04-01T20:31:00.5")
