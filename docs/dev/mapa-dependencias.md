@@ -1,5 +1,7 @@
 # Mapa de dependencias de issues
 
+> **Desde el 2026-10-18 todos los tickets abiertos están asignados a Joseph**, que los implementa con el orquestador (`tools/orquestar.sh`). La columna "Dueño" indica el área original de cada ticket.
+
 Vista general de los tickets del MVP. **La fuente de verdad es GitHub Issues**: estado, dueño y bloqueos nativos viven en cada issue. Todos son sub-issues de la spec [#4](https://github.com/npm-devs/npm-devs/issues/4).
 
 ## Cómo leer este mapa
@@ -12,7 +14,7 @@ Vista general de los tickets del MVP. **La fuente de verdad es GitHub Issues**: 
 
 | Issue | Ticket | Dueño | Bloqueado por |
 |---|---|---|---|
-| [#5](https://github.com/npm-devs/npm-devs/issues/5) | Harness de tests y CI | Joseph | — |
+| [#5](https://github.com/npm-devs/npm-devs/issues/5) | ~~Harness de tests y CI~~ ✅ cerrado | Joseph | — |
 | [#6](https://github.com/npm-devs/npm-devs/issues/6) | 👤 Plantilla de alerta enviada a Meta y cupo de Zavu | Joseph | — |
 | [#7](https://github.com/npm-devs/npm-devs/issues/7) | 👤 Grilling: datos y Domain API | Juan | — |
 | [#8](https://github.com/npm-devs/npm-devs/issues/8) | 👤 Grilling: dashboard | Lian | — |
