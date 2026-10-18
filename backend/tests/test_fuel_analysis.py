@@ -138,12 +138,12 @@ def real_api(database_url):
 
 
 def _window(api, trip, start_utc8, end_utc8):
-    """Pasadas del viaje cuyo tramo cae en la ventana (hora local UTC+8) dada."""
+    """Pasadas del viaje que se solapan con la ventana (hora local UTC+8) dada."""
     tz = datetime.fromisoformat
     lo, hi = tz(start_utc8 + "+08:00"), tz(end_utc8 + "+08:00")
     with psycopg.connect(api.app.state.database_url) as conn:
         cells = [r[0] for r in conn.execute(
-            "SELECT h3_cell FROM passes WHERE trip_id = %s AND t_start >= %s AND t_end <= %s", (trip, lo, hi))]
+            "SELECT h3_cell FROM passes WHERE trip_id = %s AND t_end > %s AND t_start < %s", (trip, lo, hi))]
     data = api.get(f"/v1/trips/{trip}/fuel").json()["data"]["pasadas"]
     return [p for p in data if p["tramo"]["h3"] in cells]
 
@@ -162,16 +162,11 @@ def test_real_t07_climbing_nanling_stays_within_the_norm(real_api):
 
 
 @pytest.mark.skipif(not REAL, reason="FLEET_DATA_DIR no está definido")
-@pytest.mark.xfail(strict=True, reason=(
-    "BLOQUEADO (#14): en la salida real T28-V03 va por el corredor K11-K17 (ida), que solo tiene 1 fila de línea "
-    "base y ninguna en esas celdas; ninguna pasada de T28 el 2020-04-07 (UTC+8 ni UTC) vale ~90,5 L/100 km. "
-    "Hay que decidir el escenario de la Demo A sobre otra pasada o recalcular los corredores en data/."))
-def test_real_t28_demo_a_segment_shows_overconsumption(real_api):
-    with psycopg.connect(real_api.app.state.database_url) as conn:
-        trip = conn.execute(
-            "SELECT trip_id FROM trips WHERE alias = 'T28' AND t_start <= %s AND t_end >= %s",
-            (datetime.fromisoformat("2020-04-07T08:30+08:00"), datetime.fromisoformat("2020-04-07T08:48+08:00")),
-        ).fetchone()[0]
-    segment = _window(real_api, trip, "2020-04-07T08:30", "2020-04-07T08:48")
+def test_real_demo_a_t03_segments_show_overconsumption_once_the_replay_passes_them(real_api):
+    # Demo A: T03-V05 (ida) el 2020-04-17 entre 12:29 y 13:30 UTC+8.
+    segment = _window(real_api, "T03-V05", "2020-04-17T12:29", "2020-04-17T13:30")
 
-    assert any(p["sobreconsumo"] and p["exceso_l"] > 0 for p in segment), segment
+    over = [p for p in segment if p["sobreconsumo"]]
+    assert len(over) == 5, segment
+    assert all(p["linea_base"] is not None and p["exceso_l"] > 0 for p in over)
+    assert sum(p["exceso_l"] for p in over) >= 3, over
