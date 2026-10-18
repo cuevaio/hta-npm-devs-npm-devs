@@ -1,12 +1,16 @@
 {
-  "name": "support-2",
+  "name": "fleet-intelligence-zavu",
   "private": true,
   "type": "module",
-  "dependencies": {},
   "devDependencies": {
+    "@types/node": "^24.0.0",
     "@zavudev/functions": "^0.3.0",
     "@zavudev/sdk": "^0.51.0",
-    "@types/node": "^24.0.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^4.1.12"
+  },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "vitest run"
   }
 }

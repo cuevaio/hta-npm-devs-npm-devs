@@ -1,0 +1,21 @@
+name: zavu
+on:
+  push:
+    paths: ["zavu/**", "backend/openapi.json", ".github/workflows/zavu.yml"]
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: zavu
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: zavu/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test

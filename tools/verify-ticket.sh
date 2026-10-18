@@ -10,12 +10,12 @@ base=$(git merge-base HEAD origin/main 2>/dev/null || git merge-base HEAD main)
 changed=$( { git diff --name-only "$base"; git diff --name-only; git ls-files --others --exclude-standard; } | sort -u)
 
 targets=()
-for d in backend mcp dashboard web; do
+for d in backend mcp zavu dashboard web; do
   if grep -q "^$d/" <<<"$changed"; then targets+=("$d"); fi
 done
 # El harness (Makefile, workflows) afecta a todas las carpetas.
 if grep -qE '^(Makefile|\.github/workflows/)' <<<"$changed"; then
-  targets=(backend mcp dashboard web)
+  targets=(backend mcp zavu dashboard web)
 fi
 
 if [ ${#targets[@]} -eq 0 ]; then
