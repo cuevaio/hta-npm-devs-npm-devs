@@ -16,6 +16,7 @@ Cada tool hace un único `fetch` a `GET ${DOMAIN_API_URL}/v1/tools/<tool>` con `
 | `SENDER_ID` | Sender de Zavu del agente |
 | `DOMAIN_API_URL` | URL base de la Domain API, sin `/v1` |
 | `DOMAIN_API_KEY` | API key de servicio (`X-API-Key`) |
+| `GEMINI_API_KEY` | API key propia de Google para el modelo `gemini-4-argon` (proveedor `google`); sin ella el agente no se registra |
 
 ## Tests
 
@@ -31,6 +32,7 @@ npm test   # levanta Prism desde ../backend/openapi.json en el puerto 4011 y lo 
 npx zavudev fn secrets set SENDER_ID <senderId>
 npx zavudev fn secrets set DOMAIN_API_URL <url>
 npx zavudev fn secrets set DOMAIN_API_KEY <clave>
+npx zavudev fn secrets set GEMINI_API_KEY -   # lee la key de stdin
 npx zavudev deploy
 ```
 
