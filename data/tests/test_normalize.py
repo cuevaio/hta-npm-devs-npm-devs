@@ -36,3 +36,4 @@ def test_esquema_procedencia_y_orden(fake_fleet):
     assert df["provenance"].unique().to_list() == ["fead_observed"]
     assert df["event_time"].dtype.time_zone == "UTC"
     assert df["event_time"].is_sorted() and df["event_time"].is_unique().all()
+    assert df["alt_m"].null_count() == len(df)  # FEAD no trae altitud: la columna existe pero vacía

@@ -29,6 +29,7 @@ NORMALIZED_COLUMNS = (
     "event_time",
     "lat",
     "lon",
+    "alt_m",  # msnm; FEAD no la trae (nula), la flota de Perú la toma de SRTM
     "speed_kmh",
     "rpm",
     "fuel_rate_lph",
@@ -99,6 +100,7 @@ class Telemetry:
         }
         for key, arr in self.cols.items():
             data[key] = pl.Series(np.frombuffer(arr, dtype=np.float64).copy()).fill_nan(None)
+        data["alt_m"] = pl.Series([None] * len(self), dtype=pl.Float64)  # FEAD no tiene altitud
         data["engine_on"] = pl.Series(np.frombuffer(self.engine_on, dtype=np.int8) == 1)
         data["provenance"] = pl.Series([PROVENANCE] * len(self), dtype=pl.String)
         df = pl.DataFrame(data).select(NORMALIZED_COLUMNS)

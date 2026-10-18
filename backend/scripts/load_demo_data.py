@@ -27,6 +27,7 @@ TRIPS = ["trip_id", "alias", "corridor", "sentido", "origin_terminal", "dest_ter
 FREIGHTS = ["trip_id", "freight_id", "alias", "driver_id", "client", "cargo", "corridor", "sentido",
             "origin_terminal", "dest_terminal", "planned_departure", "provenance"]
 # Columnas que solo trae la flota de Perú (ADR 0012); se cargan si están.
+TELEMETRY_EXTRA = ["alt_m"]
 TRIPS_EXTRA = ["km", "liters"]
 FREIGHTS_EXTRA = ["client_ruc", "tonnage_t", "gre_remitente", "gre_transportista", "tarifa_pen", "igv_pen",
                   "total_pen", "detraccion_pen", "fuel_liters", "fuel_cost_pen"]
@@ -94,8 +95,9 @@ def load(source: Path, database_url: str, replay_start: datetime = REPLAY_START)
             future = df.filter(pl.col("event_time") > replay_start)
             if not future.is_empty():
                 last_event = max(last_event, future["event_time"].max())
-            counts["history"] += _copy(conn, "telemetry_reading", history, TELEMETRY)
-            counts["source"] += _copy(conn, "telemetry_source", future, TELEMETRY)
+            columns = _with_extra(df, TELEMETRY, TELEMETRY_EXTRA)
+            counts["history"] += _copy(conn, "telemetry_reading", history, columns)
+            counts["source"] += _copy(conn, "telemetry_source", future, columns)
         trips = _utc(pl.read_csv(source / "trips.csv"), "t_start", "t_end")
         aliases |= set(trips["alias"].unique())
         conn.execute("INSERT INTO vehicles (alias) SELECT unnest(%s::text[]) ON CONFLICT DO NOTHING", (sorted(aliases),))

@@ -119,15 +119,16 @@ class Tramo:
     t: np.ndarray
     lat: np.ndarray
     lon: np.ndarray
+    alt: np.ndarray  # msnm, SRTM de la ruta (rutas_peru.json)
     v_kmh: np.ndarray
     lph: np.ndarray
     carga: np.ndarray
 
 
-def _quieto(t0: float, dur: float, lat: float, lon: float, camion: Camion) -> Tramo:
+def _quieto(t0: float, dur: float, lat: float, lon: float, alt: float, camion: Camion) -> Tramo:
     t = np.arange(t0, t0 + dur, PASO_S, dtype=float)
     z = np.zeros(len(t))
-    return Tramo(t, z + lat, z + lon, z, z + camion.ralenti_lph * camion.condicion, z)
+    return Tramo(t, z + lat, z + lon, z + alt, z, z + camion.ralenti_lph * camion.condicion, z)
 
 
 def simular_viaje(ruta: Ruta, masa_t: float, pf: Perfil, t0: float, paradas, lentos):
@@ -145,11 +146,11 @@ def simular_viaje(ruta: Ruta, masa_t: float, pf: Perfil, t0: float, paradas, len
             km = np.interp(ts, tb, ruta.km[a : b + 1])
             i = np.clip(np.searchsorted(km_mid, km), 0, len(vm) - 1)
             tramos.append(Tramo(ts, np.interp(km, ruta.km, ruta.lat), np.interp(km, ruta.km, ruta.lon),
-                                np.interp(km, km_mid, vm) * 3.6, lph[i], carga[i]))
+                                np.interp(km, ruta.km, ruta.alt_m), np.interp(km, km_mid, vm) * 3.6, lph[i], carga[i]))
         if n < len(paradas):
             _, dur, ralenti = paradas[n]
             if ralenti:  # al costado de la vía, unos 30 m
-                tramos.append(_quieto(tb[-1], dur, ruta.lat[b] + 0.00027, ruta.lon[b], pf.camion))
+                tramos.append(_quieto(tb[-1], dur, ruta.lat[b] + 0.00027, ruta.lon[b], ruta.alt_m[b], pf.camion))
             retraso += dur
     return tramos, float(manejo_t[-1] + retraso)
 
@@ -157,7 +158,8 @@ def simular_viaje(ruta: Ruta, masa_t: float, pf: Perfil, t0: float, paradas, len
 def _ruido(tr: Tramo, rng: np.random.Generator) -> Tramo:
     n = len(tr.t)
     mov = tr.v_kmh > 0.5
-    return Tramo(tr.t, tr.lat + rng.normal(0, 3e-5, n) * mov, tr.lon + rng.normal(0, 3e-5, n) * mov,
+    # la altitud no lleva ruido: no consume números del generador y el resto de la salida no cambia
+    return Tramo(tr.t, tr.lat + rng.normal(0, 3e-5, n) * mov, tr.lon + rng.normal(0, 3e-5, n) * mov, tr.alt,
                  np.maximum(0, tr.v_kmh + rng.normal(0, 0.6, n) * mov),
                  np.maximum(0.2, tr.lph * rng.normal(1, 0.04, n)), tr.carga)
 
@@ -167,7 +169,7 @@ def _frame(alias: str, tramos: list[Tramo], rng: np.random.Generator, odo0: floa
     t = np.concatenate([x.t for x in tramos])
     orden = np.argsort(t, kind="stable")
     t = t[orden]
-    col = {k: np.concatenate([getattr(x, k) for x in tramos])[orden] for k in ("lat", "lon", "v_kmh", "lph", "carga")}
+    col = {k: np.concatenate([getattr(x, k) for x in tramos])[orden] for k in ("lat", "lon", "alt", "v_kmh", "lph", "carga")}
     keep = (t >= INICIO) & (t < FIN)
     dt = np.minimum(np.diff(t, prepend=t[0]), PASO_S)
     fuel_total = fuel0 + np.cumsum(col["lph"] * dt / 3600)
@@ -178,6 +180,7 @@ def _frame(alias: str, tramos: list[Tramo], rng: np.random.Generator, odo0: floa
         "alias": alias,
         "event_time": (t[keep] * 1e6).astype(np.int64),
         "lat": np.round(col["lat"][keep], 6), "lon": np.round(col["lon"][keep], 6),
+        "alt_m": np.round(col["alt"][keep], 1),
         "speed_kmh": np.round(col["v_kmh"][keep], 1), "rpm": np.round(rpm[keep]),
         "fuel_rate_lph": np.round(col["lph"][keep], 2), "fuel_total_l": np.round(fuel_total[keep], 2),
         "odometer_km": np.round(odo[keep], 2), "engine_on": True, "provenance": PROVENANCE,
@@ -242,7 +245,7 @@ def simular_flota(rutas: dict[str, Ruta], seed: int = SEED, aliases=None):
                 if g and g.tipo in ("parada_sin_explicar", "parada_explicada"):
                     km = ruta.largo_km * g.km_frac
                     paradas = sorted([p for p in paradas if abs(p[0] - km) > 60] + [(km, g.dur_s, g.tipo == "parada_explicada" and pf.ralenti_en_paradas)])
-                tramos.append(_quieto(t, calentamiento, ruta.lat[0], ruta.lon[0], pf.camion))
+                tramos.append(_quieto(t, calentamiento, ruta.lat[0], ruta.lon[0], ruta.alt_m[0], pf.camion))
                 salida = t + calentamiento
                 pv = pf
                 if pf.condicion_replay and salida >= REPLAY_DESDE:
@@ -269,7 +272,7 @@ def simular_flota(rutas: dict[str, Ruta], seed: int = SEED, aliases=None):
                     "trip_id": trip_id, "carga_t": round(masa, 1), "km_ruta": round(ruta.largo_km, 1),
                 })
                 # llegada: un rato en ralentí y estancia larga con el motor apagado (carga y descarga)
-                tramos.append(_quieto(llegada, vr.uniform(8, 15) * 60, ruta.lat[-1], ruta.lon[-1], pf.camion))
+                tramos.append(_quieto(llegada, vr.uniform(8, 15) * 60, ruta.lat[-1], ruta.lon[-1], ruta.alt_m[-1], pf.camion))
                 t = llegada + vr.uniform(5, 11) * 3600
                 sentido = "vuelta" if sentido == "ida" else "ida"
             if aliases is None or alias in aliases:

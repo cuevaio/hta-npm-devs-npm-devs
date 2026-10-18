@@ -75,6 +75,9 @@ class VehiculoResumen(BaseModel):
     viaje_id: str | None = None
     velocidad_kmh: float
     posicion: Posicion
+    altitud_m: float | None = Field(
+        None, description="Altitud de la última posición conocida, en msnm (SRTM de la ruta); nula si la fuente no la trae"
+    )
     hora_evento: AwareDatetime = Field(description="Hora del evento de la última lectura (UTC)")
 
 

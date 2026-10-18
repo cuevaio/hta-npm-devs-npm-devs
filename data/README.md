@@ -56,8 +56,9 @@ Los tests (`uv run pytest`, o `make test-data`) usan un tar sintético con matr�
 ## Salida (`out/`, no versionada)
 
 `telemetry/<alias>.parquet` (los 6 vehículos de la demo, 19 días), `trips.csv`, `passes_demo.csv`, `baseline.csv`,
-`freights.csv`, `drivers.csv`, `driver_reports.csv`. Esquema de telemetría: `alias, event_time (UTC), lat, lon, speed_kmh,
-rpm, fuel_rate_lph, fuel_total_l, odometer_km, engine_on, provenance`.
+`freights.csv`, `drivers.csv`, `driver_reports.csv`. Esquema de telemetría: `alias, event_time (UTC), lat, lon, alt_m,
+speed_kmh, rpm, fuel_rate_lph, fuel_total_l, odometer_km, engine_on, provenance`. `alt_m` es la altitud en msnm del punto
+de la ruta (SRTM, en `rutas_peru.json`); el pipeline de FEAD la deja nula porque FEAD no la trae.
 
 ## Procedencia de la logística sintética
 

@@ -16,6 +16,11 @@ test("lista los vehículos del replay con su estado en palabras", async ({ page 
   await expect(t03).toContainText("hora de Lima");
 });
 
+test("cada vehículo muestra la altitud de su última posición en msnm", async ({ page }) => {
+  await expect(page.locator('button.vehicle[data-alias="T03"]')).toContainText("575 msnm"); // costa, LIM-AQP
+  await expect(page.locator('button.vehicle[data-alias="T28"]')).toContainText(/3[\s.,]?831 msnm/); // altiplano, AQP-JUL
+});
+
 test("el viaje V-001 muestra corredor y sentido", async ({ page }) => {
   const t03 = page.locator('button.vehicle[data-alias="T03"]');
   await expect(t03).toContainText("V-001");
