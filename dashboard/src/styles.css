@@ -111,7 +111,8 @@ h3 { font-size: var(--cuadra-t-label); font-family: var(--cuadra-mono); font-wei
 }
 
 /* --------------------------------------------------------------------- operación */
-.grid { display: grid; grid-template-columns: 400px 1fr; flex: 1; min-height: 0; height: calc(100vh - 92px); }
+/* flex: none: con flex 1 el alto salía de la lista (.app solo tiene min-height) y el mapa quedaba más alto que la ventana */
+.grid { display: grid; grid-template-columns: 400px 1fr; grid-template-rows: minmax(0, 1fr); flex: none; min-height: 0; height: calc(100vh - 92px); }
 .lateral { padding: var(--cuadra-s-3) var(--cuadra-s-2) var(--cuadra-s-3) var(--cuadra-s-3); overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--cuadra-linea) transparent; }
 .mapa { position: relative; min-height: 480px; padding: 12px 12px 12px 0; }
 
@@ -163,15 +164,31 @@ h3 { font-size: var(--cuadra-t-label); font-family: var(--cuadra-mono); font-wei
 }
 
 /* mapa */
-.map { position: absolute; inset: 12px 12px 12px 0; border-radius: 14px; overflow: hidden; background: var(--cuadra-tinta-pozo); border: 1px solid var(--cuadra-linea-suave); animation: aparece .8s ease both; }
-.maplibregl-ctrl-group { background: rgba(12, 17, 14, .9) !important; border: 1px solid var(--cuadra-linea) !important; border-radius: 10px !important; box-shadow: none !important; backdrop-filter: blur(8px); }
-.maplibregl-ctrl-group button + button { border-top-color: var(--cuadra-linea) !important; }
-.maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: invert(1) opacity(.7); }
-.maplibregl-ctrl-attrib { background: rgba(5, 7, 6, .7) !important; color: var(--cuadra-fg-mute) !important; border-radius: 8px 0 0 0; font-size: 10.5px; }
-.maplibregl-ctrl-attrib a { color: var(--cuadra-fg-dim) !important; }
+.map-wrap { position: absolute; inset: 12px 12px 12px 0; }
+/* .map-wrap .map le gana a .mapboxgl-map/.maplibregl-map { position: relative }, que se cargan después
+   (Mapbox llega con import dinámico) y dejaban el mapa con alto 0 */
+.map-wrap .map { position: absolute; inset: 0; border-radius: 14px; overflow: hidden; background: var(--cuadra-tinta-pozo); border: 1px solid var(--cuadra-linea-suave); animation: aparece .8s ease both; }
+.camara {
+  position: absolute; z-index: 3; left: 14px; top: 14px; display: flex; align-items: center; gap: 8px;
+  padding: 6px 6px 6px 14px; border-radius: 999px; border: 1px solid var(--cuadra-linea-fuerte);
+  background: rgba(12, 17, 14, .9); backdrop-filter: blur(8px); animation: aparece .4s ease both;
+}
+.camara .dato { color: var(--cuadra-fg); }
+.camara button {
+  padding: 6px 12px; border-radius: 999px; cursor: pointer; border: 1px solid var(--cuadra-linea-fuerte);
+  background: var(--cuadra-tinta-3); color: var(--cuadra-fg); font: 500 12px var(--cuadra-mono);
+}
+.camara button:hover { border-color: var(--cuadra-sello); color: var(--cuadra-sello); }
+.mapboxgl-ctrl-group, .maplibregl-ctrl-group { background: rgba(12, 17, 14, .9) !important; border: 1px solid var(--cuadra-linea) !important; border-radius: 10px !important; box-shadow: none !important; backdrop-filter: blur(8px); }
+.mapboxgl-ctrl-group button + button, .maplibregl-ctrl-group button + button { border-top-color: var(--cuadra-linea) !important; }
+.mapboxgl-ctrl-group button .mapboxgl-ctrl-icon, .maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: invert(1) opacity(.7); }
+.mapboxgl-ctrl-attrib, .maplibregl-ctrl-attrib { background: rgba(5, 7, 6, .7) !important; color: var(--cuadra-fg-mute) !important; border-radius: 8px 0 0 0; font-size: 10.5px; }
+.mapboxgl-ctrl-attrib a, .maplibregl-ctrl-attrib a { color: var(--cuadra-fg-dim) !important; }
 
-/* Marcador: tractocamión visto desde arriba (components/truck.ts). El botón es el área de toque
-   centrada en el camión; el SVG gira con --rumbo y la etiqueta queda horizontal a su derecha. */
+/* Marcador: tractocamión visto desde arriba (components/truck.ts), acostado sobre la pista
+   (pitchAlignment/rotationAlignment "map"). El SVG gira con --rumbo, que map/motion.ts suaviza cuadro a
+   cuadro, y escala con --escala para medir ~18 m reales con zoom alto. La etiqueta es otro marcador
+   (.marker-tag) que queda siempre de frente a su lado. */
 .marker {
   --estado: #8A938D; --rumbo: 0deg;
   position: relative; width: 40px; height: 40px; padding: 0;
@@ -181,7 +198,7 @@ h3 { font-size: var(--cuadra-t-label); font-family: var(--cuadra-mono); font-wei
 .marker[data-estado="ralenti"] { --estado: var(--cuadra-observa); }
 .marker .camion-giro {
   position: absolute; left: 50%; top: 50%; width: 28px; height: 90px; margin: -45px 0 0 -14px;
-  transform: rotate(var(--rumbo)); transition: transform 1.6s var(--cuadra-ease-asiento);
+  transform: rotate(var(--rumbo)) scale(var(--escala, 1));
   pointer-events: none;
 }
 .marker .camion {
@@ -219,24 +236,27 @@ h3 { font-size: var(--cuadra-t-label); font-family: var(--cuadra-mono); font-wei
 @keyframes intermitente { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
 .marker[data-estado="detenido"] .freno { opacity: 1; }
 
-.marker .tag {
-  position: absolute; left: calc(50% + 22px); top: 50%; transform: translateY(-50%);
+.marker-tag { --estado: #8A938D; cursor: pointer; }
+.marker-tag[data-estado="en_viaje"] { --estado: var(--cuadra-sello); }
+.marker-tag[data-estado="ralenti"] { --estado: var(--cuadra-observa); }
+.marker-tag .tag {
   display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; white-space: nowrap;
   border-radius: 999px; border: 1px solid var(--cuadra-linea-fuerte);
   background: rgba(12, 17, 14, .9); backdrop-filter: blur(6px); box-shadow: 0 6px 16px -8px #000;
   font-family: var(--cuadra-mono); font-size: 10.5px; color: var(--cuadra-fg-dim);
   transition: background var(--cuadra-dur-rapido), border-color var(--cuadra-dur-rapido), color var(--cuadra-dur-rapido);
 }
-.marker .tag b { font-weight: 500; color: var(--cuadra-fg); }
-.marker .tag-dato:empty { display: none; }
-.marker .tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--estado); }
+.marker-tag .tag b { font-weight: 500; color: var(--cuadra-fg); }
+.marker-tag .tag-dato:empty { display: none; }
+.marker-tag .tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--estado); }
 .marker:hover .camion { transform: scale(1.12); }
-.marker:hover .tag { border-color: var(--cuadra-fg-mute); }
+.marker-tag:hover .tag { border-color: var(--cuadra-fg-mute); }
 .marker.is-selected { z-index: 2; }
-.marker.is-selected .camion { transform: scale(1.25); filter: drop-shadow(0 0 6px rgba(216, 243, 106, .55)); }
-.marker.is-selected .tag { background: var(--cuadra-sello); border-color: var(--cuadra-sello); color: var(--cuadra-sobre-acento); }
-.marker.is-selected .tag b { color: var(--cuadra-sobre-acento); }
-.marker.is-selected .tag::before { background: var(--cuadra-sobre-acento); }
+.marker.is-selected .camion { transform: scale(1.12); filter: drop-shadow(0 0 6px rgba(216, 243, 106, .55)); }
+.marker-tag.is-selected { z-index: 2; }
+.marker-tag.is-selected .tag { background: var(--cuadra-sello); border-color: var(--cuadra-sello); color: var(--cuadra-sobre-acento); }
+.marker-tag.is-selected .tag b { color: var(--cuadra-sobre-acento); }
+.marker-tag.is-selected .tag::before { background: var(--cuadra-sobre-acento); }
 
 /* --------------------------------------------------------------------- fletes */
 /* Series validadas (dataviz) contra --cuadra-tinta-2 en oscuro; lima y ámbar quedan para estados. */

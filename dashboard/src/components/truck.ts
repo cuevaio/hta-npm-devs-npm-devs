@@ -1,5 +1,6 @@
 /**
- * Marcador de tractocamión visto desde arriba, apuntando al norte; el mapa lo gira con --rumbo.
+ * Marcador de tractocamión visto desde arriba, apuntando al norte; el mapa lo gira con --rumbo y lo
+ * escala con --escala (tamaño real con zoom alto, ver FleetMap).
  * El color de la cabina y la franja del tráiler salen de data-estado (styles.css), así un cambio de
  * estado no rehace el SVG. viewBox centrado en el camión para que gire sobre su centro.
  */
@@ -37,20 +38,10 @@ export function truckMarkup(alias: string): string {
     <rect class="freno" x="22.2" y="73" width="3.2" height="1.4" rx=".6"/>
   </svg>
 </span>
-<span class="tag"><b></b><span class="tag-dato"></span></span>`;
+`;
 }
 
-/** Rumbo en grados (0 = norte, horario) de `a` a `b`, en lon/lat. */
-export function bearing(a: [number, number], b: [number, number]): number {
-  const rad = Math.PI / 180;
-  const dLon = (b[0] - a[0]) * rad;
-  const y = Math.sin(dLon) * Math.cos(b[1] * rad);
-  const x = Math.cos(a[1] * rad) * Math.sin(b[1] * rad) - Math.sin(a[1] * rad) * Math.cos(b[1] * rad) * Math.cos(dLon);
-  return (Math.atan2(y, x) / rad + 360) % 360;
-}
-
-/** Ángulo acumulado que llega a `target` por el camino corto (de 350° a 10° gira 20°, no 340°). */
-export function unwrap(current: number, target: number): number {
-  const delta = ((((target - current) % 360) + 540) % 360) - 180;
-  return current + delta;
+/** Etiqueta del camión: va en su propio marcador, de cara a la pantalla aunque el mapa se incline. */
+export function tagMarkup(): string {
+  return `<span class="tag"><b></b><span class="tag-dato"></span></span>`;
 }

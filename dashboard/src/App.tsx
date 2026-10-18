@@ -94,7 +94,7 @@ export function App() {
                 <VehicleList snapshot={snap} selected={selected} onSelect={setSelected} />
               </section>
               <section className="mapa" aria-label="Mapa">
-                <FleetMap vehicles={vehicles} selected={selected} onSelect={setSelected} />
+                <FleetMap vehicles={vehicles} trips={snap.trips} replay={snap.replay.data} selected={selected} onSelect={setSelected} />
               </section>
             </main>
           )}
