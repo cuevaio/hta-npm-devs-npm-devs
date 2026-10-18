@@ -23,5 +23,5 @@ test("la landing pública carga", async ({ page }) => {
 
   await page.goto(urls.landing!);
 
-  await expect(page).toHaveTitle(/Fleet Intelligence/);
+  await expect(page).toHaveTitle(/Certera/);
 });

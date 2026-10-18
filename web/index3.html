@@ -1,0 +1,1338 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Certera · Telemetría con la pendiente de la ruta</title>
+    <meta name="description"
+        content="Certera cruza la telemetría del camión con la pendiente de la ruta que falta y avisa a la torre de control antes de que un camión se quede sin diésel en los Andes.">
+    <!-- Contenido basado en web/objetivo.md. El escenario Chosica–La Oroya es ilustrativo
+         y las cifras de costo son estimaciones de esa propuesta, no mediciones. -->
+    <link rel="icon" href="assets/brand/certera-favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="assets/tokens.css">
+    <style>
+        /* Una sola superficie de tinta. El símbolo son tres señales que entran por la
+   izquierda, convergen y salen como una dirección: telemetría, pares del tramo
+   y reporte humano. Es la misma figura que describe «Cómo funciona». */
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 74px;
+            overflow-x: clip
+        }
+
+        body {
+            margin: 0;
+            background: var(--cuadra-tinta);
+            color: var(--cuadra-fg);
+            font-family: var(--cuadra-body);
+            font-size: var(--cuadra-t-body);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased
+        }
+
+        ::selection {
+            background: var(--cuadra-sello);
+            color: var(--cuadra-sobre-acento)
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--cuadra-sello);
+            outline-offset: 3px;
+            border-radius: 4px
+        }
+
+        img {
+            max-width: 100%;
+            display: block
+        }
+
+        .wrap {
+            max-width: var(--cuadra-ancho);
+            margin-inline: auto;
+            padding-left: max(18px, env(safe-area-inset-left, 0px));
+            padding-right: max(18px, env(safe-area-inset-right, 0px))
+        }
+
+        .sec {
+            border-top: 1px solid var(--cuadra-linea)
+        }
+
+        .sec>.wrap {
+            padding-block: var(--cuadra-s-11)
+        }
+
+        h1,
+        h2,
+        h3,
+        p,
+        ol,
+        ul {
+            margin: 0
+        }
+
+        h1 {
+            font-family: var(--cuadra-display);
+            font-weight: 800;
+            font-size: var(--cuadra-t-mega);
+            line-height: .98;
+            letter-spacing: -.04em;
+            text-wrap: balance
+        }
+
+        h2 {
+            font-family: var(--cuadra-display);
+            font-weight: 800;
+            font-size: var(--cuadra-t-h1);
+            line-height: 1;
+            letter-spacing: -.034em;
+            margin-top: 14px;
+            text-wrap: balance
+        }
+
+        h3 {
+            font-family: var(--cuadra-display);
+            font-weight: 700;
+            font-size: var(--cuadra-t-h3);
+            line-height: 1.25;
+            letter-spacing: -.012em
+        }
+
+        .eyebrow {
+            font-size: var(--cuadra-t-label);
+            font-weight: 700;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--cuadra-sello)
+        }
+
+        .lede {
+            font-size: var(--cuadra-t-lede);
+            line-height: 1.6;
+            color: var(--cuadra-fg-dim);
+            max-width: 56ch;
+            margin-top: var(--cuadra-s-3)
+        }
+
+        .micro {
+            font-size: var(--cuadra-t-micro);
+            color: var(--cuadra-fg-dim)
+        }
+
+        .dato {
+            font-family: var(--cuadra-mono);
+            font-variant-numeric: tabular-nums
+        }
+
+        .cabeza {
+            display: grid;
+            grid-template-columns: 1.08fr 1fr;
+            gap: var(--cuadra-s-6);
+            align-items: end
+        }
+
+        .cabeza .lede {
+            margin-top: 0
+        }
+
+        @media(max-width:900px) {
+            .cabeza {
+                grid-template-columns: 1fr;
+                gap: var(--cuadra-s-2)
+            }
+        }
+
+        /* ------------------------------------------------------------------- nav -- */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: rgba(5, 7, 6, .9);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--cuadra-linea)
+        }
+
+        .navin {
+            display: flex;
+            align-items: center;
+            gap: var(--cuadra-s-3);
+            min-height: 58px
+        }
+
+        .marca {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-family: var(--cuadra-display);
+            font-weight: 800;
+            font-size: 17px;
+            letter-spacing: -.01em;
+            text-decoration: none;
+            color: var(--cuadra-fg);
+            flex: 0 0 auto
+        }
+
+        .marca canvas {
+            width: 26px;
+            height: 26px;
+            display: block;
+            flex: 0 0 auto
+        }
+
+        .navlinks {
+            display: flex;
+            gap: var(--cuadra-s-3);
+            margin-left: auto;
+            align-items: center;
+            font-size: 12.5px;
+            font-weight: 600;
+            letter-spacing: .07em;
+            text-transform: uppercase
+        }
+
+        .navlinks a {
+            color: var(--cuadra-fg-dim);
+            text-decoration: none;
+            transition: color var(--cuadra-dur-rapido)
+        }
+
+        .navlinks a:hover {
+            color: var(--cuadra-sello)
+        }
+
+        @media(max-width:860px) {
+            .navlinks a.sec-link {
+                display: none
+            }
+        }
+
+        .barra {
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            height: 2px;
+            background: var(--cuadra-sello);
+            width: 0
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 24px;
+            background: var(--cuadra-sello);
+            color: var(--cuadra-sobre-acento);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-decoration: none;
+            white-space: nowrap;
+            border: 1px solid var(--cuadra-sello);
+            border-radius: var(--cuadra-radio-s);
+            transition: background var(--cuadra-dur-rapido), border-color var(--cuadra-dur-rapido)
+        }
+
+        .btn:hover {
+            background: var(--cuadra-sello-2);
+            border-color: var(--cuadra-sello-2)
+        }
+
+        .btn.sec2 {
+            background: transparent;
+            color: var(--cuadra-fg);
+            border-color: var(--cuadra-linea-fuerte)
+        }
+
+        .btn.sec2:hover {
+            background: rgba(255, 255, 255, .04);
+            border-color: var(--cuadra-fg-mute)
+        }
+
+        .navlinks a.btn {
+            padding: 9px 16px;
+            font-size: 12px;
+            color: var(--cuadra-sobre-acento)
+        }
+
+        .navlinks a.btn:hover {
+            color: var(--cuadra-sobre-acento)
+        }
+
+        .ctas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: var(--cuadra-s-4)
+        }
+
+        /* ------------------------------------------------------------------ hero -- */
+        .hero {
+            position: relative;
+            overflow: hidden
+        }
+
+        .hero>.wrap {
+            position: relative;
+            z-index: 1;
+            padding-block: var(--cuadra-s-8) var(--cuadra-s-11)
+        }
+
+        #campo {
+            position: absolute;
+            inset: 0;
+            z-index: 0
+        }
+
+        /* El titular del hero va más grande que el resto: es la única pieza mega. */
+        .hero h1 {
+            font-size: clamp(52px, 8.2vw, 112px);
+            line-height: .94
+        }
+
+        .nombre {
+            text-transform: uppercase
+        }
+
+        .herogrid {
+            display: grid;
+            grid-template-columns: 1.12fr .88fr;
+            gap: var(--cuadra-s-6);
+            align-items: center;
+            margin-top: var(--cuadra-s-4)
+        }
+
+        @media(max-width:900px) {
+            .herogrid {
+                grid-template-columns: 1fr;
+                gap: var(--cuadra-s-4)
+            }
+        }
+
+        figure {
+            margin: 0
+        }
+
+        .marco {
+            background: var(--cuadra-tinta-pozo);
+            border: var(--cuadra-borde);
+            border-radius: var(--cuadra-radio);
+            position: relative;
+            overflow: hidden;
+            min-width: 0
+        }
+
+        .marco canvas {
+            display: block;
+            width: 100%;
+            height: auto
+        }
+
+        .marco .rotulo {
+            position: absolute;
+            left: 14px;
+            bottom: 13px;
+            font-family: var(--cuadra-mono);
+            font-size: 10.5px;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: var(--cuadra-fg-mute)
+        }
+
+        /* ----------------------------------------------------------- cómo funciona -- */
+        .flujo {
+            display: grid;
+            grid-template-columns: .92fr 1.08fr;
+            gap: var(--cuadra-s-6);
+            align-items: start;
+            margin-top: var(--cuadra-s-6)
+        }
+
+        @media(max-width:980px) {
+            .flujo {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .escena {
+            background: var(--cuadra-tinta-pozo);
+            border: var(--cuadra-borde);
+            border-radius: var(--cuadra-radio);
+            overflow: hidden;
+            min-width: 0;
+            position: sticky;
+            top: 84px
+        }
+
+        @media(max-width:980px) {
+            .escena {
+                position: static
+            }
+        }
+
+        .escena canvas {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 900/810;
+            display: block
+        }
+
+        /* La leyenda va bajo el lienzo: encima tapaba el módulo inferior izquierdo. */
+        .escena .fuentes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 18px;
+            padding: 12px 15px;
+            border-top: 1px solid var(--cuadra-linea)
+        }
+
+        .fu {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            letter-spacing: .05em;
+            color: var(--cuadra-fg-mute)
+        }
+
+        .fu i {
+            width: 9px;
+            height: 9px;
+            display: block;
+            flex: 0 0 auto
+        }
+
+        .pasos {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            border-top: 1px solid var(--cuadra-linea)
+        }
+
+        .pasos li {
+            border-bottom: 1px solid var(--cuadra-linea);
+            display: grid;
+            grid-template-columns: 36px 1fr;
+            gap: 14px;
+            align-items: baseline;
+            padding: 20px 0;
+            cursor: default;
+            transition: background var(--cuadra-dur-medio), padding var(--cuadra-dur-medio) var(--cuadra-ease-asiento)
+        }
+
+        .pasos .n {
+            font-family: var(--cuadra-mono);
+            font-size: var(--cuadra-t-label);
+            letter-spacing: .08em;
+            color: var(--cuadra-fg-mute);
+            font-variant-numeric: tabular-nums
+        }
+
+        .pasos h3 {
+            color: var(--cuadra-fg-dim)
+        }
+
+        .pasos p {
+            color: var(--cuadra-fg-mute);
+            font-size: 14px;
+            line-height: 1.55;
+            margin-top: 5px
+        }
+
+        .pasos li.vivo {
+            background: var(--cuadra-tinta-2);
+            box-shadow: inset 3px 0 0 var(--cuadra-sello);
+            border-radius: 0 var(--cuadra-radio-s) var(--cuadra-radio-s) 0;
+            padding-inline: 15px
+        }
+
+        .pasos li.vivo .n {
+            color: var(--cuadra-sello)
+        }
+
+        .pasos li.vivo h3 {
+            color: var(--cuadra-fg)
+        }
+
+        .pasos li.vivo p {
+            color: var(--cuadra-fg-dim)
+        }
+
+        /* --------------------------------------------------------- diferenciador -- */
+        .contraste {
+            display: grid;
+            grid-template-columns: 1.06fr .94fr;
+            gap: 14px;
+            margin-top: var(--cuadra-s-6);
+            align-items: stretch
+        }
+
+        @media(max-width:980px) {
+            .contraste {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .contraste .marco {
+            display: flex;
+            align-items: center
+        }
+
+        .dos {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-width: 0
+        }
+
+        .veredicto {
+            border: 1px solid var(--cuadra-linea);
+            border-radius: var(--cuadra-radio);
+            padding: var(--cuadra-s-3);
+            background: var(--cuadra-tinta-2);
+            min-width: 0;
+            flex: 1 1 auto
+        }
+
+        .veredicto.no {
+            border-color: var(--cuadra-rechazo-borde);
+            background: var(--cuadra-rechazo-fondo)
+        }
+
+        .veredicto.si {
+            border-color: var(--cuadra-ok-borde);
+            background: var(--cuadra-ok-fondo)
+        }
+
+        .veredicto p {
+            margin-top: var(--cuadra-s-2);
+            color: var(--cuadra-fg-dim);
+            font-size: 14px
+        }
+
+        .veredicto h3 {
+            margin-top: 12px
+        }
+
+        .veredicto .cifra {
+            font-family: var(--cuadra-display);
+            font-weight: 800;
+            font-size: 30px;
+            letter-spacing: -.02em;
+            font-variant-numeric: tabular-nums;
+            margin-top: var(--cuadra-s-2);
+            display: block
+        }
+
+        .veredicto.no .cifra {
+            color: var(--cuadra-rechazo)
+        }
+
+        .veredicto.si .cifra {
+            color: var(--cuadra-ok)
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid currentColor
+        }
+
+        .chip.no {
+            color: var(--cuadra-rechazo)
+        }
+
+        .chip.si {
+            color: var(--cuadra-ok)
+        }
+
+        .chip i {
+            width: 8px;
+            height: 8px;
+            background: currentColor;
+            display: block;
+            flex: 0 0 auto;
+            border-radius: 50%
+        }
+
+        /* ------------------------------------------------------------ procedencia -- */
+        .aviso {
+            border: 1px solid var(--cuadra-observa-borde);
+            background: var(--cuadra-observa-fondo);
+            border-radius: var(--cuadra-radio);
+            padding: var(--cuadra-s-3);
+            margin-top: var(--cuadra-s-4);
+            font-size: var(--cuadra-t-lede);
+            color: var(--cuadra-fg)
+        }
+
+        .etiquetas {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--cuadra-s-2);
+            margin-top: var(--cuadra-s-4);
+            padding: 0;
+            list-style: none
+        }
+
+        .etiquetas li {
+            border-top: 2px solid var(--cuadra-linea-fuerte);
+            padding-top: 12px;
+            min-width: 0
+        }
+
+        .etiquetas .dato {
+            color: var(--cuadra-sello);
+            font-size: 13px;
+            display: block;
+            word-break: break-all
+        }
+
+        .etiquetas p {
+            margin-top: 5px
+        }
+
+        @media(max-width:900px) {
+            .etiquetas {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        @media(max-width:560px) {
+            .etiquetas {
+                grid-template-columns: 1fr
+            }
+        }
+
+        /* ------------------------------------------------------------- problema -- */
+        .trio {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: var(--cuadra-s-6)
+        }
+
+        @media(max-width:900px) {
+            .trio {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .tarjeta {
+            background: var(--cuadra-tinta-2);
+            border: var(--cuadra-borde);
+            border-radius: var(--cuadra-radio);
+            padding: var(--cuadra-s-3);
+            min-width: 0
+        }
+
+        .tarjeta .cifra {
+            font-family: var(--cuadra-display);
+            font-weight: 800;
+            font-size: 28px;
+            letter-spacing: -.02em;
+            font-variant-numeric: tabular-nums;
+            display: block
+        }
+
+        .tarjeta p {
+            margin-top: 10px;
+            color: var(--cuadra-fg-dim);
+            font-size: 14px
+        }
+
+        /* ------------------------------------------------------------ escenario -- */
+        .leyenda {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 18px;
+            padding: 12px 15px;
+            border-top: 1px solid var(--cuadra-linea)
+        }
+
+        .contraste .marco.perfil {
+            display: block;
+            align-self: start
+        }
+
+        .alerta {
+            margin-top: 14px;
+            border: 1px solid var(--cuadra-observa-borde);
+            background: var(--cuadra-observa-fondo);
+            border-radius: var(--cuadra-radio);
+            padding: var(--cuadra-s-3)
+        }
+
+        .alerta b {
+            display: block;
+            color: var(--cuadra-observa);
+            font-size: 13px;
+            letter-spacing: .08em;
+            text-transform: uppercase
+        }
+
+        .alerta p {
+            margin-top: 8px;
+            font-size: var(--cuadra-t-lede)
+        }
+
+        /* --------------------------------------------------------- torre (MCP) -- */
+        .preguntas {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: var(--cuadra-s-6);
+            max-width: 760px
+        }
+
+        .pregunta {
+            background: var(--cuadra-tinta-3);
+            border: 1px solid var(--cuadra-linea-fuerte);
+            border-radius: 12px 12px 12px 3px;
+            padding: 13px 16px;
+            font-size: 15px;
+            align-self: flex-start
+        }
+
+        .pregunta:nth-child(2) {
+            align-self: flex-end;
+            border-radius: 12px 12px 3px 12px
+        }
+
+        /* ------------------------------------------------------------------- cta -- */
+        footer {
+            border-top: 1px solid var(--cuadra-linea)
+        }
+
+        footer .wrap {
+            padding-block: var(--cuadra-s-4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap
+        }
+
+        footer .sep {
+            flex: 1 1 auto
+        }
+
+        @media(max-width:700px) {
+            footer .sep {
+                display: none
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            * {
+                animation: none !important;
+                transition: none !important
+            }
+
+            html {
+                scroll-behavior: auto
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav aria-label="Principal">
+        <div class="wrap navin">
+            <a class="marca" href="#hero">
+                <canvas id="navLogo" width="140" height="140" aria-hidden="true"></canvas>
+                Certera
+            </a>
+            <div class="navlinks">
+                <a class="sec-link" href="#problema">Problema</a>
+                <a class="sec-link" href="#como-funciona">Cómo funciona</a>
+                <a class="sec-link" href="#diferenciador">Escenario</a>
+                <a class="sec-link" href="#torre">Torre de control</a>
+                <a class="btn dashboard-link" href="https://fleet-intelligence-dashboard.vercel.app">Abrir el
+                    dashboard</a>
+            </div>
+            <div class="barra" id="barra" aria-hidden="true"></div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="sec hero" id="hero">
+            <canvas id="campo" aria-hidden="true"></canvas>
+            <div class="wrap">
+                <p class="eyebrow">Perú · Transporte pesado · Agente de telemetría</p>
+                <div class="herogrid">
+                    <div>
+                        <h1>Señales claras. Decisiones certeras.</h1>
+                        <p class="lede">Las plataformas de flota calculan el combustible como si la carretera fuera
+                            plana. En los Andes un camión sube de 0 a 4 800 msnm en horas. <span
+                                class="nombre">Certera</span> mira la pendiente que viene y avisa antes de que el camión
+                            se quede sin diésel.</p>
+                        <div class="ctas">
+                            <a class="btn" href="#diferenciador">Ver el escenario</a>
+                            <a class="btn sec2" href="#como-funciona">Cómo funciona</a>
+                        </div>
+                    </div>
+                    <figure class="marco">
+                        <canvas id="heroLienzo" width="820" height="820" role="img"
+                            aria-label="Tres fuentes —el vehículo, la ruta y el chofer— entran por la izquierda, convergen y salen como una sola dirección"></canvas>
+                        <span class="rotulo">Vehículo · ruta · chofer</span>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <section class="sec" id="problema">
+            <div class="wrap">
+                <div class="cabeza">
+                    <div>
+                        <p class="eyebrow">El problema</p>
+                        <h2>La sierra no es<br>una carretera plana</h2>
+                    </div>
+                    <p class="lede">Las plataformas genéricas de gestión de flotas predicen el consumo y el desgaste
+                        suponiendo terreno plano. En la geografía andina esa falta de contexto físico deja camiones sin
+                        combustible en zonas remotas o con el motor recalentado: pérdidas logísticas y económicas para
+                        la empresa.</p>
+                </div>
+                <div class="trio">
+                    <div class="tarjeta">
+                        <span class="cifra">0 → 4 800 msnm</span>
+                        <p>Lo que un camión sube en cuestión de horas, de la costa a las cumbres de la sierra.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <span class="cifra" style="color:var(--cuadra-rechazo)">Sin diésel</span>
+                        <p>El cálculo plano subestima la subida y el camión queda varado lejos de un grifo.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <span class="cifra" style="color:var(--cuadra-observa)">Recalentamiento</span>
+                        <p>La pendiente exige al motor más de lo que el plan del viaje supuso.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="sec" id="como-funciona">
+            <div class="wrap">
+                <div class="cabeza">
+                    <div>
+                        <p class="eyebrow">Cómo funciona</p>
+                        <h2>Un analista proactivo,<br>no una caja negra</h2>
+                    </div>
+                    <p class="lede">En lugar de un modelo que necesita meses de historia y no explica sus números, un
+                        agente con herramientas razona sobre lo que pasa ahora y sobre la ruta que falta, con una
+                        persona en el circuito por WhatsApp.</p>
+                </div>
+                <div class="flujo">
+                    <div class="escena">
+                        <canvas id="simbolo" width="900" height="810" role="img"
+                            aria-label="Las señales del vehículo, de la ruta y del chofer se asientan hasta formar una sola dirección"></canvas>
+                        <div class="fuentes" aria-hidden="true">
+                            <span class="fu"><i style="background:#F7F8F2"></i>Vehículo y GPS</span>
+                            <span class="fu"><i style="background:#8FB4F0"></i>Topografía de la ruta</span>
+                            <span class="fu"><i style="background:#F0B259"></i>Chofer por WhatsApp</span>
+                        </div>
+                    </div>
+                    <ol class="pasos" id="pasos">
+                        <li><span class="n">01</span>
+                            <div>
+                                <h3>Reglas en la ingesta</h3>
+                                <p>Cada lectura pasa por reglas físicas básicas. El agente solo se activa si hay una
+                                    anomalía frente a la geografía que viene, así no se gasta IA en cada dato.</p>
+                            </div>
+                        </li>
+                        <li><span class="n">02</span>
+                            <div>
+                                <h3>El agente consulta la ruta</h3>
+                                <p>Usa herramientas de elevación para anticipar la pendiente y el esfuerzo del motor en
+                                    la ruta planificada, y lo cruza con la carga y el combustible restante.</p>
+                            </div>
+                        </li>
+                        <li><span class="n">03</span>
+                            <div>
+                                <h3>Alerta y validación humana</h3>
+                                <p>Avisa a la torre de control con la explicación y una sugerencia. Si una parada no
+                                    cuadra, le pregunta al chofer y contrasta su respuesta con los sensores.</p>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+                <ul class="etiquetas">
+                    <li><span class="dato">Telemetría</span>
+                        <p class="micro">Peso de la carga, nivel de combustible, códigos de motor y detenciones
+                            repentinas.</p>
+                    </li>
+                    <li><span class="dato">GPS</span>
+                        <p class="micro">Velocidad y coordenadas actuales.</p>
+                    </li>
+                    <li><span class="dato">Topografía futura</span>
+                        <p class="micro">Pendiente y esfuerzo del motor en la ruta que falta.</p>
+                    </li>
+                    <li><span class="dato">WhatsApp</span>
+                        <p class="micro">Grupos del convoy y notas de voz: derrumbes, esperas e incidentes.</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="sec" id="diferenciador">
+            <div class="wrap">
+                <div class="cabeza">
+                    <div>
+                        <p class="eyebrow">Escenario</p>
+                        <h2>Avisa antes<br>de Ticlio</h2>
+                    </div>
+                    <p class="lede">El T-04 sale de Chosica, a 860 msnm, hacia La Oroya con 30 galones de diésel y 30
+                        toneladas de carga. Le quedan unos 100 km de subida hasta Ticlio, a 4 818 msnm.</p>
+                </div>
+                <div class="contraste">
+                    <figure class="marco perfil">
+                        <canvas id="perfil" width="640" height="400" role="img"
+                            aria-label="Perfil de altura de Chosica a La Oroya y combustible restante del T-04: con el supuesto plano llega con 13 galones; con la pendiente se queda sin diésel en el kilómetro 92, antes de Ticlio; abasteciendo 40 galones en San Mateo llega con 35"></canvas>
+                        <div class="leyenda" aria-hidden="true">
+                            <span class="fu"><i style="background:#6B746E"></i>Supuesto plano</span>
+                            <span class="fu"><i style="background:#F7F8F2"></i>Con la pendiente</span>
+                            <span class="fu"><i style="background:#D8F36A"></i>Abasteciendo en San Mateo</span>
+                            <span class="fu"><i style="background:#8FB4F0"></i>Altura</span>
+                        </div>
+                    </figure>
+                    <div class="dos">
+                        <div class="veredicto no">
+                            <span class="chip no"><i></i>No avisa</span>
+                            <h3>Una plataforma que supone terreno plano</h3>
+                            <span class="cifra">Llega con 13 gal</span>
+                            <p>Con el consumo de carretera plana, 30 galones alcanzan de sobra. No ve riesgo y el camión
+                                sigue de largo por San Mateo.</p>
+                        </div>
+                        <div class="veredicto si">
+                            <span class="chip si"><i></i>Alerta proactiva</span>
+                            <h3>Certera, con la pendiente de la ruta</h3>
+                            <span class="cifra">Sin diésel en el km 92</span>
+                            <p>Con 30 toneladas, el consumo de subida llega a triplicarse. El diésel se acaba 8 km antes
+                                de coronar Ticlio. Abasteciendo 40 galones en San Mateo, llega a La Oroya con 35.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="alerta" role="note">
+                    <b>Alerta proactiva · T-04</b>
+                    <p>El T-04 se quedará sin diésel antes de coronar Ticlio debido a la pendiente. Sugerencia:
+                        abastecer
+                        40 galones en el grifo de San Mateo.</p>
+                </div>
+                <p class="micro" style="margin-top:var(--cuadra-s-3)">Escenario ilustrativo: perfil de altura
+                    aproximado de la Carretera Central y un modelo de consumo simplificado. No son mediciones de un
+                    camión real.</p>
+            </div>
+        </section>
+
+        <section class="sec" id="torre">
+            <div class="wrap">
+                <div class="cabeza">
+                    <div>
+                        <p class="eyebrow">Torre de control</p>
+                        <h2>Pregúntale<br>a tu flota</h2>
+                    </div>
+                    <p class="lede">Un servidor MCP de solo lectura deja que las herramientas de IA de confianza de la
+                        empresa consulten la flota en lenguaje natural, sin aprender un panel nuevo.</p>
+                </div>
+                <div class="preguntas">
+                    <p class="pregunta">¿Cuál es el estado de la flota en la Carretera Central?</p>
+                    <p class="pregunta">Revisa la telemetría del T-02 de las últimas 3 horas. ¿Ves algún patrón de
+                        recalentamiento en la subida a Casapalca?</p>
+                </div>
+                <ul class="etiquetas">
+                    <li><span class="dato">Solo lectura</span>
+                        <p class="micro">La IA consulta sensores, GPS y alertas; no modifica nada.</p>
+                    </li>
+                    <li><span class="dato">Datos en casa</span>
+                        <p class="micro">Ubicación y carga se quedan en la infraestructura de la empresa. La IA pide
+                            solo
+                            lo que necesita para responder.</p>
+                    </li>
+                    <li><span class="dato">Menos paneles</span>
+                        <p class="micro">La conversación reemplaza los filtros complejos y acelera el MVP.</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="sec" id="procedencia">
+            <div class="wrap">
+                <div class="cabeza">
+                    <div>
+                        <p class="eyebrow">Viabilidad</p>
+                        <h2>Un camión varado<br>paga la plataforma</h2>
+                    </div>
+                    <p class="lede">Pensado para jefes de operaciones y personal de torre de control. Evitar un solo
+                        camión varado cubre el costo operativo de la plataforma en la nube.</p>
+                </div>
+                <div class="trio">
+                    <div class="tarjeta">
+                        <span class="cifra">US$ 500–2 000</span>
+                        <p>Lo que puede costar un camión varado: grúa, reprogramación logística y penalidades.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <span class="cifra" style="color:var(--cuadra-sello)">&lt; US$ 3</span>
+                        <p>Costo operativo objetivo por camión al mes: la IA solo razona cuando las reglas detectan una
+                            anomalía.</p>
+                    </div>
+                    <div class="tarjeta">
+                        <span class="cifra">1 evento</span>
+                        <p>Basta evitar uno para pagar la plataforma.</p>
+                    </div>
+                </div>
+                <p class="aviso"><strong>Aviso:</strong> las cifras de costo son estimaciones de la propuesta y el
+                    escenario de Ticlio es ilustrativo. No son mediciones de una flota peruana.</p>
+            </div>
+        </section>
+
+        <section class="sec" id="cta">
+            <div class="wrap">
+                <p class="eyebrow">Pruébalo</p>
+                <h2>Mira la torre<br>de control</h2>
+                <p class="lede">Abre el dashboard y sigue a la flota en el mapa, con sus alertas y la explicación de
+                    cada
+                    una.</p>
+                <div class="ctas"><a class="btn dashboard-link"
+                        href="https://fleet-intelligence-dashboard.vercel.app">Abrir el dashboard</a></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="wrap">
+            <img src="assets/brand/certera-simbolo.svg" alt="" width="20" height="20">
+            <b style="font-family:var(--cuadra-display);font-weight:800;font-size:14px">Certera</b>
+            <span class="sep"></span>
+            <p class="micro">Propuesta · escenario ilustrativo y estimaciones, no mediciones.</p>
+        </div>
+    </footer>
+
+    <script>
+        // URL del dashboard: único lugar. Se ajusta al desplegar el dashboard en Vercel.
+        var DASHBOARD_URL = "https://fleet-intelligence-dashboard.vercel.app";
+        document.querySelectorAll("a.dashboard-link").forEach(function (a) { a.href = DASHBOARD_URL; });
+
+        // Animaciones decorativas: la página se lee completa sin ellas.
+        (function () {
+            "use strict";
+            var css = getComputedStyle(document.documentElement);
+            var v = function (n, fb) { return (css.getPropertyValue(n).trim() || fb); };
+            var FG = v("--cuadra-fg", "#F7F8F2");
+            var MUTE = v("--cuadra-fg-mute", "#6B746E");
+            var LINEA = v("--cuadra-linea", "#1A211E");
+            var LIMA = v("--cuadra-sello", "#D8F36A");
+            var AZUL = v("--cuadra-azul", "#8FB4F0");
+            var AMBAR = v("--cuadra-observa", "#F0B259");
+            var ALERTA = v("--cuadra-rechazo", "#FF7D8A");
+            var POZO = v("--cuadra-tinta-pozo", "#000201");
+            var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+            /* ===================================================== el símbolo de marca
+               Nueve módulos sobre una retícula de 5x5: seis señales que entran por la
+               izquierda y tres que salen como una sola dirección. Los tres pasos de
+               «Cómo funciona» son exactamente esas tres etapas. La versión estática
+               está en assets/brand/certera-simbolo.svg.                              */
+            var N = 5;
+            var MODULOS = [
+                { c: 0, r: 0, f: "tele" }, { c: 0, r: 2, f: "pares" }, { c: 0, r: 4, f: "humano" },
+                { c: 1, r: 1, f: "tele" }, { c: 1, r: 3, f: "humano" }, { c: 1, r: 2, f: "pares" },
+                { c: 2, r: 2, f: "salida" }, { c: 3, r: 2, f: "salida" }, { c: 4, r: 2, f: "salida" }
+            ];
+            var COLOR = { tele: FG, pares: AZUL, humano: AMBAR, salida: LIMA };
+            var CAMINOS = [
+                { f: "tele", pts: [[0, 0], [1, 1], [2, 2]] },
+                { f: "pares", pts: [[0, 2], [1, 2], [2, 2]] },
+                { f: "humano", pts: [[0, 4], [1, 3], [2, 2]] }
+            ];
+            var META = [0, 6, 7, 9];
+
+            function hx(c) { var n = parseInt(c.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+            function mezcla(a, b, t) {
+                var A = hx(a), B = hx(b);
+                return "rgb(" + Math.round(A[0] + (B[0] - A[0]) * t) + "," + Math.round(A[1] + (B[1] - A[1]) * t) + "," + Math.round(A[2] + (B[2] - A[2]) * t) + ")";
+            }
+            function ruido(i) { var s = Math.sin(i * 127.1) * 43758.5453; return s - Math.floor(s); }
+
+            function dibujaSimbolo(cv, op) {
+                var x = cv.getContext("2d"), W = cv.width, H = cv.height;
+                x.clearRect(0, 0, W, H);
+                if (op.fondo) { x.fillStyle = POZO; x.fillRect(0, 0, W, H); }
+
+                var u = Math.min(W * 0.74, H * 0.78) / N;
+                var ox = (W - u * N) / 2, oy = (H - u * N) / 2;
+                var g = (cv.clientWidth && cv.clientWidth < 48) ? 0 : u * 0.105;
+                var pos = function (c, r) { return [ox + c * u, oy + r * u]; };
+                var centro = function (c, r) { return [ox + c * u + u / 2, oy + r * u + u / 2]; };
+
+                if (op.reticula) {
+                    x.strokeStyle = LINEA; x.lineWidth = Math.max(1, u * 0.022);
+                    for (var i = 0; i <= N; i++) {
+                        x.beginPath(); x.moveTo(ox + i * u, oy); x.lineTo(ox + i * u, oy + N * u); x.stroke();
+                        x.beginPath(); x.moveTo(ox, oy + i * u); x.lineTo(ox + N * u, oy + i * u); x.stroke();
+                    }
+                }
+
+                if (op.caudal > 0 && !reduce) {
+                    CAMINOS.forEach(function (cam, k) {
+                        var col = COLOR[cam.f];
+                        x.strokeStyle = col; x.globalAlpha = 0.13 * op.caudal; x.lineWidth = u * 0.06;
+                        x.beginPath();
+                        cam.pts.forEach(function (p, j) { var q = centro(p[0], p[1]); j ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); });
+                        x.stroke(); x.globalAlpha = 1;
+                        for (var n = 0; n < 2; n++) {
+                            var t = ((op.t / 1500 + n / 2 + k * 0.19) % 1);
+                            var seg = t < 0.5 ? 0 : 1, ft = t < 0.5 ? t * 2 : (t - 0.5) * 2;
+                            var a = centro(cam.pts[seg][0], cam.pts[seg][1]);
+                            var b = centro(cam.pts[seg + 1][0], cam.pts[seg + 1][1]);
+                            x.fillStyle = col; x.globalAlpha = op.caudal * (0.25 + 0.75 * Math.sin(t * Math.PI));
+                            x.beginPath(); x.arc(a[0] + (b[0] - a[0]) * ft, a[1] + (b[1] - a[1]) * ft, u * 0.075, 0, Math.PI * 2); x.fill();
+                            x.globalAlpha = 1;
+                        }
+                    });
+                }
+
+                MODULOS.forEach(function (p, i) {
+                    var a = op.avance[i];
+                    if (a < 0.01) return;
+                    var e = 1 - Math.pow(1 - a, 3);
+                    var deriva = reduce ? 0 : Math.sin(op.t / 900 + i) * u * 0.14 * (1 - e);
+                    var q = pos(p.c, p.r);
+                    x.save();
+                    x.translate(q[0] + u / 2 + (ruido(i) - 0.5) * u * 3.2 * (1 - e) + deriva,
+                        q[1] + u / 2 + (ruido(i + 41) - 0.5) * u * 3.2 * (1 - e) + deriva * 0.6);
+                    x.rotate((1 - e) * (ruido(i + 7) - 0.5) * 0.75);
+                    x.globalAlpha = 0.4 + 0.6 * e;
+                    x.fillStyle = e > 0.9 ? (p.f === "salida" ? LIMA : mezcla(COLOR[p.f], FG, op.resolver || 0)) : MUTE;
+                    x.fillRect(-(u / 2 - g), -(u / 2 - g), u - 2 * g, u - 2 * g);
+                    x.restore(); x.globalAlpha = 1;
+                    if (a > 0.55 && a < 0.97 && !reduce) {
+                        x.strokeStyle = LIMA; x.globalAlpha = (1 - (a - 0.55) / 0.42) * 0.85; x.lineWidth = u * 0.05;
+                        x.strokeRect(q[0] + g * 0.5, q[1] + g * 0.5, u - g, u - g); x.globalAlpha = 1;
+                    }
+                });
+
+                if (op.pulso && !reduce) {
+                    var ciclo = (op.t % 2600) / 2600;
+                    MODULOS.forEach(function (p, i) {
+                        var d = Math.abs(ciclo - [0, 3, 1, 5, 2, 4, 6, 7, 8].indexOf(i) / 8);
+                        if (d > 0.14) return;
+                        var q2 = pos(p.c, p.r);
+                        x.fillStyle = LIMA; x.globalAlpha = (1 - d / 0.14) * 0.55;
+                        x.fillRect(q2[0] + g, q2[1] + g, u - 2 * g, u - 2 * g); x.globalAlpha = 1;
+                    });
+                }
+            }
+
+            function nuevoAvance() { return MODULOS.map(function () { return 0; }); }
+            function acerca(av, objetivo, k) {
+                for (var i = 0; i < av.length; i++) av[i] += ((i < objetivo ? 1 : 0) - av[i]) * (reduce ? 1 : k);
+            }
+
+            /* ---- hero: el símbolo se arma en bucle -------------------------------- */
+            var heroCv = document.getElementById("heroLienzo");
+            var avHero = nuevoAvance(), CICLO = 10000;
+            function pintaHero(t) {
+                var fase = reduce ? 1 : (t % CICLO) / CICLO;
+                acerca(avHero, reduce ? 9 : Math.min(9, Math.floor(fase / 0.6 * 10)), 0.06);
+                if (!reduce && fase > 0.95) avHero = nuevoAvance();
+                dibujaSimbolo(heroCv, {
+                    t: t, avance: avHero, resolver: reduce ? 1 : Math.max(0, Math.min(1, (fase - 0.6) / 0.14)),
+                    caudal: Math.max(0, Math.min(1, (fase - 0.25) / 0.2)), reticula: true, fondo: true, pulso: false
+                });
+            }
+
+            /* ---- la escena de «Cómo funciona», atada a los tres pasos ------------- */
+            var escenaCv = document.getElementById("simbolo");
+            var filas = [].slice.call(document.querySelectorAll("#pasos li"));
+            var avEscena = nuevoAvance(), paso = 1, ultimoPaso = 0;
+            function marcaPaso(n) {
+                paso = n;
+                filas.forEach(function (li, i) { li.className = (i + 1) === n ? "vivo" : ""; });
+            }
+            filas.forEach(function (li, i) {
+                li.addEventListener("mouseenter", function () {
+                    if (i + 1 < paso) avEscena = nuevoAvance();
+                    marcaPaso(i + 1); ultimoPaso = performance.now();
+                });
+            });
+            function pintaEscena(t) {
+                acerca(avEscena, META[paso], 0.055);
+                dibujaSimbolo(escenaCv, {
+                    t: t, avance: avEscena, resolver: paso >= 3 ? 1 : 0,
+                    caudal: paso >= 2 ? 1 : 0, reticula: true, fondo: true, pulso: false
+                });
+            }
+
+            /* ---- el logotipo del nav late, sin cambiar de forma ------------------- */
+            var navCv = document.getElementById("navLogo");
+            var LLENO = MODULOS.map(function () { return 1; });
+            function pintaLogos(t) {
+                dibujaSimbolo(navCv, { t: t, avance: LLENO, resolver: 1, caudal: 0, reticula: false, fondo: false, pulso: true });
+            }
+
+            /* ---- campo de puntos y avance de lectura ------------------------------ */
+            var campo = document.getElementById("campo"), fx = campo.getContext("2d");
+            var barra = document.getElementById("barra");
+            function tamCampo() { var p = campo.parentElement; campo.width = p.offsetWidth; campo.height = p.offsetHeight; }
+            function pintaCampo(t) {
+                var W = campo.width, H = campo.height, s = 44;
+                fx.clearRect(0, 0, W, H);
+                for (var y = s / 2; y < H; y += s)
+                    for (var x0 = s / 2; x0 < W; x0 += s) {
+                        var d = Math.sin(x0 * 0.011 + y * 0.015 + t / 1800);
+                        fx.fillStyle = "rgba(216,243,106," + (0.035 + 0.06 * (d * 0.5 + 0.5)).toFixed(3) + ")";
+                        fx.fillRect(x0, y, 2, 2);
+                    }
+            }
+            function leeAvance() {
+                var alto = document.documentElement.scrollHeight - innerHeight;
+                barra.style.width = ((alto > 0 ? Math.min(1, Math.max(0, scrollY / alto)) : 0) * 100).toFixed(2) + "%";
+            }
+            addEventListener("resize", function () { tamCampo(); leeAvance(); });
+            addEventListener("scroll", leeAvance, { passive: true });
+            tamCampo(); leeAvance();
+
+            /* ======================================== el perfil del escenario Ticlio
+               Altura aproximada de la Carretera Central y combustible restante del
+               T-04 con tres supuestos. Modelo ilustrativo: consumo plano de 0,12
+               gal/km que crece 45 % por cada 1 % de pendiente de subida. Las cifras
+               del texto (13 gal, km 92, 35 gal) salen de este mismo modelo.        */
+            (function () {
+                var c = document.getElementById("perfil");
+                if (!c || !c.getContext) return;
+                var ctx = c.getContext("2d");
+                // El canvas se escala al ancho de la columna: la fuente y los márgenes crecen
+                // en pantallas angostas para que el texto no baje de ~9,5 px en pantalla.
+                var FS = Math.max(10.5, 9.5 * c.width / (c.clientWidth || c.width));
+                var esc = FS / 10.5;
+                var W = c.width, H = c.height, PL = 18, PR = 46 * esc, PT = 26, PB = 46 * esc;
+                var KM = 140, GAL0 = 30, BASE = 0.12, K = 0.45, RECARGA = 40, KM_GRIFO = 60;
+                var ALT = [[0, 860], [45, 2390], [60, 3150], [75, 3700], [88, 4150], [100, 4818], [108, 4500], [140, 3745]];
+                var HITOS = [[0, "Chosica", "860"], [60, "San Mateo", "3 150"], [100, "Ticlio", "4 818"], [140, "La Oroya", "3 745"]];
+                var ALT_MAX = 5200, GAL_MAX = 60;
+
+                function alt(km) {
+                    for (var i = 1; i < ALT.length; i++) if (km <= ALT[i][0]) {
+                        var a = ALT[i - 1], b = ALT[i];
+                        return a[1] + (b[1] - a[1]) * (km - a[0]) / (b[0] - a[0]);
+                    }
+                    return ALT[ALT.length - 1][1];
+                }
+                function pendiente(km) { return (alt(km + 0.5) - alt(km - 0.5)) / 10; } // en %
+                function serie(conPendiente, recarga) {
+                    var g = GAL0, pts = [[0, g]], vacio = null;
+                    for (var km = 0.5; km <= KM + 1e-9; km += 0.5) {
+                        var p = conPendiente ? pendiente(km - 0.25) : 0;
+                        g -= BASE * Math.max(0.3, 1 + K * p) * 0.5;
+                        if (recarga && Math.abs(km - KM_GRIFO) < 1e-9) { pts.push([km, g]); g += RECARGA; }
+                        if (g <= 0) { vacio = km; pts.push([km, 0]); break; }
+                        pts.push([km, g]);
+                    }
+                    return { pts: pts, vacio: vacio };
+                }
+                var PLANO = serie(false, false), PEND = serie(true, false), RECA = serie(true, true);
+
+                var px = function (km) { return PL + (W - PL - PR) * km / KM; };
+                var pa = function (m) { return PT + (H - PT - PB) * (1 - m / ALT_MAX); };
+                var pg = function (g) { return PT + (H - PT - PB) * (1 - g / GAL_MAX); };
+                var mono = function (w) { return w + " " + FS.toFixed(1) + 'px "IBM Plex Mono", ui-monospace, monospace'; };
+
+                function linea(s, hasta, color, ancho, guion) {
+                    ctx.strokeStyle = color; ctx.lineWidth = ancho; ctx.setLineDash(guion || []); ctx.lineJoin = "round";
+                    ctx.beginPath();
+                    var prim = true;
+                    s.pts.forEach(function (q) {
+                        if (q[0] > hasta) return;
+                        if (prim) { ctx.moveTo(px(q[0]), pg(q[1])); prim = false; } else ctx.lineTo(px(q[0]), pg(q[1]));
+                    });
+                    ctx.stroke(); ctx.setLineDash([]);
+                }
+
+                function draw(p) { // p: kilómetros revelados (0..KM)
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.fillStyle = POZO; ctx.fillRect(0, 0, W, H);
+
+                    // relieve
+                    ctx.beginPath(); ctx.moveTo(px(0), pa(0));
+                    for (var km = 0; km <= KM; km += 1) ctx.lineTo(px(km), pa(alt(km)));
+                    ctx.lineTo(px(KM), pa(0)); ctx.closePath();
+                    ctx.fillStyle = "rgba(143,180,240,.10)"; ctx.fill();
+                    ctx.beginPath();
+                    for (km = 0; km <= KM; km += 1) km ? ctx.lineTo(px(km), pa(alt(km))) : ctx.moveTo(px(km), pa(alt(km)));
+                    ctx.strokeStyle = "rgba(143,180,240,.45)"; ctx.lineWidth = 1.2; ctx.stroke();
+
+                    // hitos de la ruta
+                    HITOS.forEach(function (h, i) {
+                        var x = px(h[0]);
+                        ctx.strokeStyle = LINEA; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+                        ctx.beginPath(); ctx.moveTo(x, PT); ctx.lineTo(x, H - PB); ctx.stroke(); ctx.setLineDash([]);
+                        ctx.textAlign = i === 0 ? "left" : (i === HITOS.length - 1 ? "right" : "center");
+                        ctx.font = mono(500); ctx.fillStyle = h[1] === "Ticlio" ? FG : MUTE;
+                        ctx.fillText(h[1], x, H - PB + 18 * esc);
+                        ctx.font = mono(400); ctx.fillStyle = MUTE;
+                        ctx.fillText(h[2] + " msnm", x, H - PB + 32 * esc);
+                    });
+
+                    // eje de galones a la derecha
+                    ctx.textAlign = "left"; ctx.font = mono(400); ctx.fillStyle = MUTE;
+                    [0, 20, 40, 60].forEach(function (g) { ctx.fillText(g + " gal", W - PR + 6, pg(g) + 4); });
+
+                    linea(PLANO, p, MUTE, 1.6, [6, 5]);
+                    linea(RECA, p, LIMA, 2, [7, 4]);
+                    linea(PEND, p, FG, 2.4);
+
+                    if (PEND.vacio !== null && p >= PEND.vacio) {
+                        var vx = px(PEND.vacio), vy = pg(0);
+                        ctx.fillStyle = ALERTA; ctx.fillRect(vx - 4, vy - 4, 8, 8);
+                        // a la derecha del punto: a la izquierda pasa la línea que baja
+                        ctx.font = mono(500); ctx.textAlign = "left";
+                        ctx.fillText("SIN DIÉSEL · KM " + PEND.vacio, vx + 10, vy - 8);
+                    }
+                    if (p >= KM_GRIFO) {
+                        ctx.fillStyle = LIMA; ctx.font = mono(500); ctx.textAlign = "center";
+                        ctx.fillText("+40 GAL", px(KM_GRIFO), pg(55) + 2);
+                    }
+                }
+
+                if (reduce) { draw(KM); return; }
+                var t0 = null, DUR = 7000, PAUSA = 2500;
+                (function frame(t) {
+                    if (t0 === null) t0 = t;
+                    draw(Math.min(KM, KM * ((t - t0) % (DUR + PAUSA)) / DUR));
+                    requestAnimationFrame(frame);
+                })(performance.now());
+            })();
+
+            /* ---- bucle ------------------------------------------------------------ */
+            marcaPaso(1);
+            if (reduce) {
+                pintaCampo(0); pintaHero(0); pintaLogos(0); marcaPaso(3); pintaEscena(0);
+            } else {
+                ultimoPaso = performance.now();
+                (function bucle(now) {
+                    pintaCampo(now); pintaHero(now); pintaLogos(now); pintaEscena(now);
+                    if (now - ultimoPaso > 2600) {
+                        ultimoPaso = now;
+                        if (paso >= 3) { marcaPaso(1); avEscena = nuevoAvance(); }
+                        else marcaPaso(paso + 1);
+                    }
+                    requestAnimationFrame(bucle);
+                })(performance.now());
+            }
+        })();
+    </script>
+</body>
+
+</html>

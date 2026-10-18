@@ -9,7 +9,37 @@
         content="Certera cruza la telemetría del camión con la pendiente de la ruta que falta y avisa a la torre de control antes de que un camión se quede sin diésel en los Andes.">
     <!-- Contenido basado en web/objetivo.md. El escenario Chosica–La Oroya es ilustrativo
          y las cifras de costo son estimaciones de esa propuesta, no mediciones. -->
+    <meta name="theme-color" content="#050706">
+    <meta name="color-scheme" content="dark">
+    <link rel="canonical" href="https://certera-landing.vercel.app/">
+
+    <!-- Vista previa al compartir (WhatsApp, LinkedIn, Facebook, X, Slack). Los
+         crawlers no ejecutan JS: las URLs van absolutas y escritas aquí. Si cambia
+         el dominio de Vercel, se cambia en canonical, og:url y las dos imágenes.
+         La imagen se regenera con: node scripts/imagenes.mjs -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Certera">
+    <meta property="og:locale" content="es_PE">
+    <meta property="og:url" content="https://certera-landing.vercel.app/">
+    <meta property="og:title" content="Certera · Señales claras. Decisiones certeras.">
+    <meta property="og:description"
+        content="Cruza la telemetría del camión con la pendiente de la ruta y avisa a la torre de control antes de que un camión se quede sin diésel en los Andes.">
+    <meta property="og:image" content="https://certera-landing.vercel.app/assets/og-certera.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt"
+        content="Certera: perfil de altura de Chosica a La Oroya con Ticlio a 4 818 msnm marcado en lima">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Certera · Señales claras. Decisiones certeras.">
+    <meta name="twitter:description"
+        content="Telemetría con la pendiente de la ruta: avisa antes de que un camión se quede sin diésel en los Andes.">
+    <meta name="twitter:image" content="https://certera-landing.vercel.app/assets/og-certera.png">
+
+    <link rel="icon" href="favicon.ico" sizes="32x32">
     <link rel="icon" href="assets/brand/certera-favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -344,6 +374,85 @@
             letter-spacing: .14em;
             text-transform: uppercase;
             color: var(--cuadra-fg-mute)
+        }
+
+        /* ------------------------------------------------------------ viaje real -- */
+        .ficha {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: var(--cuadra-s-6) 0 14px;
+            font-family: var(--cuadra-mono);
+            font-size: 12.5px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--cuadra-fg-mute)
+        }
+
+        .ficha span {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 8px 14px;
+            border: var(--cuadra-borde);
+            border-radius: 999px;
+            background: var(--cuadra-tinta-2)
+        }
+
+        .ficha b {
+            font-family: var(--cuadra-display);
+            font-weight: 800;
+            font-size: 17px;
+            letter-spacing: -.01em;
+            color: var(--cuadra-fg);
+            text-transform: none
+        }
+
+        .ficha .vivo {
+            margin-left: auto;
+            align-items: center;
+            color: var(--cuadra-sello);
+            border-color: var(--cuadra-sello-borde);
+            background: var(--cuadra-sello-fondo)
+        }
+
+        .ficha .vivo i {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--cuadra-sello);
+            animation: latido 2s ease-in-out infinite
+        }
+
+        @keyframes latido {
+            50% {
+                opacity: .25
+            }
+        }
+
+        @media(max-width:700px) {
+            .ficha .vivo {
+                margin-left: 0
+            }
+        }
+
+        .simulador {
+            position: relative;
+            border-radius: calc(var(--cuadra-radio) + 6px);
+            padding: 6px;
+            background: linear-gradient(160deg, var(--cuadra-linea-fuerte), var(--cuadra-tinta-2) 40%, var(--cuadra-tinta-2) 70%, var(--cuadra-sello-borde));
+            box-shadow: 0 40px 90px -50px rgba(216, 243, 106, .35)
+        }
+
+        .simulador iframe {
+            display: block;
+            width: 100%;
+            /* Altura de respaldo; el script la ajusta al contenido del simulador. */
+            height: min(110vw, 760px);
+            border: 0;
+            border-radius: var(--cuadra-radio);
+            background: var(--cuadra-tinta-pozo);
+            color-scheme: dark
         }
 
         /* ----------------------------------------------------------- cómo funciona -- */
@@ -758,6 +867,7 @@
             </a>
             <div class="navlinks">
                 <a class="sec-link" href="#problema">Problema</a>
+                <a class="sec-link" href="#simulador">Viaje real</a>
                 <a class="sec-link" href="#como-funciona">Cómo funciona</a>
                 <a class="sec-link" href="#diferenciador">Escenario</a>
                 <a class="sec-link" href="#torre">Torre de control</a>
@@ -819,6 +929,30 @@
                         <span class="cifra" style="color:var(--cuadra-observa)">Recalentamiento</span>
                         <p>La pendiente exige al motor más de lo que el plan del viaje supuso.</p>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="sec" id="simulador">
+            <div class="wrap">
+                <div class="cabeza">
+                    <div>
+                        <p class="eyebrow">Viaje real</p>
+                        <h2>La pendiente se ve<br>en el consumo</h2>
+                    </div>
+                    <p class="lede">Un viaje registrado de un camión, reproducido sobre su propia carretera. En cada
+                        subida los litros por kilómetro se disparan; en bajada la inyección se corta. Esa es la señal
+                        que un cálculo plano no ve y que <span class="nombre">Certera</span> lee antes de que llegue.</p>
+                </div>
+                <div class="ficha" aria-label="Datos del viaje">
+                    <span><b>147,8</b> km</span>
+                    <span><b>71,8</b> L de diésel</span>
+                    <span><b>2 h 25</b> min</span>
+                    <span class="vivo"><i></i>Arrastra para recorrer</span>
+                </div>
+                <div class="simulador">
+                    <iframe id="simuladorFrame" src="assets/simulador.html" loading="lazy"
+                        title="Simulación del viaje: el camión recorre la carretera con su pendiente real y el panel muestra altura, litros por kilómetro, velocidad y pendiente"></iframe>
                 </div>
             </div>
         </section>
@@ -1023,6 +1157,25 @@
         // URL del dashboard: único lugar. Se ajusta al desplegar el dashboard en Vercel.
         var DASHBOARD_URL = "https://fleet-intelligence-dashboard.vercel.app";
         document.querySelectorAll("a.dashboard-link").forEach(function (a) { a.href = DASHBOARD_URL; });
+
+        // El simulador (assets/simulador.html, generado con scripts/simulador.mjs) vive en
+        // un iframe; aquí se ajusta su altura a lo que ocupa. En file:// el navegador no
+        // deja leerlo y se queda con la altura de respaldo del CSS.
+        (function () {
+            var frame = document.getElementById("simuladorFrame");
+            if (!frame) return;
+            function ajustar() {
+                try {
+                    var doc = frame.contentDocument;
+                    frame.style.height = Math.ceil(doc.body.getBoundingClientRect().height) + "px";
+                    if (!frame._observado && window.ResizeObserver) {
+                        new ResizeObserver(ajustar).observe(doc.body);
+                        frame._observado = true;
+                    }
+                } catch (e) { }
+            }
+            frame.addEventListener("load", ajustar);
+        })();
 
         // Animaciones decorativas: la página se lee completa sin ellas.
         (function () {

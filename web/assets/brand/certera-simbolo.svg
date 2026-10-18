@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" width="140" height="140" role="img" aria-label="Certera">
+  <!-- Retícula 5x5, u=20, margen 20. Seis señales entran por la izquierda
+       (telemetría, pares del tramo, reporte humano) y salen como una sola
+       dirección en lima. Mismo dibujo que el canvas de la landing. -->
+  <g fill="#F7F8F2">
+    <rect x="22" y="22" width="16" height="16"/>
+    <rect x="42" y="42" width="16" height="16"/>
+    <rect x="22" y="62" width="16" height="16"/>
+    <rect x="42" y="62" width="16" height="16"/>
+    <rect x="42" y="82" width="16" height="16"/>
+    <rect x="22" y="102" width="16" height="16"/>
+  </g>
+  <g fill="#D8F36A">
+    <rect x="62" y="62" width="16" height="16"/>
+    <rect x="82" y="62" width="16" height="16"/>
+    <rect x="102" y="62" width="16" height="16"/>
+  </g>
+</svg>

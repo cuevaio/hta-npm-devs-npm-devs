@@ -1,0 +1,84 @@
+/* ===========================================================================
+   CERTERA · tokens de diseño de la landing
+   Paleta de tinta con acento lima. El símbolo son tres señales (telemetría,
+   pares del tramo, reporte humano) que convergen en una sola dirección.
+   No redefinir valores fuera de este archivo. Los nombres --cuadra-* se
+   conservan para no romper los estilos existentes.
+   =========================================================================== */
+
+:root {
+  /* --- Tinta: el fondo del producto ------------------------------------- */
+  --cuadra-tinta:        #050706;  /* fondo base */
+  --cuadra-tinta-2:      #0C110E;  /* superficie elevada: tarjeta, panel */
+  --cuadra-tinta-3:      #131A16;  /* superficie sobre superficie */
+  --cuadra-tinta-pozo:   #000201;  /* huecos: visor, lienzo, media */
+  --cuadra-linea:        #1A211E;  /* borde 1px */
+  --cuadra-linea-suave:  #121815;  /* separador interno */
+  --cuadra-linea-fuerte: #2C3631;  /* borde con más peso: hover, burbuja */
+
+  /* --- Texto ------------------------------------------------------------ */
+  --cuadra-fg:           #F7F8F2;  /* texto principal */
+  --cuadra-fg-dim:       #A4ACA6;  /* texto secundario */
+  --cuadra-fg-mute:      #6B746E;  /* texto terciario, rótulos */
+
+  /* --- Acento y señales del símbolo ------------------------------------- */
+  --cuadra-sello:        #D8F36A;  /* acento lima: acción y salida del símbolo */
+  --cuadra-sello-2:      #C6E351;  /* acento en hover */
+  --cuadra-sello-fondo:  rgba(216,243,106,.10);
+  --cuadra-sello-borde:  rgba(216,243,106,.38);
+  --cuadra-azul:         #8FB4F0;  /* pares del tramo */
+
+  /* --- Estados: color = veredicto, nunca decoración --------------------- */
+  --cuadra-ok:           #D8F36A;  /* sin alerta */
+  --cuadra-ok-fondo:     rgba(216,243,106,.07);
+  --cuadra-ok-borde:     rgba(216,243,106,.34);
+  --cuadra-observa:      #F0B259;  /* falta una pieza concreta; reporte humano */
+  --cuadra-observa-fondo:rgba(240,178,89,.09);
+  --cuadra-observa-borde:rgba(240,178,89,.40);
+  --cuadra-rechazo:      #FF7D8A;  /* alerta, falso positivo */
+  --cuadra-rechazo-fondo:rgba(255,125,138,.07);
+  --cuadra-rechazo-borde:rgba(255,125,138,.40);
+
+  /* Texto que va encima del acento (siempre tinta, nunca blanco) */
+  --cuadra-sobre-acento: #050706;
+
+  /* --- Tipografía ------------------------------------------------------- */
+  --cuadra-display: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --cuadra-body:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --cuadra-mono:    'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  /* Escala tipográfica: fluida entre 400px y 1240px de viewport */
+  --cuadra-t-mega:   clamp(40px, 6.2vw, 80px);   /* titular del hero */
+  --cuadra-t-h1:     clamp(32px, 4.6vw, 56px);   /* título de sección */
+  --cuadra-t-h2:     clamp(26px, 3.4vw, 40px);   /* subsección, cifra grande */
+  --cuadra-t-h3:     19px;                        /* título de tarjeta */
+  --cuadra-t-lede:   clamp(16px, 1.6vw, 18px);   /* párrafo de entrada */
+  --cuadra-t-body:   16px;                        /* texto corrido */
+  --cuadra-t-dato:   17px;                        /* mono, tabular */
+  --cuadra-t-micro:  13px;                        /* pie, descripción */
+  --cuadra-t-label:  11.5px;                      /* eyebrow, etiqueta */
+
+  /* --- Espacio ---------------------------------------------------------- */
+  --cuadra-u:    8px;    /* unidad base */
+  --cuadra-s-1:  8px;
+  --cuadra-s-2:  16px;
+  --cuadra-s-3:  24px;
+  --cuadra-s-4:  32px;
+  --cuadra-s-6:  48px;
+  --cuadra-s-8:  64px;
+  --cuadra-s-11: 88px;   /* aire vertical entre secciones */
+  --cuadra-ancho: 1240px;
+
+  /* --- Forma ------------------------------------------------------------ */
+  --cuadra-radio:   10px;  /* tarjeta, marco, panel */
+  --cuadra-radio-s: 6px;   /* botón, fila activa */
+  --cuadra-borde: 1px solid var(--cuadra-linea);
+
+  /* --- Movimiento ------------------------------------------------------- */
+  --cuadra-ease-asiento: cubic-bezier(.16,.84,.26,1);
+  --cuadra-dur-rapido:   180ms;
+  --cuadra-dur-medio:    380ms;
+  --cuadra-dur-asiento:  2800ms;
+
+  color-scheme: dark;
+}
