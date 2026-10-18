@@ -1,4 +1,5 @@
-import { exports } from "cloudflare:workers";
+import { createExecutionContext } from "cloudflare:test";
+import { env, exports } from "cloudflare:workers";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { initializeParams, mockUpstream } from "./helpers";
 
@@ -178,6 +179,17 @@ describe("OAuth del MCP con GitHub", () => {
     expect(location.origin + location.pathname).toBe(REDIRECT);
     expect(location.searchParams.get("error")).toBe("access_denied");
     expect(seen.token).toBeUndefined();
+  });
+
+  it("sin la OAuth App de GitHub configurada no redirige con client_id=undefined", async () => {
+    const { default: worker } = await import("../src/index");
+    const sinGithub = { ...env, GITHUB_CLIENT_ID: undefined, GITHUB_CLIENT_SECRET: undefined } as unknown as Env;
+    for (const path of ["/authorize?response_type=code&client_id=x", "/callback?code=a&state=b"]) {
+      const response = await worker.fetch(new Request(`${BASE}${path}`), sinGithub, createExecutionContext());
+      expect(response.status).toBe(503);
+      expect(response.headers.get("Location")).toBeNull();
+      expect(await response.text()).toContain("GITHUB_CLIENT_ID");
+    }
   });
 
   it("el callback sin la cookie del navegador se rechaza", async () => {

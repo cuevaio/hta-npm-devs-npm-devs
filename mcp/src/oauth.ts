@@ -142,6 +142,12 @@ async function callback(request: Request, env: OAuthEnv): Promise<Response> {
 /** Rutas propias del servidor de autorización: consentimiento y vuelta de GitHub. */
 export async function authHandler(request: Request, env: OAuthEnv): Promise<Response> {
   const { pathname } = new URL(request.url);
+  if ((pathname === "/authorize" || pathname === "/callback") && (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET)) {
+    return html(
+      "<h1>Inicio de sesión no disponible</h1><p>El servidor no tiene configurada la aplicación de GitHub (GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET). Avísale al administrador de Certera.</p>",
+      503,
+    );
+  }
   try {
     if (pathname === "/authorize") return await authorize(request, env);
     if (pathname === "/callback") return await callback(request, env);
