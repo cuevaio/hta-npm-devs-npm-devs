@@ -1,31 +1,23 @@
 from datetime import datetime
 
 import pytest
-from fastapi.testclient import TestClient
-
-from app.main import create_app
 from app.schemas import (
     AlertList, Bottlenecks, Envelope, FleetOverview, FuelAnalysis, Provenance, ReplayState,
     TripStatus, VehicleStatus,
 )
 
-KEY = {"X-API-Key": "secreta"}
+from tests.helpers import KEY
 
 # (ruta pública, ruta de la tool, modelo de data)
 READS = [
     ("/v1/fleet", "/v1/tools/get_fleet_overview", FleetOverview),
-    ("/v1/vehicles/T03", "/v1/tools/get_vehicle_status?alias=T03", VehicleStatus),
+    ("/v1/vehicles/T07", "/v1/tools/get_vehicle_status?alias=T07", VehicleStatus),
     ("/v1/trips/V-001", "/v1/tools/get_trip_status?trip_id=V-001", TripStatus),
     ("/v1/trips/V-001/fuel", "/v1/tools/get_fuel_analysis?trip_id=V-001", FuelAnalysis),
     ("/v1/trips/V-001/bottlenecks", "/v1/tools/get_operational_bottlenecks?trip_id=V-001", Bottlenecks),
     ("/v1/alerts", "/v1/tools/get_alerts", AlertList),
     ("/v1/replay", None, ReplayState),
 ]
-
-
-@pytest.fixture
-def api():
-    return TestClient(create_app(api_key="secreta"))
 
 
 def _cases():
@@ -92,13 +84,13 @@ def test_control_replay_changes_the_state_seen_by_the_dashboard(api):
 
     play = api.post("/v1/tools/control_replay", headers=KEY, json={"action": "play"})
     api.post("/v1/tools/control_replay", headers=KEY, json={"action": "set_speed", "speed": 60})
-    api.post("/v1/tools/control_replay", headers=KEY, json={"action": "seek", "to_event_time": "2020-04-15T00:00:00Z"})
+    api.post("/v1/tools/control_replay", headers=KEY, json={"action": "seek", "to_event_time": "2020-04-02T00:00:00Z"})
 
     assert play.status_code == 200
     data = api.get("/v1/replay").json()["data"]
     assert data["estado"] == "playing"
     assert data["velocidad"] == 60
-    assert data["hora_replay"].startswith("2020-04-15T00:00:00")
+    assert data["hora_replay"].startswith("2020-04-02T00:00:00")
 
 
 @pytest.mark.parametrize(

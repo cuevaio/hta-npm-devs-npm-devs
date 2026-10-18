@@ -4,17 +4,17 @@ from fastapi.testclient import TestClient
 from app.main import create_app
 
 TOOL_GETS = [
-    "/v1/tools/get_fleet_overview", "/v1/tools/get_vehicle_status?alias=T03",
+    "/v1/tools/get_fleet_overview", "/v1/tools/get_vehicle_status?alias=T07",
     "/v1/tools/get_trip_status?trip_id=V-001", "/v1/tools/get_fuel_analysis?trip_id=V-001",
     "/v1/tools/get_operational_bottlenecks?trip_id=V-001", "/v1/tools/get_alerts",
 ]
-PUBLIC = ["/v1/fleet", "/v1/vehicles/T03", "/v1/trips/V-001", "/v1/trips/V-001/fuel",
+PUBLIC = ["/v1/fleet", "/v1/vehicles/T07", "/v1/trips/V-001", "/v1/trips/V-001/fuel",
           "/v1/trips/V-001/bottlenecks", "/v1/alerts", "/v1/replay"]
 
 
 @pytest.fixture
-def api():
-    return TestClient(create_app(api_key="secreta", cors_origins=["https://dashboard.example.com"]))
+def api(loaded):
+    return TestClient(create_app(loaded, api_key="secreta", cors_origins=["https://dashboard.example.com"]))
 
 
 @pytest.mark.parametrize("path", TOOL_GETS)
@@ -44,9 +44,9 @@ def test_dashboard_reads_are_public(api, path):
     assert api.get(path).status_code == 200
 
 
-def test_protected_routes_are_503_when_api_key_is_not_configured(monkeypatch):
+def test_protected_routes_are_503_when_api_key_is_not_configured(monkeypatch, loaded):
     monkeypatch.delenv("API_KEY", raising=False)
-    api = TestClient(create_app())
+    api = TestClient(create_app(loaded))
 
     assert api.get("/v1/tools/get_alerts", headers={"X-API-Key": "lo-que-sea"}).status_code == 503
     assert api.post("/v1/tools/control_replay", json={"action": "play"}).status_code == 503
