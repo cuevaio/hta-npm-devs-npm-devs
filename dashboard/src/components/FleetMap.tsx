@@ -4,6 +4,7 @@ import * as maplibregl from "maplibre-gl";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import { useEffect, useRef } from "react";
 import type { Vehicle } from "../api/client";
+import { bearing, truckMarkup, unwrap } from "./truck";
 
 const DEFAULT_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 const configured = import.meta.env.VITE_MAP_STYLE as string | undefined;
@@ -17,6 +18,10 @@ type Props = { vehicles: Vehicle[]; selected: string | null; onSelect: (alias: s
 type LngLat = [number, number];
 
 const reduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// La API no trae rumbo: se calcula entre lecturas cuando el camión avanzó lo bastante para que el
+// ángulo no sea ruido del GPS (~30 m). Detenido conserva el último rumbo conocido.
+const MIN_MOVE_DEG = 0.0003;
 
 /** Lleva el marcador de donde está a `to` en 1,8 s (menos que el polling de 2 s), sin saltos. */
 function glide(mk: maplibregl.Marker, to: LngLat, anim: Map<maplibregl.Marker, number>) {
@@ -42,6 +47,7 @@ export function FleetMap({ vehicles, selected, onSelect }: Props) {
   const map = useRef<maplibregl.Map | null>(null);
   const markers = useRef(new Map<string, maplibregl.Marker>());
   const anim = useRef(new Map<maplibregl.Marker, number>());
+  const heading = useRef(new Map<string, { at: LngLat; deg: number }>());
   const fitted = useRef(false);
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
@@ -74,16 +80,24 @@ export function FleetMap({ vehicles, selected, onSelect }: Props) {
         el.type = "button";
         el.className = "marker";
         el.setAttribute("aria-label", v.alias);
-        el.innerHTML = '<span class="pin" aria-hidden="true"></span><span class="tag"></span>';
-        el.querySelector(".tag")!.textContent = v.alias;
+        el.innerHTML = truckMarkup(v.alias);
+        el.querySelector(".tag b")!.textContent = v.alias;
         el.addEventListener("click", () => onSelectRef.current(v.alias));
         mk = new maplibregl.Marker({ element: el }).setLngLat(lngLat).addTo(m);
         markers.current.set(v.alias, mk);
       } else {
         glide(mk, lngLat, anim.current);
       }
+      const h = heading.current.get(v.alias);
+      if (!h) {
+        heading.current.set(v.alias, { at: lngLat, deg: 0 });
+      } else if (Math.hypot(lngLat[0] - h.at[0], lngLat[1] - h.at[1]) > MIN_MOVE_DEG) {
+        heading.current.set(v.alias, { at: lngLat, deg: unwrap(h.deg, bearing(h.at, lngLat)) });
+      }
       const el = mk.getElement();
       el.dataset.estado = v.estado;
+      el.style.setProperty("--rumbo", `${heading.current.get(v.alias)!.deg}deg`);
+      el.querySelector(".tag-dato")!.textContent = v.estado === "en_viaje" ? `${Math.round(v.velocidad_kmh)} km/h` : "";
       el.classList.toggle("is-selected", v.alias === selected);
     }
     for (const [alias, mk] of markers.current) {
@@ -92,6 +106,7 @@ export function FleetMap({ vehicles, selected, onSelect }: Props) {
         anim.current.delete(mk);
         mk.remove();
         markers.current.delete(alias);
+        heading.current.delete(alias);
       }
     }
     if (!fitted.current && vehicles.length > 0) {
