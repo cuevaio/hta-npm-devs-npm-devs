@@ -13,7 +13,7 @@ def test_fixture_versionado_existe_y_cumple_el_esquema_normalizado():
     df = pl.read_csv(FIXTURES / "telemetry.csv")
     assert tuple(df.columns) == NORMALIZED_COLUMNS
     assert set(df["alias"]) <= {"T03", "T07"} and len(df) > 100
-    assert df["provenance"].unique().to_list() == ["fead_observed"]
+    assert df["provenance"].unique().to_list() == ["synthetic_demo"]  # ADR 0012
     assert df["event_time"].str.ends_with("Z").all()
 
 

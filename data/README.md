@@ -1,6 +1,28 @@
 # data/: pipeline de datos de Fleet Intelligence
 
-Convierte FEAD EMS dataset-2 (telemetría real de una flota en China, abril de 2020) en datos anónimos para la demo.
+## Flota sintética en Perú (la de la demo, ADR 0012)
+
+```bash
+cd data && uv sync
+uv run python -m fleetdata.peru --out out   # ~1 min; también regenera data/fixtures/
+```
+
+28 tractocamiones (T01…T28) en cuatro corredores reales durante 19 días: Lima–Arequipa (Panamericana Sur),
+Lima–Huancayo (Carretera Central, Ticlio a 4 816 m), Lima–Piura (Panamericana Norte) y Arequipa–Juliaca. Todo es
+`synthetic_demo` salvo la línea base (`model_inferred`). La salida tiene el mismo formato que la de FEAD, más
+`terminals.csv`, km y litros por viaje en `trips.csv` y la capa comercial peruana en `freights.csv`.
+
+| Módulo | Qué hace |
+|---|---|
+| `rutas.py` | Corredores y terminales. `python -m fleetdata.rutas` descarga una vez la geometría (OSRM, © OpenStreetMap, ODbL) y la altitud (SRTM 90 m) a `rutas_peru.json`, que se versiona. |
+| `fisica.py` | Perfil de velocidad y consumo por potencia en rueda: masa, pendiente, curvas, altitud y aerodinámica. Calibrado con FEAD (~33 L/100 km en llano). |
+| `peru.py` | Horarios, paradas, tráfico, carga por viaje y los casos de la demo (`GUIONES`): sobreconsumo de T07 desde el día 13, ralentí de T04, parada sin explicar de T28 y subida a Ticlio de T22. Reusa `trips.find_passes` y `baseline`. |
+| `synthetic.py` | Fletes con toneladas, tarifa en S/ por t-km, IGV, detracción del 4 % (si supera S/ 400), GRE, RUC ficticio (dígito verificador inválido a propósito) y costo de combustible. Tarifas y precio del diésel son supuestos. |
+
+## Pipeline de FEAD (referencia de calibración)
+
+Convierte FEAD EMS dataset-2 (telemetría real de una flota en China, abril de 2020) en datos anónimos. La demo ya no
+lo usa (ADR 0012).
 El repositorio solo contiene scripts y un fixture chico: nunca datos crudos (ADR 0006). FEAD no tiene licencia y sus
 filas traen matrículas, IMEI y direcciones reales.
 

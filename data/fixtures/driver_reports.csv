@@ -1,8 +1,13 @@
 report_id,trip_id,driver_id,reported_at,text,provenance
-R-001,T07-V01,D-08,2020-04-02T20:38:42Z,"Todo en orden, sigo la ruta.",synthetic_demo
-R-002,T03-V01,D-01,2020-04-03T18:10:00Z,"Esperando que termine la carga en el terminal, dejé el motor en marcha para no perder la calefacción.",synthetic_demo
-R-004,T03-V01,D-01,2020-04-05T03:52:05Z,Hay tráfico lento por obras en la carretera.,synthetic_demo
-R-010,T07-V03,D-08,2020-04-07T22:55:00Z,"Subiendo la montaña con carga completa, voy lento y con el acelerador a fondo.",synthetic_demo
-R-013,T03-V03,D-01,2020-04-10T23:37:45Z,"Todo en orden, sigo la ruta.",synthetic_demo
-R-015,T07-V04,D-07,2020-04-12T00:31:52Z,"Paré a descansar y cargar combustible, retomo en 30 minutos.",synthetic_demo
-R-021,T07-V05,D-09,2020-04-14T20:12:30Z,Hay tráfico lento por obras en la carretera.,synthetic_demo
+R-001,T07-V01,D-07,2020-04-01T04:31:27Z,"Todo en orden, sigo la ruta.",synthetic_demo
+R-010,T03-V03,D-05,2020-04-03T19:20:57Z,"Paré a descansar y cargar combustible, retomo en 30 minutos.",synthetic_demo
+R-016,T07-V04,D-07,2020-04-05T06:13:04Z,"Paré a descansar y cargar combustible, retomo en 30 minutos.",synthetic_demo
+R-018,T07-V05,D-07,2020-04-06T10:59:54Z,"Paré a descansar y cargar combustible, retomo en 30 minutos.",synthetic_demo
+R-022,T03-V06,D-05,2020-04-07T13:37:51Z,"Todo en orden, sigo la ruta.",synthetic_demo
+R-023,T07-V06,D-07,2020-04-07T18:10:52Z,"Todo en orden, sigo la ruta.",synthetic_demo
+R-026,T03-V07,D-05,2020-04-08T20:13:16Z,"Paré a descansar y cargar combustible, retomo en 30 minutos.",synthetic_demo
+R-032,T07-V09,D-11,2020-04-11T12:35:00Z,Hay tráfico lento por obras en la carretera.,synthetic_demo
+R-033,T03-V10,D-05,2020-04-12T10:25:55Z,Hay tráfico lento por obras en la carretera.,synthetic_demo
+R-038,T03-V11,D-05,2020-04-13T08:27:15Z,"Esperando que terminen de cargar en el terminal de Lima, dejé el motor en marcha.",synthetic_demo
+R-044,T03-V12,D-07,2020-04-15T04:51:03Z,"Paré a descansar y cargar combustible, retomo en 30 minutos.",synthetic_demo
+R-045,T07-V12,D-07,2020-04-15T11:28:07Z,Hay tráfico lento por obras en la carretera.,synthetic_demo
