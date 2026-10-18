@@ -1502,6 +1502,18 @@
             "title": "Alias",
             "type": "string"
           },
+          "altitud_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Altitud de la última posición conocida, en msnm (SRTM de la ruta); nula si la fuente no la trae",
+            "title": "Altitud M"
+          },
           "conductor": {
             "anyOf": [
               {
@@ -1601,6 +1613,18 @@
             "description": "Alias anónimo del vehículo, T01…T28",
             "title": "Alias",
             "type": "string"
+          },
+          "altitud_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Altitud de la última posición conocida, en msnm (SRTM de la ruta); nula si la fuente no la trae",
+            "title": "Altitud M"
           },
           "estado": {
             "enum": [
@@ -1743,6 +1767,7 @@
                     "vehiculos": [
                       {
                         "alias": "T03",
+                        "altitud_m": 575.0,
                         "estado": "en_viaje",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -1754,6 +1779,7 @@
                       },
                       {
                         "alias": "T07",
+                        "altitud_m": 407.0,
                         "estado": "en_viaje",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -1765,6 +1791,7 @@
                       },
                       {
                         "alias": "T28",
+                        "altitud_m": 3831.0,
                         "estado": "detenido",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -1775,6 +1802,7 @@
                       },
                       {
                         "alias": "T04",
+                        "altitud_m": 23.0,
                         "estado": "ralenti",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -1785,6 +1813,7 @@
                       },
                       {
                         "alias": "T22",
+                        "altitud_m": 3266.0,
                         "estado": "detenido",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -1795,6 +1824,7 @@
                       },
                       {
                         "alias": "T09",
+                        "altitud_m": 63.0,
                         "estado": "detenido",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -2210,6 +2240,7 @@
                     "vehiculos": [
                       {
                         "alias": "T03",
+                        "altitud_m": 575.0,
                         "estado": "en_viaje",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -2221,6 +2252,7 @@
                       },
                       {
                         "alias": "T07",
+                        "altitud_m": 407.0,
                         "estado": "en_viaje",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -2232,6 +2264,7 @@
                       },
                       {
                         "alias": "T28",
+                        "altitud_m": 3831.0,
                         "estado": "detenido",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -2242,6 +2275,7 @@
                       },
                       {
                         "alias": "T04",
+                        "altitud_m": 23.0,
                         "estado": "ralenti",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -2252,6 +2286,7 @@
                       },
                       {
                         "alias": "T22",
+                        "altitud_m": 3266.0,
                         "estado": "detenido",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -2262,6 +2297,7 @@
                       },
                       {
                         "alias": "T09",
+                        "altitud_m": 63.0,
                         "estado": "detenido",
                         "hora_evento": "2020-04-14T03:30:00Z",
                         "posicion": {
@@ -2756,6 +2792,7 @@
                 "example": {
                   "data": {
                     "alias": "T03",
+                    "altitud_m": 575.0,
                     "conductor": "Marcos Quispe (sintético)",
                     "corredor": "LIM-AQP",
                     "estado": "en_viaje",
@@ -3185,6 +3222,7 @@
                 "example": {
                   "data": {
                     "alias": "T03",
+                    "altitud_m": 575.0,
                     "conductor": "Marcos Quispe (sintético)",
                     "corredor": "LIM-AQP",
                     "estado": "en_viaje",

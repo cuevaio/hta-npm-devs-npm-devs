@@ -38,6 +38,17 @@ def test_la_telemetria_esta_en_peru_y_es_synthetic_demo(out):
         assert df["fuel_total_l"].is_sorted() and df["odometer_km"].is_sorted()
 
 
+def test_cada_lectura_trae_la_altitud_real_de_su_punto_de_la_ruta(out):
+    for alias in peru.DEMO_ALIASES:
+        df = pl.read_parquet(out / "out" / "telemetry" / f"{alias}.parquet")
+        assert df["alt_m"].null_count() == 0
+        assert 0 <= df["alt_m"].min() and df["alt_m"].max() < 5000  # de la costa a Ticlio (4 818 msnm)
+    t22 = pl.read_parquet(out / "out" / "telemetry" / "T22.parquet")  # LIM-HYO cruza Ticlio
+    assert t22["alt_m"].max() > 4500
+    t28 = pl.read_parquet(out / "out" / "telemetry" / "T28.parquet")  # AQP-JUL llega al altiplano
+    assert t28["alt_m"].max() > 3800
+
+
 def test_consumo_creible_y_la_sierra_gasta_mas_de_subida(out):
     trips = _read(out, "trips.csv")
     llano = trips.filter(pl.col("corridor") == "LIM-PIU")["l_per_100km"].median()

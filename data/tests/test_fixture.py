@@ -15,6 +15,7 @@ def test_fixture_versionado_existe_y_cumple_el_esquema_normalizado():
     assert set(df["alias"]) <= {"T03", "T07"} and len(df) > 100
     assert df["provenance"].unique().to_list() == ["synthetic_demo"]  # ADR 0012
     assert df["event_time"].str.ends_with("Z").all()
+    assert df["alt_m"].null_count() == 0 and df["alt_m"].min() >= 0  # altitud SRTM de la ruta
 
 
 def test_fixture_es_chico():

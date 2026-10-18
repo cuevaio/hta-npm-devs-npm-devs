@@ -33,3 +33,10 @@ const SOLES = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN
 export function pen(v: number | null | undefined): string {
   return v == null ? "–" : SOLES.format(v);
 }
+
+const METROS = new Intl.NumberFormat("es-PE", { maximumFractionDigits: 0 });
+
+/** Altitud en msnm sin decimales; null si la fuente no la trae (el pipeline de FEAD), para no mostrarla. */
+export function msnm(v: number | null | undefined): string | null {
+  return v == null ? null : `${METROS.format(v)} msnm`;
+}

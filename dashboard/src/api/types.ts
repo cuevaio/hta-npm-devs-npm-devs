@@ -914,6 +914,11 @@ export interface components {
              */
             alias: string;
             /**
+             * Altitud M
+             * @description Altitud de la última posición conocida, en msnm (SRTM de la ruta); nula si la fuente no la trae
+             */
+            altitud_m?: number | null;
+            /**
              * Conductor
              * @description Nombre sintético del conductor
              */
@@ -948,6 +953,11 @@ export interface components {
              * @description Alias anónimo del vehículo, T01…T28
              */
             alias: string;
+            /**
+             * Altitud M
+             * @description Altitud de la última posición conocida, en msnm (SRTM de la ruta); nula si la fuente no la trae
+             */
+            altitud_m?: number | null;
             /**
              * Estado
              * @enum {string}
@@ -1064,6 +1074,7 @@ export interface operations {
                      *         "vehiculos": [
                      *           {
                      *             "alias": "T03",
+                     *             "altitud_m": 575,
                      *             "estado": "en_viaje",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1075,6 +1086,7 @@ export interface operations {
                      *           },
                      *           {
                      *             "alias": "T07",
+                     *             "altitud_m": 407,
                      *             "estado": "en_viaje",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1086,6 +1098,7 @@ export interface operations {
                      *           },
                      *           {
                      *             "alias": "T28",
+                     *             "altitud_m": 3831,
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1096,6 +1109,7 @@ export interface operations {
                      *           },
                      *           {
                      *             "alias": "T04",
+                     *             "altitud_m": 23,
                      *             "estado": "ralenti",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1106,6 +1120,7 @@ export interface operations {
                      *           },
                      *           {
                      *             "alias": "T22",
+                     *             "altitud_m": 3266,
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1116,6 +1131,7 @@ export interface operations {
                      *           },
                      *           {
                      *             "alias": "T09",
+                     *             "altitud_m": 63,
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1515,6 +1531,7 @@ export interface operations {
                      *         "vehiculos": [
                      *           {
                      *             "alias": "T03",
+                     *             "altitud_m": 575,
                      *             "estado": "en_viaje",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1526,6 +1543,7 @@ export interface operations {
                      *           },
                      *           {
                      *             "alias": "T07",
+                     *             "altitud_m": 407,
                      *             "estado": "en_viaje",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1537,6 +1555,7 @@ export interface operations {
                      *           },
                      *           {
                      *             "alias": "T28",
+                     *             "altitud_m": 3831,
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1547,6 +1566,7 @@ export interface operations {
                      *           },
                      *           {
                      *             "alias": "T04",
+                     *             "altitud_m": 23,
                      *             "estado": "ralenti",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1557,6 +1577,7 @@ export interface operations {
                      *           },
                      *           {
                      *             "alias": "T22",
+                     *             "altitud_m": 3266,
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1567,6 +1588,7 @@ export interface operations {
                      *           },
                      *           {
                      *             "alias": "T09",
+                     *             "altitud_m": 63,
                      *             "estado": "detenido",
                      *             "hora_evento": "2020-04-14T03:30:00Z",
                      *             "posicion": {
@@ -1991,6 +2013,7 @@ export interface operations {
                      * @example {
                      *       "data": {
                      *         "alias": "T03",
+                     *         "altitud_m": 575,
                      *         "conductor": "Marcos Quispe (sintético)",
                      *         "corredor": "LIM-AQP",
                      *         "estado": "en_viaje",
@@ -2377,6 +2400,7 @@ export interface operations {
                      * @example {
                      *       "data": {
                      *         "alias": "T03",
+                     *         "altitud_m": 575,
                      *         "conductor": "Marcos Quispe (sintético)",
                      *         "corredor": "LIM-AQP",
                      *         "estado": "en_viaje",

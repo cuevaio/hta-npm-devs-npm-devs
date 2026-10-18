@@ -36,13 +36,14 @@ def _pos(lat: float, lon: float) -> Posicion:
     return Posicion(lat=lat, lon=lon)
 
 
+# altitud_m: SRTM del punto de rutas_peru.json más cercano a cada posición (todas a ≤ 1 km de su ruta)
 VEHICLES = {
-    "T03": VehiculoResumen(alias="T03", estado="en_viaje", viaje_id="V-001", velocidad_kmh=72.5, posicion=_pos(-14.83, -74.94), hora_evento=NOW),
-    "T07": VehiculoResumen(alias="T07", estado="en_viaje", viaje_id="V-002", velocidad_kmh=64.0, posicion=_pos(-14.07, -75.73), hora_evento=NOW),
-    "T28": VehiculoResumen(alias="T28", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-15.49, -70.13), hora_evento=NOW),
-    "T04": VehiculoResumen(alias="T04", estado="ralenti", velocidad_kmh=0.0, posicion=_pos(-15.85, -74.25), hora_evento=NOW),
-    "T22": VehiculoResumen(alias="T22", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-12.06, -75.21), hora_evento=NOW),
-    "T09": VehiculoResumen(alias="T09", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-12.05, -77.09), hora_evento=NOW),
+    "T03": VehiculoResumen(alias="T03", estado="en_viaje", viaje_id="V-001", velocidad_kmh=72.5, posicion=_pos(-14.83, -74.94), altitud_m=575.0, hora_evento=NOW),
+    "T07": VehiculoResumen(alias="T07", estado="en_viaje", viaje_id="V-002", velocidad_kmh=64.0, posicion=_pos(-14.07, -75.73), altitud_m=407.0, hora_evento=NOW),
+    "T28": VehiculoResumen(alias="T28", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-15.49, -70.13), altitud_m=3831.0, hora_evento=NOW),
+    "T04": VehiculoResumen(alias="T04", estado="ralenti", velocidad_kmh=0.0, posicion=_pos(-15.85, -74.25), altitud_m=23.0, hora_evento=NOW),
+    "T22": VehiculoResumen(alias="T22", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-12.06, -75.21), altitud_m=3266.0, hora_evento=NOW),
+    "T09": VehiculoResumen(alias="T09", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-12.05, -77.09), altitud_m=63.0, hora_evento=NOW),
 }
 
 REPORTE = ReporteConductor(

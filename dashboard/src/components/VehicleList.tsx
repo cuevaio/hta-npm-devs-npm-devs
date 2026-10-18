@@ -1,5 +1,5 @@
 import type { Snapshot } from "../api/client";
-import { ESTADO, horaLima, isStale } from "../format";
+import { ESTADO, horaLima, isStale, msnm } from "../format";
 
 type Props = {
   snapshot: Snapshot;
@@ -14,6 +14,7 @@ export function VehicleList({ snapshot, selected, onSelect }: Props) {
       {fleet.data.vehiculos.map((v) => {
         const trip = v.viaje_id ? trips[v.viaje_id] : undefined;
         const stale = isStale(v.hora_evento, replay.data.hora_replay);
+        const altitud = msnm(v.altitud_m);
         return (
           <li key={v.alias}>
             <button
@@ -29,7 +30,7 @@ export function VehicleList({ snapshot, selected, onSelect }: Props) {
                 {stale && <span className="chip chip-stale">Desactualizado</span>}
               </span>
               <span className="dato">
-                {v.velocidad_kmh.toFixed(1)} km/h · {horaLima(v.hora_evento)}
+                {v.velocidad_kmh.toFixed(1)} km/h{altitud && ` · ${altitud}`} · {horaLima(v.hora_evento)}
               </span>
               {trip ? (
                 <span className="trip">

@@ -8,15 +8,15 @@ from .db import connect
 from .schemas import FleetOverview, Posicion, VehicleStatus, VehiculoResumen
 
 _LAST_READINGS = """
-SELECT v.alias, l.event_time, l.speed_kmh, l.rpm, p.lat, p.lon, t.trip_id, t.corridor, t.sentido, d.name AS conductor
+SELECT v.alias, l.event_time, l.speed_kmh, l.rpm, p.lat, p.lon, p.alt_m, t.trip_id, t.corridor, t.sentido, d.name AS conductor
 FROM vehicles v
 CROSS JOIN LATERAL (  -- última lectura: recorre el índice (alias, event_time) hacia atrás y para en la primera
     SELECT r.alias, r.event_time, r.speed_kmh, r.rpm FROM telemetry_reading r
     WHERE r.alias = v.alias AND r.event_time <= %(hora)s
     ORDER BY r.event_time DESC LIMIT 1
 ) l
-LEFT JOIN LATERAL (  -- última posición conocida: las lecturas sin GPS no la borran
-    SELECT r.lat, r.lon FROM telemetry_reading r
+LEFT JOIN LATERAL (  -- última posición conocida, con su altitud: las lecturas sin GPS no la borran
+    SELECT r.lat, r.lon, r.alt_m FROM telemetry_reading r
     WHERE r.alias = l.alias AND r.event_time <= %(hora)s AND r.lat IS NOT NULL AND r.lon IS NOT NULL
     ORDER BY r.event_time DESC LIMIT 1
 ) p ON true
@@ -47,7 +47,7 @@ def _estado(row: dict) -> str:
 def _resumen(row: dict) -> dict:
     return dict(
         alias=row["alias"], estado=_estado(row), viaje_id=row["trip_id"], velocidad_kmh=row["speed_kmh"] or 0.0,
-        posicion=Posicion(lat=row["lat"], lon=row["lon"]), hora_evento=row["event_time"],
+        posicion=Posicion(lat=row["lat"], lon=row["lon"]), altitud_m=row["alt_m"], hora_evento=row["event_time"],
     )
 
 

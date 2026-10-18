@@ -17,7 +17,7 @@ from .schemas import ReplayState
 
 Clock = Callable[[], datetime]
 
-_COLUMNS = "alias, event_time, lat, lon, speed_kmh, rpm, fuel_rate_lph, fuel_total_l, odometer_km, engine_on, provenance"
+_COLUMNS = "alias, event_time, lat, lon, alt_m, speed_kmh, rpm, fuel_rate_lph, fuel_total_l, odometer_km, engine_on, provenance"
 
 
 def system_clock() -> datetime:
