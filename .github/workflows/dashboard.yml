@@ -1,7 +1,7 @@
 name: dashboard
 on:
   push:
-    paths: ["dashboard/**", ".github/workflows/dashboard.yml"]
+    paths: ["dashboard/**", "backend/openapi.json", ".github/workflows/dashboard.yml"]
   workflow_dispatch:
 jobs:
   test:
