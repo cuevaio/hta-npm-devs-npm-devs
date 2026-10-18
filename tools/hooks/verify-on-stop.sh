@@ -25,6 +25,21 @@ if [ ! -d "$worktree" ]; then
   exit 2
 fi
 
+# Alcance: la rama solo puede tocar las rutas que declara (incidente #11:
+# un implementador revirtió 73 archivos de otros tickets).
+read -r -a alcance <<<"$(grep -oP '^ALCANCE:\s*\K.*' <<<"$message" | tail -1)"
+if [ ${#alcance[@]} -eq 0 ]; then
+  echo "Agrega a tu último mensaje la línea 'ALCANCE: <carpetas/ y archivos que toca el plan, separados por espacios>'." >&2
+  exit 2
+fi
+if ! scope=$("$CLAUDE_PROJECT_DIR/tools/check-scope.sh" "$worktree" "${alcance[@]}" 2>&1); then
+  {
+    echo "Tu rama modifica o borra archivos fuera de su alcance. Restaura los que no son de tu ticket (no reviertas trabajo ajeno)."
+    echo "$scope"
+  } >&2
+  exit 2
+fi
+
 if ! output=$("$CLAUDE_PROJECT_DIR/tools/verify-ticket.sh" "$worktree" 2>&1); then
   {
     echo "Los tests del worktree fallan; arréglalos antes de terminar (o termina con 'ESTADO: bloqueado' explicando por qué)."

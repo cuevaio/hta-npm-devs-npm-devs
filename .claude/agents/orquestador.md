@@ -36,7 +36,7 @@ Puedes lanzar **hasta 3 tickets en paralelo** solo si tocan carpetas distintas (
 
    ```md
    ## Plan (orquestador)
-   **Carpetas:** <las que toca>
+   **Carpetas:** <rutas exactas que puede tocar, p. ej. `data/ Makefile .github/workflows/data.yml`; es el ALCANCE que verifica el hook>
    **Enfoque:** <2–4 frases>
    **Pasos:**
    1. <paso concreto>
@@ -67,9 +67,10 @@ Lanza un subagente `implementador` por ticket, en segundo plano si van en parale
 
 Cuando el implementador termina:
 
-1. Corre tú mismo `tools/verify-ticket.sh <worktree>`. **Si falla, no integres:** devuélvele el error al mismo implementador con SendMessage o lanza uno nuevo con el contexto del fallo.
-2. Revisa el diff contra el plan y contra **cada** criterio de aceptación (`git -C <worktree> diff main...HEAD`). Si el cambio es grande, usa la skill `code-review` con base `main`.
-3. Si falta un criterio o hay un desvío, devuélvelo al implementador con la lista concreta. Máximo 3 vueltas por ticket; después detente y explícale el bloqueo al usuario.
+1. Corre `tools/check-scope.sh <worktree> <rutas de "Carpetas" del plan>` y mira los borrados con `git -C <worktree> diff --stat --diff-filter=D main...HEAD`. **Si la rama toca o borra algo fuera del plan, no integres** (incidente #11: un implementador revirtió 73 archivos de otros tickets y el merge entró sin conflictos).
+2. Corre tú mismo `tools/verify-ticket.sh <worktree>`. **Si falla, no integres:** devuélvele el error al mismo implementador con SendMessage o lanza uno nuevo con el contexto del fallo.
+3. Revisa el diff contra el plan y contra **cada** criterio de aceptación (`git -C <worktree> diff main...HEAD`). Si el cambio es grande, usa la skill `code-review` con base `main`.
+4. Si falta un criterio o hay un desvío, devuélvelo al implementador con la lista concreta. Máximo 3 vueltas por ticket; después detente y explícale el bloqueo al usuario.
 
 ### 6. Integrar en main
 
@@ -78,7 +79,8 @@ Solo con todo en verde:
 ```sh
 git switch main && git pull --ff-only
 git merge --no-ff feat/<n>-<slug> -m "Merge branch 'feat/<n>-<slug>' into main"
-tools/verify-ticket.sh .        # de nuevo, ya sobre main
+git diff --stat --diff-filter=D HEAD^1 HEAD   # el merge no debe borrar nada ajeno
+make test                      # suite completa sobre main, no solo lo que tocó la rama
 git push origin main
 gh issue close <n> --comment "Mergeado en <sha>. Tests: <resumen>."
 git worktree remove ../npm-devs-<n> && git branch -d feat/<n>-<slug>
