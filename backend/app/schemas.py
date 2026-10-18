@@ -291,3 +291,18 @@ class VehicleMetrics(BaseModel):
     hasta: str = Field(description="Último día del rango (YYYY-MM-DD, hora de Lima), recortado a la hora de replay")
     resumen: MetricasPeriodo = Field(description="Totales del rango; clave = 'total'")
     filas: list[MetricasPeriodo]
+
+
+class Corredor(BaseModel):
+    """Vía real de un corredor en sentido ida, para dibujarla y mover los vehículos sobre ella."""
+
+    corredor: str
+    via: str = Field(description="Nombre de la carretera, p. ej. Panamericana Sur")
+    origen: str = Field(description="Terminal de ida")
+    destino: str
+    largo_km: float
+    coordenadas: list[tuple[float, float]] = Field(description="[lon, lat] en sentido ida, simplificada a < 1 m")
+
+
+class CorridorList(BaseModel):
+    corredores: list[Corredor]
