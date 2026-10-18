@@ -4,9 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<title>Cuadra</title>
+<title>Fleet Intelligence</title>
 <meta name="description" content="Del contrato a la factura: cada entrega respaldada, cada regla validada, cada liquidación trazable. Documentación y facturación agéntica para el transporte de carga en Perú.">
-<link rel="icon" href="assets/brand/cuadra-favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/tokens.css">
 <style>
@@ -151,7 +150,7 @@ footer .micro{max-width:80ch}
 
 <nav>
   <div class="wrap navin">
-    <a class="marca" href="#top"><canvas id="navlogo" width="140" height="140" style="width:24px;height:24px" aria-hidden="true"></canvas>Cuadra</a>
+    <a class="marca" href="#top">Fleet Intelligence</a>
     <div class="navlinks">
       <a href="#flujo">Cómo funciona</a>
       <a href="#video">Video</a>
@@ -256,8 +255,7 @@ footer .micro{max-width:80ch}
         <div class="ctas"><a class="cq-btn pri" href="#flujo">Ver la secuencia</a></div>
       </div>
       <div class="plano" style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
-        <canvas id="cierreSimbolo" width="140" height="140" style="width:64px;height:64px" aria-hidden="true"></canvas>
-        <p class="dato" style="color:var(--cuadra-sello);font-size:15px">Cuadra · listo para facturar</p>
+        <p class="dato" style="color:var(--cuadra-sello);font-size:15px">Listo para facturar</p>
         <p class="micro">La marca cerrada solo aparece cuando hay una aceptación registrada, con aprobador identificado y hora.</p>
       </div>
     </div>
@@ -267,8 +265,7 @@ footer .micro{max-width:80ch}
 <footer>
   <div class="wrap">
     <div style="display:flex;align-items:center;gap:10px">
-      <canvas id="pieLogo" width="140" height="140" style="width:22px;height:22px" aria-hidden="true"></canvas>
-      <span class="marca" style="font-size:14px">Cuadra</span>
+      <span class="marca" style="font-size:14px">Fleet Intelligence</span>
     </div>
     <p class="micro">Contratos, órdenes y montos de esta página son de demostración. Describe una arquitectura operativa; no constituye asesoría legal ni tributaria.</p>
   </div>
@@ -391,7 +388,6 @@ footer .micro{max-width:80ch}
 
   var contador = document.getElementById('contador');
   var riel = document.getElementById('riel');
-  var navlogo = document.getElementById('navlogo');
   var playBtn = document.getElementById('play');
 
   function pinta(){
@@ -400,7 +396,6 @@ footer .micro{max-width:80ch}
     });
     contador.textContent = 'Paso ' + (paso<10?'0':'') + paso + ' de 10';
     riel.style.width = (paso/10*100) + '%';
-    dibujaChico(navlogo, { puerta: metaPuerta(paso), sello: paso >= 10 });
     if (reduce) dibujaEscena(0);
   }
 
@@ -490,8 +485,6 @@ footer .micro{max-width:80ch}
   document.getElementById('banda').innerHTML =
     frases.concat(frases).map(function(w){ return '<span>'+w+'</span>'; }).join('');
 
-  dibujaChico(document.getElementById('cierreSimbolo'), { puerta: 3, sello: true });
-  dibujaChico(document.getElementById('pieLogo'), { puerta: 0 });
 
   /* ---- bucle: la secuencia avanza sola hasta cerrar ---------------------- */
   var ultimo = 0;
