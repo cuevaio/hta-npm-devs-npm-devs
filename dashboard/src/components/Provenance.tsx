@@ -6,6 +6,7 @@ export function ProvenanceChips({ items }: { items: Provenance[] }) {
     <ul className="chips" aria-label="Procedencia">
       {items.map((p) => (
         <li key={p} className={`chip chip-${p}`} data-provenance={p}>
+          <i aria-hidden="true" />
           {PROCEDENCIA[p]}
         </li>
       ))}
