@@ -1,0 +1,20 @@
+[project]
+name = "fleet-data"
+version = "0.1.0"
+description = "Pipeline de datos de Fleet Intelligence: FEAD EMS dataset-2 a telemetría anónima, línea base offline y logística sintética"
+requires-python = ">=3.12"
+dependencies = ["h3>=4.1", "numpy>=2.0", "polars>=1.0"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["fleetdata"]

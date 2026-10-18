@@ -33,7 +33,7 @@ Trabajas **solo** dentro del worktree cuya ruta absoluta viene en tu prompt. Los
 
 - No mergees a `main`, no hagas push, no cierres ni comentes issues: eso lo hace el orquestador.
 - No toques secretos ni credenciales; las integraciones reales van detrás de variables de entorno y se prueban contra simulados.
-- No toques carpetas fuera de las que nombra el plan.
+- No toques carpetas fuera de las que nombra el plan. **Nunca sobrescribas un archivo existente con una versión propia o vieja**: edita sobre el contenido actual de la rama. Antes de terminar revisa `git -C <worktree> diff --stat main...HEAD`: si aparece un archivo ajeno modificado o borrado, restáuralo con `git checkout main -- <archivo>`.
 
 ## Cómo terminas
 
@@ -42,7 +42,8 @@ Tu último mensaje es para el orquestador y **debe** terminar con estas líneas 
 ```
 WORKTREE: <ruta absoluta del worktree>
 TICKET: #<n>
+ALCANCE: <carpetas/ y archivos que toca el plan, separados por espacios>
 ESTADO: listo | bloqueado
 ```
 
-Antes de esas líneas: qué hiciste, qué test cubre cada criterio de aceptación y cualquier desvío del plan. Al terminar, un hook corre los tests del worktree; si fallan, te devuelve el error y tienes que arreglarlo antes de poder cerrar.
+Antes de esas líneas: qué hiciste, qué test cubre cada criterio de aceptación y cualquier desvío del plan. Al terminar, un hook verifica el alcance (`tools/check-scope.sh`) y corre los tests del worktree; si algo falla, te devuelve el error y tienes que arreglarlo antes de poder cerrar.

@@ -1,0 +1,8 @@
+report_id,trip_id,driver_id,reported_at,text,provenance
+R-001,T07-V01,D-08,2020-04-02T20:38:42Z,"Todo en orden, sigo la ruta.",synthetic_demo
+R-002,T03-V01,D-01,2020-04-03T18:10:00Z,"Esperando que termine la carga en el terminal, dejé el motor en marcha para no perder la calefacción.",synthetic_demo
+R-004,T03-V01,D-01,2020-04-05T03:52:05Z,Hay tráfico lento por obras en la carretera.,synthetic_demo
+R-010,T07-V03,D-08,2020-04-07T22:55:00Z,"Subiendo la montaña con carga completa, voy lento y con el acelerador a fondo.",synthetic_demo
+R-013,T03-V03,D-01,2020-04-10T23:37:45Z,"Todo en orden, sigo la ruta.",synthetic_demo
+R-015,T07-V04,D-07,2020-04-12T00:31:52Z,"Paré a descansar y cargar combustible, retomo en 30 minutos.",synthetic_demo
+R-021,T07-V05,D-09,2020-04-14T20:12:30Z,Hay tráfico lento por obras en la carretera.,synthetic_demo
