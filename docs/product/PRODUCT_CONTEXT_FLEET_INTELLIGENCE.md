@@ -33,7 +33,7 @@ Un **hub de inteligencia operacional** que:
 1. Ingiere inicialmente telemetría histórica **FEAD / EMS dataset-2**, mediante un **Telemetry Replay Service** que la emite como eventos secuenciales. La interfaz `TelemetryProvider` permitirá integrar después **Samsara**, **Global GPS Perú** o gateways **OBD-II/J1939**, sin reescribir la lógica del producto.
 2. Asocia cada lectura con el **vehículo, el viaje/flete, el conductor, la carga y la ubicación**, conservando marca de tiempo y fuente.
 3. Incorpora contexto geoespacial y ambiental: **latitud, longitud, altitud, pendientes, temperatura** y, cuando esté disponible, clima, estado vial y peso de carga.
-4. Recibe reportes humanos de conductores u operadores vía **WhatsApp**, mediante la integración prevista con **Sabu**; los vincula temporal y operacionalmente con un viaje.
+4. Recibe reportes humanos de conductores u operadores vía **WhatsApp**, mediante la integración prevista con **Zavu**; los vincula temporal y operacionalmente con un viaje.
 5. Analiza desviaciones de combustible, estima el consumo esperado y presenta **posibles factores explicativos**, con nivel de confianza.
 6. Emite **alertas proactivas en WhatsApp** y responde **consultas en lenguaje natural**.
 7. Ofrece acceso controlado mediante herramientas de un **servidor MCP**, para que agentes autorizados consulten estado y soliciten predicciones.
@@ -57,7 +57,7 @@ Un **hub de inteligencia operacional** que:
 - Ingesta demostrable desde **FEAD EMS dataset-2** (registros históricos reales), con adaptador normalizador y **replay configurable** (pausar/reanudar, velocidad de reproducción, camión y rango). No se requiere Samsara ni hardware en el MVP.
 - Registro de GPS y al menos un indicador utilizable de combustible (consumo acumulado, porcentaje de tanque o litros calculados con limitaciones explícitas).
 - Hub con histórico de eventos y consultas por vehículo, flete y periodo.
-- Ingesta de mensajes/reportes WhatsApp por Sabu, asociándolos al viaje y al tiempo correctos.
+- Ingesta de mensajes/reportes WhatsApp por Zavu, asociándolos al viaje y al tiempo correctos.
 - Motor inicial para estimar consumo esperado / detectar anomalías; puede ser una **línea base estadística o reglas** antes de ML sofisticado.
 - Flujo completo de **alerta WhatsApp** por anomalía y **consulta WhatsApp** de estado/consumo/posible cuello de botella, con evidencia y hora de última actualización.
 - API de negocio y **servidor MCP** con al menos una herramienta read-only que acceda al hub **a través de una capa de servicios**; idealmente otra de predicción.
@@ -91,7 +91,7 @@ Un **hub de inteligencia operacional** que:
 |---|---|---|
 | **FEAD / EMS dataset-2** | **P0: fuente inicial** | Motor, combustible y GPS según columnas efectivamente verificadas; datos históricos replayados, no una API live. |
 | **Logística sintética** | **P0: demo** | Vehículos de demo, asignaciones a fletes/viajes, estado de entrega, conductores, carga, paradas y reportes humanos de escenario. Nunca presentarlos como hechos históricos de FEAD. |
-| **WhatsApp vía Sabu** | **P0: canal bidireccional** | Mensajes de conductores/operadores y notificaciones; validar proveedor, webhooks, autenticación y plantillas. Durante demo se asociarán a viajes sintéticos y datos replayados. |
+| **WhatsApp vía Zavu** | **P0: canal bidireccional** | Mensajes de conductores/operadores y notificaciones; validar proveedor, webhooks, autenticación y plantillas. Durante demo se asociarán a viajes sintéticos y datos replayados. |
 | **GPS / cartografía / clima / elevación** | **Opcional según disponibilidad** | Coordenadas en FEAD; altitud, temperatura y clima **no se presuponen presentes**. Incorporar fuente externa o no modelarlos; evitar inventar datos ambientales. |
 | **Samsara API** | **Integración futura** | Proveedor comercial sustituible vía `TelemetryProvider`, dependiente de credenciales/organización y permisos. |
 | **Global GPS Perú / gateway OBD-II/J1939** | **Integración futura** | Conectores y hardware a investigar, sin bloqueo para el MVP. “BDP” se conserva como nombre por aclarar, no como protocolo confirmado. |
@@ -186,7 +186,7 @@ Ejemplos:
 - “Estamos esperando para descargar”.
 - “El motor presenta una alerta y estamos estacionados”.
 
-Flujo: **WhatsApp → Sabu → webhook/adaptador → extracción de intención y entidades → asociación con viaje/vehículo → `human_report` + `operational_event` → reevaluación de alertas/predicción.**
+Flujo: **WhatsApp → Zavu → webhook/adaptador → extracción de intención y entidades → asociación con viaje/vehículo → `human_report` + `operational_event` → reevaluación de alertas/predicción.**
 
 Si la identificación del vehículo o viaje es ambigua, solicitar aclaración. Guardar mensaje original y extracción estructurada; los reportes humanos pueden estar incompletos o ser incorrectos.
 
@@ -219,7 +219,7 @@ flowchart TD
     TP --> I[Ingestion API / event pipeline]
     LG[Synthetic logistics: trips / loads / drivers] --> I
     G[Optional enrichment: GPS maps / climate] --> I
-    W[WhatsApp via Sabu] <--> WA[WhatsApp Adapter / Webhooks]
+    W[WhatsApp via Zavu] <--> WA[WhatsApp Adapter / Webhooks]
     WA --> I
     I --> H[(PostgreSQL + PostGIS Data Hub)]
     H --> E[Feature Engineering + Context Correlation]
@@ -246,7 +246,7 @@ flowchart TD
 - **Domain API:** consultas consolidadas y control de acceso; evita que el LLM ejecute SQL arbitrario.
 - **MCP server:** publica herramientas tipadas, seguras y de alcance limitado que llaman la Domain API.
 - **Agent/orchestrator:** interpreta preguntas, selecciona herramientas y redacta respuestas apoyadas en evidencia.
-- **WhatsApp adapter:** canal de entrada y salida a través de Sabu.
+- **WhatsApp adapter:** canal de entrada y salida a través de Zavu.
 - **Alert service:** reglas de disparo, severidad, deduplicación y entregas.
 
 ## 11. MCP server: herramientas iniciales
@@ -372,7 +372,7 @@ En MVP priorizar 2–3 herramientas reales: **`get_trip_status`, `get_fuel_analy
 - Nombre comercial del producto.
 - **“MVP server” vs “MCP server”**: se asume MCP por las tools; confirmar.
 - **“BDP” vs OBD-II / J1939**: identificar escáner exacto, protocolo y conectividad.
-- Alcance y documentación de **Sabu** para WhatsApp entrante/saliente.
+- Alcance y documentación de **Zavu** para WhatsApp entrante/saliente.
 - **Samsara** deja de ser bloqueo del MVP; acceso real y campos por vehículo quedan para expansión.
 - Descarga, esquema, tipos, unidades, licencia, cobertura GPS/combustible y calidad del **FEAD EMS dataset-2** (pendiente inspeccionar archivos).
 - Especificación concreta del **Telemetry Replay Service** (batching, reloj virtual, velocidad, transporte de eventos, límites y reanudación).
@@ -394,7 +394,7 @@ En MVP priorizar 2–3 herramientas reales: **`get_trip_status`, `get_fuel_analy
 ## 19. Registro de cambio arquitectónico (18-oct-2026)
 
 - **Sustituido:** Samsara API como fuente P0 → **FEAD / EMS dataset-2** + `Telemetry Replay Service`.
-- **Conservado:** foco en combustible, WhatsApp bidireccional con Sabu, alertas, Domain API, MCP, hub, agente y mantenimiento opcional.
+- **Conservado:** foco en combustible, WhatsApp bidireccional con Zavu, alertas, Domain API, MCP, hub, agente y mantenimiento opcional.
 - **Aclarado:** PostgreSQL + PostGIS es la base de partida para el MVP; Graph/RAG sigue como investigación para memoria contextual.
 - **Resguardos:** FEAD tiene mediciones históricas reales, mientras que datos de fletes, conductores y contratos para la demo serán sintéticos y se etiquetarán. Replay ≠ telemetría en vivo; mantenimiento/retrasos no están validados por FEAD.
 - **Meta:** demostración reproducible de extremo a extremo sin depender de APIs comerciales.
