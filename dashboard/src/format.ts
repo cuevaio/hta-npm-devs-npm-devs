@@ -26,3 +26,10 @@ export const STALE_MS = 5 * 60_000;
 export function isStale(horaEvento: string, horaReplay: string): boolean {
   return new Date(horaReplay).getTime() - new Date(horaEvento).getTime() > STALE_MS;
 }
+
+const SOLES = new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN", maximumFractionDigits: 0 });
+
+/** Monto en soles sin decimales; "–" si no se conoce aún (p. ej. un flete en curso). */
+export function pen(v: number | null | undefined): string {
+  return v == null ? "–" : SOLES.format(v);
+}
