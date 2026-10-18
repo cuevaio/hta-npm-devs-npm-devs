@@ -1,2 +1,7 @@
 # salida generada por tools/build-artifact.sh
 build/
+
+# python
+.venv/
+__pycache__/
+.pytest_cache/

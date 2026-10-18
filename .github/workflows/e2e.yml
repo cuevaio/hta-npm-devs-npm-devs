@@ -1,0 +1,38 @@
+name: e2e
+# Corre contra los despliegues públicos. Las URLs vienen de variables del
+# repositorio (Settings → Variables) o de los inputs al lanzarlo a mano; los
+# tests de una superficie sin URL se saltan.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: URL de la Domain API
+        required: false
+      dashboard_url:
+        description: URL del dashboard
+        required: false
+      landing_url:
+        description: URL de la landing
+        required: false
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: e2e
+    env:
+      E2E_API_URL: ${{ inputs.api_url || vars.E2E_API_URL }}
+      E2E_DASHBOARD_URL: ${{ inputs.dashboard_url || vars.E2E_DASHBOARD_URL }}
+      E2E_LANDING_URL: ${{ inputs.landing_url || vars.E2E_LANDING_URL }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
