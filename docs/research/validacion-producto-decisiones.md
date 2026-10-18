@@ -35,7 +35,7 @@ Registro de las decisiones tomadas en las sesiones de grilling (skill `grilling`
 | D19 | Repo | `backend/`, `data/` (Juan) · `mcp/`, `zavu/` (Joseph) · `web/` (Lian) · `e2e/` compartido · `CONTEXT.md` en la raíz. | 2026-10-18 |
 | D20 | Contrato | OpenAPI de FastAPI versionado en `backend/openapi.json`; tipos TS generados para `mcp/`, `zavu/`, `web/`. Primer ticket de Juan publica el contrato con datos de ejemplo. | 2026-10-18 |
 | D21 | Harness | pytest+httpx (backend, PostGIS en Docker), vitest + vitest-pool-workers (MCP), Playwright (web y e2e contra URL pública). Checks obligatorios en PR. Ticket 0. | 2026-10-18 |
-| D22 | Web stack | Vite + TS (framework a decidir por Lian en su grilling), MapLibre, Cloudflare Pages. | 2026-10-18 |
+| D22 | Web stack | Vite + TS (framework a decidir por Lian en su grilling), MapLibre, Cloudflare Pages. **Corregido por D34/D35: React y Vercel.** | 2026-10-18 |
 | D23 | Auth | `X-API-Key` en rutas de MCP, Zavu y control de replay; lecturas del dashboard públicas (datos anónimos). Secrets en Secret Manager / Worker / Zavu. | 2026-10-18 |
 | D24 | Infra GCP | La levanta Joseph (proyecto, Cloud SQL, Cloud Run, Secret Manager, Artifact Registry). | 2026-10-18 |
 | D25 | Perfil del piloto | **Transporte troncal interprovincial de larga distancia** con tractocamiones pesados en relevo 24/7, en corredores fijos (p. ej. Harbin–Guangzhou ~3 450 km). Fuente: `fead-perfil-piloto.md`. | 2026-10-18 |
@@ -46,6 +46,9 @@ Registro de las decisiones tomadas en las sesiones de grilling (skill `grilling`
 | D30 | Equipo y carpetas | Se suma Ismael (@Ismaelrojas0112) para la landing. `web/` pasa a ser la landing (Ismael) y el dashboard vive en `dashboard/` (Lian, @KevinPinto123). Corrige D4 y D19. | 2026-10-18 |
 | D31 | Tickets | 22 tickets publicados como sub-issues de la spec #4 (#5–#26), con dependencias nativas. Ver `docs/dev/mapa-dependencias.md`. | 2026-10-18 |
 | D32 | Implementación | Joseph implementa todos los tickets con el orquestador (Opus 5.5 planifica, implementadores Sonnet 5.5 ejecutan, hook de tests). Los 21 tickets abiertos quedan asignados a @JosephRobles23. | 2026-10-18 |
+| D33 | Grilling datos (#7) | Tramo = celda H3 res. 6 + sentido (ADR 0008); viaje entre paradas ≥ 3 h cerca de un terminal; consumo = integral de `x7001` / distancia GPS; línea base offline con los 28 camiones, días 1–12, mínimo 3 pasadas (ADR 0009); sobreconsumo ≥ 1,25 × mediana y > p90; anomalía = tramos seguidos con exceso ≥ 3 L; anti-spam 1 alerta/vehículo/60 min de hora del evento; migraciones SQL numeradas con psycopg; replay desde tabla fuente en Cloud SQL; 6 camiones (T03, T04, T07, T22, T28, T09); UTC en base, UTC+8 en pantalla. | 2026-10-18 |
+| D34 | Grilling dashboard (#8) | React + Vite (ADR 0010); una página (barra de replay, mapa, vehículos, alertas, detalle por viaje); polling 2 s; Recharts y MapLibre con CARTO dark-matter; `tokens.css` copiado de `web/`; API key de control pedida al presentador y guardada en `sessionStorage`; banner de replay y etiquetas de procedencia; desactualizado tras 5 min de replay. | 2026-10-18 |
+| D35 | Grilling landing (#9) y despliegue web | Titular "Sabe por qué tu flota gasta más combustible, antes de que cueste."; 6 secciones con el caso T07 como diferenciador; animación canvas "tramo vs pares" (se elimina si no entra en 1–2 h); solo español. **Landing y dashboard en Vercel** (ADR 0011), corrige D22. | 2026-10-18 |
 
 ## Preguntas abiertas
 
