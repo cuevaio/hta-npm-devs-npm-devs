@@ -5,3 +5,7 @@ build/
 .venv/
 __pycache__/
 .pytest_cache/
+
+# credenciales locales generadas por tools/wizard-gcp.sh
+.env
+.env.*

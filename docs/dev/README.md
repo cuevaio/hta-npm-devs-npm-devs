@@ -18,6 +18,8 @@ El producto que construimos está descrito en [`docs/product/PRODUCT_CONTEXT_FLE
 | Lian Pinto | @KevinPinto123 | lianpinto2416@gmail.com | Dashboard | `dashboard/` |
 | Ismael | @Ismaelrojas0112 | — | Landing page | `web/` |
 
+> Desde el 2026-10-18 Joseph implementa todos los tickets con el orquestador; la tabla indica el área original de cada persona.
+
 Regla de propiedad: **cada carpeta tiene un solo dueño** y nadie edita una carpeta ajena sin coordinarlo. `dashboard/` es de Lian y `web/` (landing) de Ismael. La ruta del webhook de reportes del conductor vive en `backend/` pero la implementa Joseph (#17), coordinando con Juan. El dashboard, el MCP y Zavu consumen el backend solo a través del contrato OpenAPI (#12).
 
 ## Flujo de trabajo: worktrees, sin PRs

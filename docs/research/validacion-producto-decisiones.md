@@ -45,6 +45,7 @@ Registro de las decisiones tomadas en las sesiones de grilling (skill `grilling`
 | D29 | Modelo de dominio | Viaje ≠ flete (1:1 en la demo); tramo ≈ 10 km por sentido; sobreconsumo → anomalía → alerta; parada ≥ 10 min; cuello de botella = tiempo perdido sin explicar; reporte en vivo = `human_reported`; roles: solo gestor de flota y conductor. Glosario en [`CONTEXT.md`](../../CONTEXT.md), ADRs 0001–0007 en [`docs/adr/`](../adr/). | 2026-10-18 |
 | D30 | Equipo y carpetas | Se suma Ismael (@Ismaelrojas0112) para la landing. `web/` pasa a ser la landing (Ismael) y el dashboard vive en `dashboard/` (Lian, @KevinPinto123). Corrige D4 y D19. | 2026-10-18 |
 | D31 | Tickets | 22 tickets publicados como sub-issues de la spec #4 (#5–#26), con dependencias nativas. Ver `docs/dev/mapa-dependencias.md`. | 2026-10-18 |
+| D32 | Implementación | Joseph implementa todos los tickets con el orquestador (Opus 5.5 planifica, implementadores Sonnet 5.5 ejecutan, hook de tests). Los 21 tickets abiertos quedan asignados a @JosephRobles23. | 2026-10-18 |
 
 ## Preguntas abiertas
 
