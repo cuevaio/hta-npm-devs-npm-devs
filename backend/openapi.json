@@ -1,0 +1,2601 @@
+{
+  "components": {
+    "schemas": {
+      "AlertList": {
+        "properties": {
+          "alertas": {
+            "items": {
+              "$ref": "#/components/schemas/Alerta"
+            },
+            "title": "Alertas",
+            "type": "array"
+          }
+        },
+        "required": [
+          "alertas"
+        ],
+        "title": "AlertList",
+        "type": "object"
+      },
+      "Alerta": {
+        "properties": {
+          "anomalia": {
+            "$ref": "#/components/schemas/Anomalia"
+          },
+          "enviada_en": {
+            "description": "Hora del evento en que se envió al gestor de flota",
+            "format": "date-time",
+            "title": "Enviada En",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "mensaje": {
+            "title": "Mensaje",
+            "type": "string"
+          },
+          "reporte_conductor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReporteConductor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "anomalia",
+          "enviada_en",
+          "mensaje"
+        ],
+        "title": "Alerta",
+        "type": "object"
+      },
+      "Anomalia": {
+        "properties": {
+          "detectada_en": {
+            "format": "date-time",
+            "title": "Detectada En",
+            "type": "string"
+          },
+          "evidencia": {
+            "title": "Evidencia",
+            "type": "string"
+          },
+          "exceso_l": {
+            "title": "Exceso L",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "tramos": {
+            "description": "Tramos seguidos con sobreconsumo",
+            "items": {
+              "$ref": "#/components/schemas/Tramo"
+            },
+            "title": "Tramos",
+            "type": "array"
+          },
+          "vehiculo_alias": {
+            "title": "Vehiculo Alias",
+            "type": "string"
+          },
+          "viaje_id": {
+            "title": "Viaje Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "viaje_id",
+          "vehiculo_alias",
+          "tramos",
+          "exceso_l",
+          "evidencia",
+          "detectada_en"
+        ],
+        "title": "Anomalia",
+        "type": "object"
+      },
+      "Bottlenecks": {
+        "properties": {
+          "cuellos_de_botella": {
+            "items": {
+              "$ref": "#/components/schemas/CuelloDeBotella"
+            },
+            "title": "Cuellos De Botella",
+            "type": "array"
+          },
+          "tiempo_perdido_min": {
+            "title": "Tiempo Perdido Min",
+            "type": "number"
+          },
+          "viaje_id": {
+            "title": "Viaje Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "viaje_id",
+          "tiempo_perdido_min",
+          "cuellos_de_botella"
+        ],
+        "title": "Bottlenecks",
+        "type": "object"
+      },
+      "ControlReplayRequest": {
+        "properties": {
+          "action": {
+            "enum": [
+              "play",
+              "pause",
+              "seek",
+              "set_speed"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "speed": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Requerido con set_speed",
+            "title": "Speed"
+          },
+          "to_event_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Requerido con seek (hora del evento, UTC)",
+            "title": "To Event Time"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "ControlReplayRequest",
+        "type": "object"
+      },
+      "CuelloDeBotella": {
+        "properties": {
+          "duracion_min": {
+            "title": "Duracion Min",
+            "type": "number"
+          },
+          "explicada": {
+            "description": "Una parada explicada por el conductor sigue visible",
+            "title": "Explicada",
+            "type": "boolean"
+          },
+          "fin": {
+            "format": "date-time",
+            "title": "Fin",
+            "type": "string"
+          },
+          "impacto_min": {
+            "description": "Tiempo perdido; ordena la lista de mayor a menor",
+            "title": "Impacto Min",
+            "type": "number"
+          },
+          "inicio": {
+            "format": "date-time",
+            "title": "Inicio",
+            "type": "string"
+          },
+          "posicion": {
+            "$ref": "#/components/schemas/Posicion"
+          },
+          "reporte_conductor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReporteConductor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tipo": {
+            "enum": [
+              "parada_sin_explicar",
+              "ralenti_prolongado",
+              "parada_explicada"
+            ],
+            "title": "Tipo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tipo",
+          "inicio",
+          "fin",
+          "duracion_min",
+          "impacto_min",
+          "explicada",
+          "posicion"
+        ],
+        "title": "CuelloDeBotella",
+        "type": "object"
+      },
+      "Envelope_AlertList_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AlertList"
+          },
+          "is_replay": {
+            "description": "Siempre true en la demo: los datos son un replay, nunca tiempo real",
+            "title": "Is Replay",
+            "type": "boolean"
+          },
+          "provenance": {
+            "description": "Procedencia de los datos de la respuesta",
+            "items": {
+              "$ref": "#/components/schemas/Provenance"
+            },
+            "minItems": 1,
+            "title": "Provenance",
+            "type": "array"
+          },
+          "time_range": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "updated_at": {
+            "description": "Hora de última actualización (UTC)",
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "provenance",
+          "time_range",
+          "updated_at",
+          "is_replay"
+        ],
+        "title": "Envelope[AlertList]",
+        "type": "object"
+      },
+      "Envelope_Bottlenecks_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Bottlenecks"
+          },
+          "is_replay": {
+            "description": "Siempre true en la demo: los datos son un replay, nunca tiempo real",
+            "title": "Is Replay",
+            "type": "boolean"
+          },
+          "provenance": {
+            "description": "Procedencia de los datos de la respuesta",
+            "items": {
+              "$ref": "#/components/schemas/Provenance"
+            },
+            "minItems": 1,
+            "title": "Provenance",
+            "type": "array"
+          },
+          "time_range": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "updated_at": {
+            "description": "Hora de última actualización (UTC)",
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "provenance",
+          "time_range",
+          "updated_at",
+          "is_replay"
+        ],
+        "title": "Envelope[Bottlenecks]",
+        "type": "object"
+      },
+      "Envelope_FleetOverview_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/FleetOverview"
+          },
+          "is_replay": {
+            "description": "Siempre true en la demo: los datos son un replay, nunca tiempo real",
+            "title": "Is Replay",
+            "type": "boolean"
+          },
+          "provenance": {
+            "description": "Procedencia de los datos de la respuesta",
+            "items": {
+              "$ref": "#/components/schemas/Provenance"
+            },
+            "minItems": 1,
+            "title": "Provenance",
+            "type": "array"
+          },
+          "time_range": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "updated_at": {
+            "description": "Hora de última actualización (UTC)",
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "provenance",
+          "time_range",
+          "updated_at",
+          "is_replay"
+        ],
+        "title": "Envelope[FleetOverview]",
+        "type": "object"
+      },
+      "Envelope_FuelAnalysis_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/FuelAnalysis"
+          },
+          "is_replay": {
+            "description": "Siempre true en la demo: los datos son un replay, nunca tiempo real",
+            "title": "Is Replay",
+            "type": "boolean"
+          },
+          "provenance": {
+            "description": "Procedencia de los datos de la respuesta",
+            "items": {
+              "$ref": "#/components/schemas/Provenance"
+            },
+            "minItems": 1,
+            "title": "Provenance",
+            "type": "array"
+          },
+          "time_range": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "updated_at": {
+            "description": "Hora de última actualización (UTC)",
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "provenance",
+          "time_range",
+          "updated_at",
+          "is_replay"
+        ],
+        "title": "Envelope[FuelAnalysis]",
+        "type": "object"
+      },
+      "Envelope_ReplayState_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ReplayState"
+          },
+          "is_replay": {
+            "description": "Siempre true en la demo: los datos son un replay, nunca tiempo real",
+            "title": "Is Replay",
+            "type": "boolean"
+          },
+          "provenance": {
+            "description": "Procedencia de los datos de la respuesta",
+            "items": {
+              "$ref": "#/components/schemas/Provenance"
+            },
+            "minItems": 1,
+            "title": "Provenance",
+            "type": "array"
+          },
+          "time_range": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "updated_at": {
+            "description": "Hora de última actualización (UTC)",
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "provenance",
+          "time_range",
+          "updated_at",
+          "is_replay"
+        ],
+        "title": "Envelope[ReplayState]",
+        "type": "object"
+      },
+      "Envelope_TripStatus_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TripStatus"
+          },
+          "is_replay": {
+            "description": "Siempre true en la demo: los datos son un replay, nunca tiempo real",
+            "title": "Is Replay",
+            "type": "boolean"
+          },
+          "provenance": {
+            "description": "Procedencia de los datos de la respuesta",
+            "items": {
+              "$ref": "#/components/schemas/Provenance"
+            },
+            "minItems": 1,
+            "title": "Provenance",
+            "type": "array"
+          },
+          "time_range": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "updated_at": {
+            "description": "Hora de última actualización (UTC)",
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "provenance",
+          "time_range",
+          "updated_at",
+          "is_replay"
+        ],
+        "title": "Envelope[TripStatus]",
+        "type": "object"
+      },
+      "Envelope_VehicleStatus_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/VehicleStatus"
+          },
+          "is_replay": {
+            "description": "Siempre true en la demo: los datos son un replay, nunca tiempo real",
+            "title": "Is Replay",
+            "type": "boolean"
+          },
+          "provenance": {
+            "description": "Procedencia de los datos de la respuesta",
+            "items": {
+              "$ref": "#/components/schemas/Provenance"
+            },
+            "minItems": 1,
+            "title": "Provenance",
+            "type": "array"
+          },
+          "time_range": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "updated_at": {
+            "description": "Hora de última actualización (UTC)",
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "provenance",
+          "time_range",
+          "updated_at",
+          "is_replay"
+        ],
+        "title": "Envelope[VehicleStatus]",
+        "type": "object"
+      },
+      "ErrorBody": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorBody",
+        "type": "object"
+      },
+      "FleetOverview": {
+        "properties": {
+          "alertas_abiertas": {
+            "title": "Alertas Abiertas",
+            "type": "integer"
+          },
+          "total_vehiculos": {
+            "title": "Total Vehiculos",
+            "type": "integer"
+          },
+          "vehiculos": {
+            "items": {
+              "$ref": "#/components/schemas/VehiculoResumen"
+            },
+            "title": "Vehiculos",
+            "type": "array"
+          },
+          "viajes_en_curso": {
+            "title": "Viajes En Curso",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_vehiculos",
+          "viajes_en_curso",
+          "alertas_abiertas",
+          "vehiculos"
+        ],
+        "title": "FleetOverview",
+        "type": "object"
+      },
+      "Flete": {
+        "properties": {
+          "carga": {
+            "title": "Carga",
+            "type": "string"
+          },
+          "cliente": {
+            "title": "Cliente",
+            "type": "string"
+          },
+          "destino": {
+            "title": "Destino",
+            "type": "string"
+          },
+          "id": {
+            "description": "Identificador sintético, p. ej. F-101",
+            "title": "Id",
+            "type": "string"
+          },
+          "origen": {
+            "title": "Origen",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "carga",
+          "cliente",
+          "origen",
+          "destino"
+        ],
+        "title": "Flete",
+        "type": "object"
+      },
+      "FuelAnalysis": {
+        "properties": {
+          "anomalias": {
+            "items": {
+              "$ref": "#/components/schemas/Anomalia"
+            },
+            "title": "Anomalias",
+            "type": "array"
+          },
+          "consumo_l_100km": {
+            "title": "Consumo L 100Km",
+            "type": "number"
+          },
+          "consumo_observado_l": {
+            "title": "Consumo Observado L",
+            "type": "number"
+          },
+          "distancia_km": {
+            "title": "Distancia Km",
+            "type": "number"
+          },
+          "exceso_total_l": {
+            "title": "Exceso Total L",
+            "type": "number"
+          },
+          "pasadas": {
+            "items": {
+              "$ref": "#/components/schemas/Pasada"
+            },
+            "title": "Pasadas",
+            "type": "array"
+          },
+          "viaje_id": {
+            "title": "Viaje Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "viaje_id",
+          "distancia_km",
+          "consumo_observado_l",
+          "consumo_l_100km",
+          "exceso_total_l",
+          "pasadas",
+          "anomalias"
+        ],
+        "title": "FuelAnalysis",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "LineaBase": {
+        "description": "Consumo esperado de un tramo según sus pares (ADR 0002, 0009).",
+        "properties": {
+          "mediana_l": {
+            "title": "Mediana L",
+            "type": "number"
+          },
+          "n_pasadas": {
+            "description": "Pasadas de pares con las que se calculó",
+            "title": "N Pasadas",
+            "type": "integer"
+          },
+          "p90_l": {
+            "title": "P90 L",
+            "type": "number"
+          }
+        },
+        "required": [
+          "mediana_l",
+          "p90_l",
+          "n_pasadas"
+        ],
+        "title": "LineaBase",
+        "type": "object"
+      },
+      "Pasada": {
+        "properties": {
+          "consumo_observado_l": {
+            "title": "Consumo Observado L",
+            "type": "number"
+          },
+          "exceso_l": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Litros sobre la mediana; nulo sin línea base",
+            "title": "Exceso L"
+          },
+          "linea_base": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LineaBase"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nula si el tramo no tiene suficientes pasadas"
+          },
+          "ralenti_min": {
+            "title": "Ralenti Min",
+            "type": "number"
+          },
+          "sobreconsumo": {
+            "title": "Sobreconsumo",
+            "type": "boolean"
+          },
+          "tramo": {
+            "$ref": "#/components/schemas/Tramo"
+          }
+        },
+        "required": [
+          "tramo",
+          "consumo_observado_l",
+          "sobreconsumo",
+          "ralenti_min"
+        ],
+        "title": "Pasada",
+        "type": "object"
+      },
+      "Posicion": {
+        "properties": {
+          "lat": {
+            "title": "Lat",
+            "type": "number"
+          },
+          "lon": {
+            "title": "Lon",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "title": "Posicion",
+        "type": "object"
+      },
+      "Provenance": {
+        "description": "Procedencia de un dato (CONTEXT.md).",
+        "enum": [
+          "fead_observed",
+          "synthetic_demo",
+          "human_reported",
+          "external_enrichment",
+          "model_inferred"
+        ],
+        "title": "Provenance",
+        "type": "string"
+      },
+      "ReplayState": {
+        "properties": {
+          "estado": {
+            "enum": [
+              "playing",
+              "paused"
+            ],
+            "title": "Estado",
+            "type": "string"
+          },
+          "fin": {
+            "format": "date-time",
+            "title": "Fin",
+            "type": "string"
+          },
+          "hora_replay": {
+            "description": "Posición actual del replay, en hora del evento (UTC)",
+            "format": "date-time",
+            "title": "Hora Replay",
+            "type": "string"
+          },
+          "inicio": {
+            "format": "date-time",
+            "title": "Inicio",
+            "type": "string"
+          },
+          "velocidad": {
+            "description": "Multiplicador de velocidad del replay",
+            "exclusiveMinimum": 0.0,
+            "title": "Velocidad",
+            "type": "number"
+          }
+        },
+        "required": [
+          "estado",
+          "velocidad",
+          "hora_replay",
+          "inicio",
+          "fin"
+        ],
+        "title": "ReplayState",
+        "type": "object"
+      },
+      "ReporteConductor": {
+        "description": "Mensaje de WhatsApp de un conductor, con su texto original.",
+        "properties": {
+          "procedencia": {
+            "$ref": "#/components/schemas/Provenance",
+            "default": "human_reported"
+          },
+          "recibido_en": {
+            "description": "Hora de ingesta del reporte (UTC)",
+            "format": "date-time",
+            "title": "Recibido En",
+            "type": "string"
+          },
+          "texto": {
+            "title": "Texto",
+            "type": "string"
+          }
+        },
+        "required": [
+          "texto",
+          "recibido_en"
+        ],
+        "title": "ReporteConductor",
+        "type": "object"
+      },
+      "TimeRange": {
+        "description": "Rango de tiempo de los datos, en hora del evento (UTC).",
+        "properties": {
+          "from": {
+            "description": "Inicio (hora del evento, UTC)",
+            "format": "date-time",
+            "title": "From",
+            "type": "string"
+          },
+          "to": {
+            "description": "Fin (hora del evento, UTC)",
+            "format": "date-time",
+            "title": "To",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "Tramo": {
+        "description": "Celda H3 de resolución 6 recorrida en un sentido (ADR 0008).",
+        "properties": {
+          "h3": {
+            "title": "H3",
+            "type": "string"
+          },
+          "sentido": {
+            "enum": [
+              "ida",
+              "vuelta"
+            ],
+            "title": "Sentido",
+            "type": "string"
+          }
+        },
+        "required": [
+          "h3",
+          "sentido"
+        ],
+        "title": "Tramo",
+        "type": "object"
+      },
+      "TripStatus": {
+        "properties": {
+          "conductor": {
+            "title": "Conductor",
+            "type": "string"
+          },
+          "corredor": {
+            "title": "Corredor",
+            "type": "string"
+          },
+          "distancia_km": {
+            "title": "Distancia Km",
+            "type": "number"
+          },
+          "estado": {
+            "enum": [
+              "en_curso",
+              "finalizado"
+            ],
+            "title": "Estado",
+            "type": "string"
+          },
+          "fin": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fin"
+          },
+          "flete": {
+            "$ref": "#/components/schemas/Flete"
+          },
+          "inicio": {
+            "format": "date-time",
+            "title": "Inicio",
+            "type": "string"
+          },
+          "progreso_pct": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Progreso Pct",
+            "type": "number"
+          },
+          "sentido": {
+            "enum": [
+              "ida",
+              "vuelta"
+            ],
+            "title": "Sentido",
+            "type": "string"
+          },
+          "vehiculo_alias": {
+            "title": "Vehiculo Alias",
+            "type": "string"
+          },
+          "viaje_id": {
+            "title": "Viaje Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "viaje_id",
+          "vehiculo_alias",
+          "conductor",
+          "flete",
+          "corredor",
+          "sentido",
+          "estado",
+          "inicio",
+          "distancia_km",
+          "progreso_pct"
+        ],
+        "title": "TripStatus",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VehicleStatus": {
+        "properties": {
+          "alias": {
+            "description": "Alias anónimo del vehículo, T01…T28",
+            "title": "Alias",
+            "type": "string"
+          },
+          "conductor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nombre sintético del conductor",
+            "title": "Conductor"
+          },
+          "corredor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corredor"
+          },
+          "estado": {
+            "enum": [
+              "en_viaje",
+              "detenido",
+              "ralenti"
+            ],
+            "title": "Estado",
+            "type": "string"
+          },
+          "hora_evento": {
+            "description": "Hora del evento de la última lectura (UTC)",
+            "format": "date-time",
+            "title": "Hora Evento",
+            "type": "string"
+          },
+          "posicion": {
+            "$ref": "#/components/schemas/Posicion"
+          },
+          "sentido": {
+            "anyOf": [
+              {
+                "enum": [
+                  "ida",
+                  "vuelta"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sentido"
+          },
+          "ultima_alerta_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultima Alerta Id"
+          },
+          "velocidad_kmh": {
+            "title": "Velocidad Kmh",
+            "type": "number"
+          },
+          "viaje_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viaje Id"
+          }
+        },
+        "required": [
+          "alias",
+          "estado",
+          "velocidad_kmh",
+          "posicion",
+          "hora_evento"
+        ],
+        "title": "VehicleStatus",
+        "type": "object"
+      },
+      "VehiculoResumen": {
+        "properties": {
+          "alias": {
+            "description": "Alias anónimo del vehículo, T01…T28",
+            "title": "Alias",
+            "type": "string"
+          },
+          "estado": {
+            "enum": [
+              "en_viaje",
+              "detenido",
+              "ralenti"
+            ],
+            "title": "Estado",
+            "type": "string"
+          },
+          "hora_evento": {
+            "description": "Hora del evento de la última lectura (UTC)",
+            "format": "date-time",
+            "title": "Hora Evento",
+            "type": "string"
+          },
+          "posicion": {
+            "$ref": "#/components/schemas/Posicion"
+          },
+          "velocidad_kmh": {
+            "title": "Velocidad Kmh",
+            "type": "number"
+          },
+          "viaje_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viaje Id"
+          }
+        },
+        "required": [
+          "alias",
+          "estado",
+          "velocidad_kmh",
+          "posicion",
+          "hora_evento"
+        ],
+        "title": "VehiculoResumen",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "description": "Clave de la Domain API (variable API_KEY)",
+        "in": "header",
+        "name": "X-API-Key",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "description": "Contrato de la Domain API con datos de ejemplo. Toda respuesta va en un sobre con procedencia, rango de tiempo (hora del evento, UTC) y hora de última actualización. Las rutas `/v1/tools/*` (MCP, Zavu y control del replay) exigen `X-API-Key`; las lecturas `/v1/*` del dashboard son públicas.",
+    "title": "Fleet Intelligence · Domain API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/alerts": {
+      "get": {
+        "operationId": "read_alerts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "alertas": [
+                      {
+                        "anomalia": {
+                          "detectada_en": "2020-04-14T02:55:00Z",
+                          "evidencia": "Dos tramos seguidos con consumo >= 1,25 x mediana de sus pares y sobre el p90; ralentí de 21 min en el segundo.",
+                          "exceso_l": 9.4,
+                          "id": "A-001",
+                          "tramos": [
+                            {
+                              "h3": "86309a0efffffff",
+                              "sentido": "ida"
+                            },
+                            {
+                              "h3": "86309a0c7ffffff",
+                              "sentido": "ida"
+                            }
+                          ],
+                          "vehiculo_alias": "T03",
+                          "viaje_id": "V-001"
+                        },
+                        "enviada_en": "2020-04-14T03:00:00Z",
+                        "id": "AL-001",
+                        "mensaje": "T03 gasta 9,4 L más que sus pares en dos tramos seguidos del viaje V-001.",
+                        "reporte_conductor": {
+                          "procedencia": "human_reported",
+                          "recibido_en": "2020-04-14T02:40:00Z",
+                          "texto": "Hay obras en el paso de Nanling, estamos parados hace media hora"
+                        }
+                      }
+                    ]
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred",
+                    "human_reported"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-14T00:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_AlertList_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Alertas enviadas al gestor de flota",
+        "tags": [
+          "dashboard (público)"
+        ]
+      }
+    },
+    "/v1/fleet": {
+      "get": {
+        "operationId": "read_fleet",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "alertas_abiertas": 1,
+                    "total_vehiculos": 6,
+                    "vehiculos": [
+                      {
+                        "alias": "T03",
+                        "estado": "en_viaje",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 28.19,
+                          "lon": 113.02
+                        },
+                        "velocidad_kmh": 72.5,
+                        "viaje_id": "V-001"
+                      },
+                      {
+                        "alias": "T07",
+                        "estado": "en_viaje",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 30.57,
+                          "lon": 114.3
+                        },
+                        "velocidad_kmh": 64.0,
+                        "viaje_id": "V-002"
+                      },
+                      {
+                        "alias": "T28",
+                        "estado": "detenido",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 45.75,
+                          "lon": 126.63
+                        },
+                        "velocidad_kmh": 0.0
+                      },
+                      {
+                        "alias": "T04",
+                        "estado": "ralenti",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 34.75,
+                          "lon": 113.62
+                        },
+                        "velocidad_kmh": 0.0
+                      },
+                      {
+                        "alias": "T22",
+                        "estado": "detenido",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 23.13,
+                          "lon": 113.26
+                        },
+                        "velocidad_kmh": 0.0
+                      },
+                      {
+                        "alias": "T09",
+                        "estado": "detenido",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 45.8,
+                          "lon": 126.53
+                        },
+                        "velocidad_kmh": 0.0
+                      }
+                    ],
+                    "viajes_en_curso": 2
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-14T00:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_FleetOverview_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Vista general de la flota",
+        "tags": [
+          "dashboard (público)"
+        ]
+      }
+    },
+    "/v1/replay": {
+      "get": {
+        "operationId": "read_replay",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "estado": "paused",
+                    "fin": "2020-04-19T23:59:00Z",
+                    "hora_replay": "2020-04-13T00:00:00Z",
+                    "inicio": "2020-04-13T00:00:00Z",
+                    "velocidad": 1.0
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-13T00:00:00Z",
+                    "to": "2020-04-19T23:59:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ReplayState_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Estado del replay",
+        "tags": [
+          "dashboard (público)"
+        ]
+      }
+    },
+    "/v1/tools/control_replay": {
+      "post": {
+        "operationId": "control_replay",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ControlReplayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "estado": "paused",
+                    "fin": "2020-04-19T23:59:00Z",
+                    "hora_replay": "2020-04-13T00:00:00Z",
+                    "inicio": "2020-04-13T00:00:00Z",
+                    "velocidad": 1.0
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-13T00:00:00Z",
+                    "to": "2020-04-19T23:59:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ReplayState_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "X-API-Key ausente o incorrecta"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "API_KEY no configurada en el servidor"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Tool control_replay (escritura)",
+        "tags": [
+          "tools (X-API-Key)"
+        ]
+      }
+    },
+    "/v1/tools/get_alerts": {
+      "get": {
+        "operationId": "get_alerts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "alertas": [
+                      {
+                        "anomalia": {
+                          "detectada_en": "2020-04-14T02:55:00Z",
+                          "evidencia": "Dos tramos seguidos con consumo >= 1,25 x mediana de sus pares y sobre el p90; ralentí de 21 min en el segundo.",
+                          "exceso_l": 9.4,
+                          "id": "A-001",
+                          "tramos": [
+                            {
+                              "h3": "86309a0efffffff",
+                              "sentido": "ida"
+                            },
+                            {
+                              "h3": "86309a0c7ffffff",
+                              "sentido": "ida"
+                            }
+                          ],
+                          "vehiculo_alias": "T03",
+                          "viaje_id": "V-001"
+                        },
+                        "enviada_en": "2020-04-14T03:00:00Z",
+                        "id": "AL-001",
+                        "mensaje": "T03 gasta 9,4 L más que sus pares en dos tramos seguidos del viaje V-001.",
+                        "reporte_conductor": {
+                          "procedencia": "human_reported",
+                          "recibido_en": "2020-04-14T02:40:00Z",
+                          "texto": "Hay obras en el paso de Nanling, estamos parados hace media hora"
+                        }
+                      }
+                    ]
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred",
+                    "human_reported"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-14T00:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_AlertList_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "X-API-Key ausente o incorrecta"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "API_KEY no configurada en el servidor"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Tool get_alerts",
+        "tags": [
+          "tools (X-API-Key)"
+        ]
+      }
+    },
+    "/v1/tools/get_fleet_overview": {
+      "get": {
+        "operationId": "get_fleet_overview",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "alertas_abiertas": 1,
+                    "total_vehiculos": 6,
+                    "vehiculos": [
+                      {
+                        "alias": "T03",
+                        "estado": "en_viaje",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 28.19,
+                          "lon": 113.02
+                        },
+                        "velocidad_kmh": 72.5,
+                        "viaje_id": "V-001"
+                      },
+                      {
+                        "alias": "T07",
+                        "estado": "en_viaje",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 30.57,
+                          "lon": 114.3
+                        },
+                        "velocidad_kmh": 64.0,
+                        "viaje_id": "V-002"
+                      },
+                      {
+                        "alias": "T28",
+                        "estado": "detenido",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 45.75,
+                          "lon": 126.63
+                        },
+                        "velocidad_kmh": 0.0
+                      },
+                      {
+                        "alias": "T04",
+                        "estado": "ralenti",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 34.75,
+                          "lon": 113.62
+                        },
+                        "velocidad_kmh": 0.0
+                      },
+                      {
+                        "alias": "T22",
+                        "estado": "detenido",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 23.13,
+                          "lon": 113.26
+                        },
+                        "velocidad_kmh": 0.0
+                      },
+                      {
+                        "alias": "T09",
+                        "estado": "detenido",
+                        "hora_evento": "2020-04-14T03:30:00Z",
+                        "posicion": {
+                          "lat": 45.8,
+                          "lon": 126.53
+                        },
+                        "velocidad_kmh": 0.0
+                      }
+                    ],
+                    "viajes_en_curso": 2
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-14T00:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_FleetOverview_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "X-API-Key ausente o incorrecta"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "API_KEY no configurada en el servidor"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Tool get_fleet_overview",
+        "tags": [
+          "tools (X-API-Key)"
+        ]
+      }
+    },
+    "/v1/tools/get_fuel_analysis": {
+      "get": {
+        "operationId": "get_fuel_analysis",
+        "parameters": [
+          {
+            "description": "Identificador del viaje, p. ej. V-001",
+            "in": "query",
+            "name": "trip_id",
+            "required": true,
+            "schema": {
+              "description": "Identificador del viaje, p. ej. V-001",
+              "title": "Trip Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "anomalias": [
+                      {
+                        "detectada_en": "2020-04-14T02:55:00Z",
+                        "evidencia": "Dos tramos seguidos con consumo >= 1,25 x mediana de sus pares y sobre el p90; ralentí de 21 min en el segundo.",
+                        "exceso_l": 9.4,
+                        "id": "A-001",
+                        "tramos": [
+                          {
+                            "h3": "86309a0efffffff",
+                            "sentido": "ida"
+                          },
+                          {
+                            "h3": "86309a0c7ffffff",
+                            "sentido": "ida"
+                          }
+                        ],
+                        "vehiculo_alias": "T03",
+                        "viaje_id": "V-001"
+                      }
+                    ],
+                    "consumo_l_100km": 33.3,
+                    "consumo_observado_l": 612.3,
+                    "distancia_km": 1840.5,
+                    "exceso_total_l": 9.4,
+                    "pasadas": [
+                      {
+                        "consumo_observado_l": 5.1,
+                        "exceso_l": 0.1,
+                        "linea_base": {
+                          "mediana_l": 5.0,
+                          "n_pasadas": 14,
+                          "p90_l": 5.9
+                        },
+                        "ralenti_min": 0.0,
+                        "sobreconsumo": false,
+                        "tramo": {
+                          "h3": "86309a0f7ffffff",
+                          "sentido": "ida"
+                        }
+                      },
+                      {
+                        "consumo_observado_l": 11.8,
+                        "exceso_l": 5.7,
+                        "linea_base": {
+                          "mediana_l": 6.1,
+                          "n_pasadas": 12,
+                          "p90_l": 7.0
+                        },
+                        "ralenti_min": 4.0,
+                        "sobreconsumo": true,
+                        "tramo": {
+                          "h3": "86309a0efffffff",
+                          "sentido": "ida"
+                        }
+                      },
+                      {
+                        "consumo_observado_l": 9.9,
+                        "exceso_l": 2.9,
+                        "linea_base": {
+                          "mediana_l": 7.0,
+                          "n_pasadas": 11,
+                          "p90_l": 8.1
+                        },
+                        "ralenti_min": 21.0,
+                        "sobreconsumo": true,
+                        "tramo": {
+                          "h3": "86309a0c7ffffff",
+                          "sentido": "ida"
+                        }
+                      },
+                      {
+                        "consumo_observado_l": 6.3,
+                        "ralenti_min": 0.0,
+                        "sobreconsumo": false,
+                        "tramo": {
+                          "h3": "86309a0dfffffff",
+                          "sentido": "ida"
+                        }
+                      }
+                    ],
+                    "viaje_id": "V-001"
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-13T18:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_FuelAnalysis_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "X-API-Key ausente o incorrecta"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Alias o viaje desconocido"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "API_KEY no configurada en el servidor"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Tool get_fuel_analysis (desglose por tramo y sentido)",
+        "tags": [
+          "tools (X-API-Key)"
+        ]
+      }
+    },
+    "/v1/tools/get_operational_bottlenecks": {
+      "get": {
+        "operationId": "get_operational_bottlenecks",
+        "parameters": [
+          {
+            "description": "Identificador del viaje, p. ej. V-001",
+            "in": "query",
+            "name": "trip_id",
+            "required": true,
+            "schema": {
+              "description": "Identificador del viaje, p. ej. V-001",
+              "title": "Trip Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "cuellos_de_botella": [
+                      {
+                        "duracion_min": 42.0,
+                        "explicada": false,
+                        "fin": "2020-04-14T01:52:00Z",
+                        "impacto_min": 42.0,
+                        "inicio": "2020-04-14T01:10:00Z",
+                        "posicion": {
+                          "lat": 28.0,
+                          "lon": 113.1
+                        },
+                        "tipo": "parada_sin_explicar"
+                      },
+                      {
+                        "duracion_min": 21.0,
+                        "explicada": true,
+                        "fin": "2020-04-14T02:41:00Z",
+                        "impacto_min": 20.0,
+                        "inicio": "2020-04-14T02:20:00Z",
+                        "posicion": {
+                          "lat": 28.19,
+                          "lon": 113.02
+                        },
+                        "reporte_conductor": {
+                          "procedencia": "human_reported",
+                          "recibido_en": "2020-04-14T02:40:00Z",
+                          "texto": "Hay obras en el paso de Nanling, estamos parados hace media hora"
+                        },
+                        "tipo": "ralenti_prolongado"
+                      }
+                    ],
+                    "tiempo_perdido_min": 62.0,
+                    "viaje_id": "V-001"
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred",
+                    "human_reported"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-13T18:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_Bottlenecks_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "X-API-Key ausente o incorrecta"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Alias o viaje desconocido"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "API_KEY no configurada en el servidor"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Tool get_operational_bottlenecks",
+        "tags": [
+          "tools (X-API-Key)"
+        ]
+      }
+    },
+    "/v1/tools/get_trip_status": {
+      "get": {
+        "operationId": "get_trip_status",
+        "parameters": [
+          {
+            "description": "Identificador del viaje, p. ej. V-001",
+            "in": "query",
+            "name": "trip_id",
+            "required": true,
+            "schema": {
+              "description": "Identificador del viaje, p. ej. V-001",
+              "title": "Trip Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "conductor": "Wang Lei (sintético)",
+                    "corredor": "Harbin-Guangzhou",
+                    "distancia_km": 1840.5,
+                    "estado": "en_curso",
+                    "flete": {
+                      "carga": "Autopartes",
+                      "cliente": "Cliente Demo S.A.",
+                      "destino": "Guangzhou",
+                      "id": "F-101",
+                      "origen": "Harbin"
+                    },
+                    "inicio": "2020-04-13T18:00:00Z",
+                    "progreso_pct": 53.2,
+                    "sentido": "ida",
+                    "vehiculo_alias": "T03",
+                    "viaje_id": "V-001"
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-13T18:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_TripStatus_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "X-API-Key ausente o incorrecta"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Alias o viaje desconocido"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "API_KEY no configurada en el servidor"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Tool get_trip_status",
+        "tags": [
+          "tools (X-API-Key)"
+        ]
+      }
+    },
+    "/v1/tools/get_vehicle_status": {
+      "get": {
+        "operationId": "get_vehicle_status",
+        "parameters": [
+          {
+            "description": "Alias del vehículo, p. ej. T03",
+            "in": "query",
+            "name": "alias",
+            "required": true,
+            "schema": {
+              "description": "Alias del vehículo, p. ej. T03",
+              "title": "Alias",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "alias": "T03",
+                    "conductor": "Wang Lei (sintético)",
+                    "corredor": "Harbin-Guangzhou",
+                    "estado": "en_viaje",
+                    "hora_evento": "2020-04-14T03:30:00Z",
+                    "posicion": {
+                      "lat": 28.19,
+                      "lon": 113.02
+                    },
+                    "sentido": "ida",
+                    "ultima_alerta_id": "AL-001",
+                    "velocidad_kmh": 72.5,
+                    "viaje_id": "V-001"
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-14T00:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_VehicleStatus_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "X-API-Key ausente o incorrecta"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Alias o viaje desconocido"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "API_KEY no configurada en el servidor"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Tool get_vehicle_status",
+        "tags": [
+          "tools (X-API-Key)"
+        ]
+      }
+    },
+    "/v1/trips/{trip_id}": {
+      "get": {
+        "operationId": "read_trip",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "trip_id",
+            "required": true,
+            "schema": {
+              "title": "Trip Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "conductor": "Wang Lei (sintético)",
+                    "corredor": "Harbin-Guangzhou",
+                    "distancia_km": 1840.5,
+                    "estado": "en_curso",
+                    "flete": {
+                      "carga": "Autopartes",
+                      "cliente": "Cliente Demo S.A.",
+                      "destino": "Guangzhou",
+                      "id": "F-101",
+                      "origen": "Harbin"
+                    },
+                    "inicio": "2020-04-13T18:00:00Z",
+                    "progreso_pct": 53.2,
+                    "sentido": "ida",
+                    "vehiculo_alias": "T03",
+                    "viaje_id": "V-001"
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-13T18:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_TripStatus_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Alias o viaje desconocido"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Estado de un viaje",
+        "tags": [
+          "dashboard (público)"
+        ]
+      }
+    },
+    "/v1/trips/{trip_id}/bottlenecks": {
+      "get": {
+        "operationId": "read_trip_bottlenecks",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "trip_id",
+            "required": true,
+            "schema": {
+              "title": "Trip Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "cuellos_de_botella": [
+                      {
+                        "duracion_min": 42.0,
+                        "explicada": false,
+                        "fin": "2020-04-14T01:52:00Z",
+                        "impacto_min": 42.0,
+                        "inicio": "2020-04-14T01:10:00Z",
+                        "posicion": {
+                          "lat": 28.0,
+                          "lon": 113.1
+                        },
+                        "tipo": "parada_sin_explicar"
+                      },
+                      {
+                        "duracion_min": 21.0,
+                        "explicada": true,
+                        "fin": "2020-04-14T02:41:00Z",
+                        "impacto_min": 20.0,
+                        "inicio": "2020-04-14T02:20:00Z",
+                        "posicion": {
+                          "lat": 28.19,
+                          "lon": 113.02
+                        },
+                        "reporte_conductor": {
+                          "procedencia": "human_reported",
+                          "recibido_en": "2020-04-14T02:40:00Z",
+                          "texto": "Hay obras en el paso de Nanling, estamos parados hace media hora"
+                        },
+                        "tipo": "ralenti_prolongado"
+                      }
+                    ],
+                    "tiempo_perdido_min": 62.0,
+                    "viaje_id": "V-001"
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred",
+                    "human_reported"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-13T18:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_Bottlenecks_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Alias o viaje desconocido"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cuellos de botella de un viaje",
+        "tags": [
+          "dashboard (público)"
+        ]
+      }
+    },
+    "/v1/trips/{trip_id}/fuel": {
+      "get": {
+        "operationId": "read_trip_fuel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "trip_id",
+            "required": true,
+            "schema": {
+              "title": "Trip Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "anomalias": [
+                      {
+                        "detectada_en": "2020-04-14T02:55:00Z",
+                        "evidencia": "Dos tramos seguidos con consumo >= 1,25 x mediana de sus pares y sobre el p90; ralentí de 21 min en el segundo.",
+                        "exceso_l": 9.4,
+                        "id": "A-001",
+                        "tramos": [
+                          {
+                            "h3": "86309a0efffffff",
+                            "sentido": "ida"
+                          },
+                          {
+                            "h3": "86309a0c7ffffff",
+                            "sentido": "ida"
+                          }
+                        ],
+                        "vehiculo_alias": "T03",
+                        "viaje_id": "V-001"
+                      }
+                    ],
+                    "consumo_l_100km": 33.3,
+                    "consumo_observado_l": 612.3,
+                    "distancia_km": 1840.5,
+                    "exceso_total_l": 9.4,
+                    "pasadas": [
+                      {
+                        "consumo_observado_l": 5.1,
+                        "exceso_l": 0.1,
+                        "linea_base": {
+                          "mediana_l": 5.0,
+                          "n_pasadas": 14,
+                          "p90_l": 5.9
+                        },
+                        "ralenti_min": 0.0,
+                        "sobreconsumo": false,
+                        "tramo": {
+                          "h3": "86309a0f7ffffff",
+                          "sentido": "ida"
+                        }
+                      },
+                      {
+                        "consumo_observado_l": 11.8,
+                        "exceso_l": 5.7,
+                        "linea_base": {
+                          "mediana_l": 6.1,
+                          "n_pasadas": 12,
+                          "p90_l": 7.0
+                        },
+                        "ralenti_min": 4.0,
+                        "sobreconsumo": true,
+                        "tramo": {
+                          "h3": "86309a0efffffff",
+                          "sentido": "ida"
+                        }
+                      },
+                      {
+                        "consumo_observado_l": 9.9,
+                        "exceso_l": 2.9,
+                        "linea_base": {
+                          "mediana_l": 7.0,
+                          "n_pasadas": 11,
+                          "p90_l": 8.1
+                        },
+                        "ralenti_min": 21.0,
+                        "sobreconsumo": true,
+                        "tramo": {
+                          "h3": "86309a0c7ffffff",
+                          "sentido": "ida"
+                        }
+                      },
+                      {
+                        "consumo_observado_l": 6.3,
+                        "ralenti_min": 0.0,
+                        "sobreconsumo": false,
+                        "tramo": {
+                          "h3": "86309a0dfffffff",
+                          "sentido": "ida"
+                        }
+                      }
+                    ],
+                    "viaje_id": "V-001"
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-13T18:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_FuelAnalysis_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Alias o viaje desconocido"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Análisis de combustible de un viaje",
+        "tags": [
+          "dashboard (público)"
+        ]
+      }
+    },
+    "/v1/vehicles/{alias}": {
+      "get": {
+        "operationId": "read_vehicle",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "alias",
+            "required": true,
+            "schema": {
+              "title": "Alias"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "alias": "T03",
+                    "conductor": "Wang Lei (sintético)",
+                    "corredor": "Harbin-Guangzhou",
+                    "estado": "en_viaje",
+                    "hora_evento": "2020-04-14T03:30:00Z",
+                    "posicion": {
+                      "lat": 28.19,
+                      "lon": 113.02
+                    },
+                    "sentido": "ida",
+                    "ultima_alerta_id": "AL-001",
+                    "velocidad_kmh": 72.5,
+                    "viaje_id": "V-001"
+                  },
+                  "is_replay": true,
+                  "provenance": [
+                    "fead_observed",
+                    "synthetic_demo",
+                    "model_inferred"
+                  ],
+                  "time_range": {
+                    "from": "2020-04-14T00:00:00Z",
+                    "to": "2020-04-14T03:30:00Z"
+                  },
+                  "updated_at": "2020-04-14T03:30:00Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_VehicleStatus_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Alias o viaje desconocido"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Estado de un vehículo",
+        "tags": [
+          "dashboard (público)"
+        ]
+      }
+    }
+  }
+}
