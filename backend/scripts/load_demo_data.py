@@ -27,6 +27,10 @@ TRIPS = ["trip_id", "alias", "corridor", "sentido", "origin_terminal", "dest_ter
 FREIGHTS = ["trip_id", "freight_id", "alias", "driver_id", "client", "cargo", "corridor", "sentido",
             "origin_terminal", "dest_terminal", "planned_departure", "provenance"]
 DRIVERS = ["driver_id", "name", "provenance"]
+PASSES = ["trip_id", "alias", "corridor", "sentido", "h3_cell", "t_start", "t_end", "day", "km", "liters",
+          "l_per_100km", "in_baseline"]
+BASELINES = ["corridor", "sentido", "h3_cell", "n_passes", "n_vehicles", "median_l_per_100km", "p90_l_per_100km",
+             "median_liters", "p90_liters", "median_km", "provenance"]
 REPORTS = ["report_id", "trip_id", "driver_id", "reported_at", "text", "provenance"]
 
 
@@ -73,7 +77,7 @@ def load(source: Path, database_url: str, replay_start: datetime = REPLAY_START)
     counts = {"history": 0, "source": 0}
     last_event = replay_start
     with psycopg.connect(database_url) as conn:
-        conn.execute("TRUNCATE telemetry_reading, telemetry_source, driver_reports, freights, trips, drivers, vehicles")
+        conn.execute("TRUNCATE baselines, passes, telemetry_reading, telemetry_source, driver_reports, freights, trips, drivers, vehicles")
         aliases: set[str] = set()
         for path in _telemetry_files(source):
             df = _read_telemetry(path)
@@ -90,6 +94,8 @@ def load(source: Path, database_url: str, replay_start: datetime = REPLAY_START)
         _copy(conn, "drivers", pl.read_csv(source / "drivers.csv"), DRIVERS)
         _copy(conn, "trips", trips, TRIPS)
         _copy(conn, "freights", _utc(pl.read_csv(source / "freights.csv"), "planned_departure"), FREIGHTS)
+        _copy(conn, "passes", _utc(pl.read_csv(source / "passes_demo.csv"), "t_start", "t_end"), PASSES)
+        _copy(conn, "baselines", pl.read_csv(source / "baseline.csv"), BASELINES)
         _copy(conn, "driver_reports", _utc(pl.read_csv(source / "driver_reports.csv"), "reported_at"), REPORTS)
         conn.execute(
             "UPDATE replay_state SET estado = 'paused', velocidad = 1, hora_replay = %s, inicio = %s, fin = %s,"

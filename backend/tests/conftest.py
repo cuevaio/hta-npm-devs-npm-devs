@@ -31,7 +31,7 @@ def source_dir(tmp_path):
     """Salida de pipeline en miniatura: enlaces al fixture de data/ (sin copiarlo) y a los de pruebas."""
     for name in ("telemetry.csv", "drivers.csv", "driver_reports.csv"):
         (tmp_path / name).symlink_to(REPO / "data" / "fixtures" / name)
-    for name in ("trips.csv", "freights.csv"):
+    for name in ("trips.csv", "freights.csv", "passes_demo.csv", "baseline.csv"):
         shutil.copy(FIXTURES / name, tmp_path / name)
     return tmp_path
 

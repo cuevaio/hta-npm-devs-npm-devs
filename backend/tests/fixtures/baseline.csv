@@ -1,0 +1,6 @@
+corridor,sentido,h3_cell,n_passes,n_vehicles,median_l_per_100km,p90_l_per_100km,median_liters,p90_liters,median_km,provenance
+K01-K14,vuelta,8614960000fffff,5,3,40.0,45.0,2.0,2.3,5.0,model_inferred
+K01-K14,vuelta,8614960001fffff,5,3,40.0,60.0,2.0,3.0,5.0,model_inferred
+K01-K14,vuelta,8614960002fffff,2,2,40.0,45.0,2.0,2.3,5.0,model_inferred
+K01-K14,vuelta,8614960003fffff,6,1,40.0,45.0,2.0,2.3,4.0,model_inferred
+K01-K14,vuelta,8614960004fffff,5,3,40.0,45.0,2.0,2.3,5.0,model_inferred
