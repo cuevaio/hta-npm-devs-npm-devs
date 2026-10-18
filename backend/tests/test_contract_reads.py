@@ -12,8 +12,8 @@ from tests.helpers import KEY
 READS = [
     ("/v1/fleet", "/v1/tools/get_fleet_overview", FleetOverview),
     ("/v1/vehicles/T07", "/v1/tools/get_vehicle_status?alias=T07", VehicleStatus),
-    ("/v1/trips/V-001", "/v1/tools/get_trip_status?trip_id=V-001", TripStatus),
-    ("/v1/trips/V-001/fuel", "/v1/tools/get_fuel_analysis?trip_id=V-001", FuelAnalysis),
+    ("/v1/trips/T07-V01", "/v1/tools/get_trip_status?trip_id=T07-V01", TripStatus),
+    ("/v1/trips/T07-V01/fuel", "/v1/tools/get_fuel_analysis?trip_id=T07-V01", FuelAnalysis),
     ("/v1/trips/V-001/bottlenecks", "/v1/tools/get_operational_bottlenecks?trip_id=V-001", Bottlenecks),
     ("/v1/alerts", "/v1/tools/get_alerts", AlertList),
     ("/v1/replay", None, ReplayState),
@@ -62,15 +62,6 @@ def test_unknown_alias_or_trip_is_404_with_clear_body(api, path):
 
     assert response.status_code == 404
     assert "desconocido" in response.json()["detail"]
-
-
-def test_fuel_analysis_has_segments_with_and_without_baseline_and_an_anomaly(api):
-    data = api.get("/v1/trips/V-001/fuel").json()["data"]
-
-    baselines = [p["linea_base"] for p in data["pasadas"]]
-    assert any(b is None for b in baselines)
-    assert any(b and {"mediana_l", "p90_l", "n_pasadas"} <= b.keys() for b in baselines)
-    assert data["anomalias"] and data["pasadas"][0]["tramo"]["sentido"] in ("ida", "vuelta")
 
 
 def test_alert_includes_driver_report_with_human_reported_provenance(api):

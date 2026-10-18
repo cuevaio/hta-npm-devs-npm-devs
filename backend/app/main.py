@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader
 
 from . import examples as ex
+from . import fuel as fuel_mod
 from . import reads
 from .db import migrate
 from .replay import Clock, ReplayEngine, system_clock
@@ -46,6 +47,8 @@ def example_response(model, body: dict) -> dict:
 
 
 REAL_PROVENANCE = [Provenance.fead_observed, Provenance.synthetic_demo]
+TRIP_PROVENANCE = [Provenance.synthetic_demo, Provenance.fead_observed]
+FUEL_PROVENANCE = [Provenance.fead_observed, Provenance.model_inferred, Provenance.synthetic_demo]
 
 NOT_FOUND = {404: {"model": ErrorBody, "description": "Alias o viaje desconocido"}}
 AUTH_ERRORS = {
@@ -96,6 +99,7 @@ def create_app(
         ),
     )
     app.state.api_key = api_key
+    app.state.database_url = database_url
     app.state.replay_engine = engine
 
     app.add_middleware(
@@ -138,12 +142,20 @@ def create_app(
         return envelope(data, REAL_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
 
     def trip(trip_id: str) -> dict:
-        t = ex.TRIPS[_trip_id(trip_id)]
-        return envelope(t, ex.PROVENANCE, TimeRange(from_=t.inicio, to=ex.NOW))
+        need_engine()
+        found = fuel_mod.trip_status(database_url, trip_id)
+        if found is None:
+            raise HTTPException(status_code=404, detail=f"Viaje desconocido: {trip_id}")
+        data, desde, hasta, updated = found
+        return envelope(data, TRIP_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
 
     def fuel(trip_id: str) -> dict:
-        t = ex.TRIPS[_trip_id(trip_id)]
-        return envelope(ex.FUEL[trip_id], ex.PROVENANCE, TimeRange(from_=t.inicio, to=ex.NOW))
+        need_engine()
+        found = fuel_mod.fuel_analysis(database_url, trip_id)
+        if found is None:
+            raise HTTPException(status_code=404, detail=f"Viaje desconocido: {trip_id}")
+        data, desde, hasta, updated = found
+        return envelope(data, FUEL_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
 
     def bottlenecks(trip_id: str) -> dict:
         t = ex.TRIPS[_trip_id(trip_id)]
@@ -160,8 +172,9 @@ def create_app(
     v_ex = ex.VEHICLE_STATUS["T03"]
     ex_fleet = envelope(ex.FLEET, ex.PROVENANCE, TimeRange(from_=ex.T0, to=ex.NOW))
     ex_vehicle = envelope(v_ex, ex.PROVENANCE, TimeRange(from_=ex.T0, to=v_ex.hora_evento))
-    ex_trip = trip("V-001")
-    ex_fuel = fuel("V-001")
+    ex_trip_t = ex.TRIPS["V-001"]
+    ex_trip = envelope(ex_trip_t, ex.PROVENANCE, TimeRange(from_=ex_trip_t.inicio, to=ex.NOW))
+    ex_fuel = envelope(ex.FUEL["V-001"], ex.PROVENANCE, TimeRange(from_=ex_trip_t.inicio, to=ex.NOW))
     ex_bottlenecks = bottlenecks("V-001")
     ex_alerts = alerts()
     r_ex = ex.INITIAL_REPLAY

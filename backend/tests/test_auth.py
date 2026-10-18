@@ -5,10 +5,10 @@ from app.main import create_app
 
 TOOL_GETS = [
     "/v1/tools/get_fleet_overview", "/v1/tools/get_vehicle_status?alias=T07",
-    "/v1/tools/get_trip_status?trip_id=V-001", "/v1/tools/get_fuel_analysis?trip_id=V-001",
+    "/v1/tools/get_trip_status?trip_id=T07-V01", "/v1/tools/get_fuel_analysis?trip_id=T07-V01",
     "/v1/tools/get_operational_bottlenecks?trip_id=V-001", "/v1/tools/get_alerts",
 ]
-PUBLIC = ["/v1/fleet", "/v1/vehicles/T07", "/v1/trips/V-001", "/v1/trips/V-001/fuel",
+PUBLIC = ["/v1/fleet", "/v1/vehicles/T07", "/v1/trips/T07-V01", "/v1/trips/T07-V01/fuel",
           "/v1/trips/V-001/bottlenecks", "/v1/alerts", "/v1/replay"]
 
 

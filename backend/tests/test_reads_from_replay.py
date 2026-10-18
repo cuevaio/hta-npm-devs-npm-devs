@@ -57,7 +57,7 @@ def test_the_fleet_overview_changes_as_the_replay_advances(api, app, clock):
 def test_a_vehicle_outside_any_trip_is_stopped_even_if_it_has_readings(api):
     api.post(CONTROL, headers=KEY, json={"action": "seek", "to_event_time": "2020-04-03T20:05:00Z"})
     with psycopg.connect(api.app.state.replay_engine.database_url) as conn:
-        conn.execute("DELETE FROM driver_reports; DELETE FROM freights; DELETE FROM trips")
+        conn.execute("DELETE FROM passes; DELETE FROM driver_reports; DELETE FROM freights; DELETE FROM trips")
 
     data = api.get("/v1/vehicles/T07").json()["data"]
 
@@ -69,7 +69,7 @@ def test_unknown_alias_is_404_and_an_empty_database_gives_empty_lists(api, datab
     assert api.get("/v1/vehicles/T99").status_code == 404
 
     with psycopg.connect(database_url) as conn:
-        conn.execute("TRUNCATE telemetry_reading, telemetry_source, driver_reports, freights, trips, drivers, vehicles")
+        conn.execute("TRUNCATE baselines, passes, telemetry_reading, telemetry_source, driver_reports, freights, trips, drivers, vehicles")
     fleet = api.get("/v1/fleet").json()["data"]
 
     assert fleet["vehiculos"] == [] and fleet["total_vehiculos"] == 0
