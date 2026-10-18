@@ -19,3 +19,8 @@ Cada carpeta (`backend/`, `mcp/`, `dashboard/`, `web/`, `e2e/`) tiene su capa de
 - **Ningún ticket se cierra sin un test que cubra su criterio de aceptación.**
 - **Nunca se mergea a `main` con tests en rojo.**
 - Los tests verifican comportamiento externo (HTTP, lo que ve el usuario), no detalles internos. El punto de prueba principal es la Domain API por HTTP; MCP y Zavu se prueban contra el contrato OpenAPI.
+
+## Orquestador
+
+Los tickets se implementan con `tools/orquestar.sh` (agente `orquestador` + subagentes `implementador`). Ver `docs/dev/README.md`. `tools/verify-ticket.sh <worktree>` es la verificación de tests que exige el flujo antes de mergear.
+

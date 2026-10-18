@@ -54,3 +54,23 @@ Reglas:
 3. **Nunca se mergea a `main` con tests en rojo.** Si `git pull` trae conflictos, los resuelve quien está integrando, antes del push.
 4. Mergear seguido (al menos una vez por ticket terminado) para que nadie se aleje de `main`.
 5. Los cambios a contratos compartidos (esquema de BD, `TelemetryEvent`, OpenAPI de la Domain API) van en su propio ticket y se avisa al equipo antes del merge.
+
+## Implementar con el orquestador
+
+Para avanzar tickets con agentes hay un orquestador (Opus 5.5) que planifica y verifica, y subagentes implementadores (Sonnet 5.5) que escriben el código.
+
+```sh
+tools/orquestar.sh                    # sesión con el orquestador como agente principal
+tools/orquestar.sh "/orquestar 12 18" # trabaja esos tickets
+tools/orquestar.sh "/orquestar"       # toma el frente de la spec #4 hasta agotarlo
+```
+
+| Pieza | Qué hace |
+|---|---|
+| `.claude/agents/orquestador.md` | Elige tickets `ready-for-agent` sin bloqueos, publica un plan como comentario en el issue, crea el worktree, delega, verifica el diff contra los criterios de aceptación, mergea a `main`, hace push y cierra el issue. Hasta 3 tickets en paralelo si tocan carpetas distintas. |
+| `.claude/agents/implementador.md` | Implementa un ticket test-first (skill `tdd`) dentro de su worktree. No mergea, no hace push, no cierra issues. |
+| `tools/hooks/verify-on-stop.sh` | Hook `Stop` del implementador: no lo deja terminar con tests en rojo. |
+| `tools/verify-ticket.sh` | Corre los tests de las carpetas que cambió una rama. Lo usan el hook y el orquestador antes y después del merge. |
+
+Los tickets `ready-for-human` (grilling, consola de GCP, Meta) no los toma el orquestador: los lista como pendientes. La primera vez que abras la sesión, Claude Code pide confiar en el workspace para activar los hooks del proyecto.
+
