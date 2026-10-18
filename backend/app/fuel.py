@@ -3,8 +3,8 @@
 from datetime import datetime
 
 import psycopg
-from psycopg.rows import dict_row
 
+from .db import connect
 from .schemas import FuelAnalysis, LineaBase, Pasada, Flete, Tramo, TripStatus
 
 MIN_PASSES = 3  # ADR 0009
@@ -63,7 +63,7 @@ def _pasada(row: dict) -> Pasada:
 
 def fuel_analysis(database_url: str, trip_id: str) -> tuple[FuelAnalysis, datetime, datetime, datetime] | None:
     """Devuelve (datos, desde, hasta, actualizado_en), o None si el viaje es desconocido."""
-    with psycopg.connect(database_url, row_factory=dict_row) as conn:
+    with connect(database_url, dict_rows=True) as conn:
         trip = conn.execute(_TRIP, (trip_id,)).fetchone()
         if trip is None:
             return None
@@ -85,7 +85,7 @@ def fuel_analysis(database_url: str, trip_id: str) -> tuple[FuelAnalysis, dateti
 
 def trip_status(database_url: str, trip_id: str) -> tuple[TripStatus, datetime, datetime, datetime] | None:
     """None si el viaje es desconocido. Estado según la hora de replay."""
-    with psycopg.connect(database_url, row_factory=dict_row) as conn:
+    with connect(database_url, dict_rows=True) as conn:
         trip = conn.execute(_TRIP, (trip_id,)).fetchone()
         if trip is None:
             return None

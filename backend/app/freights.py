@@ -7,9 +7,8 @@ replay nunca revela consumo futuro.
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
-import psycopg
-from psycopg.rows import dict_row
 
+from .db import connect
 from .schemas import AgregadoFletes, FleteDetalle, FreightBoard, ResumenFletes
 
 LIMA = timezone(timedelta(hours=-5))
@@ -74,7 +73,7 @@ def _por(fletes: list[FleteDetalle], key) -> list[AgregadoFletes]:
 
 def freight_board(database_url: str) -> tuple[FreightBoard, datetime, datetime, datetime]:
     """Devuelve (datos, desde, hasta, actualizado_en); desde/hasta en hora del evento."""
-    with psycopg.connect(database_url, row_factory=dict_row) as conn:
+    with connect(database_url, dict_rows=True) as conn:
         st = conn.execute("SELECT * FROM replay_state").fetchone()
         rows = conn.execute(_FREIGHTS).fetchall()
     hora = st["hora_replay"]

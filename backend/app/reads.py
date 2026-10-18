@@ -3,17 +3,17 @@
 from datetime import datetime
 
 import psycopg
-from psycopg.rows import dict_row
 
+from .db import connect
 from .schemas import FleetOverview, Posicion, VehicleStatus, VehiculoResumen
 
 _LAST_READINGS = """
-SELECT l.alias, l.event_time, l.speed_kmh, l.rpm, p.lat, p.lon, t.trip_id, t.corridor, t.sentido, d.name AS conductor
-FROM (
-    SELECT DISTINCT ON (r.alias) r.alias, r.event_time, r.speed_kmh, r.rpm
-    FROM telemetry_reading r
-    WHERE r.event_time <= %(hora)s AND (%(alias)s::text IS NULL OR r.alias = %(alias)s)
-    ORDER BY r.alias, r.event_time DESC
+SELECT v.alias, l.event_time, l.speed_kmh, l.rpm, p.lat, p.lon, t.trip_id, t.corridor, t.sentido, d.name AS conductor
+FROM vehicles v
+CROSS JOIN LATERAL (  -- última lectura: recorre el índice (alias, event_time) hacia atrás y para en la primera
+    SELECT r.alias, r.event_time, r.speed_kmh, r.rpm FROM telemetry_reading r
+    WHERE r.alias = v.alias AND r.event_time <= %(hora)s
+    ORDER BY r.event_time DESC LIMIT 1
 ) l
 LEFT JOIN LATERAL (  -- última posición conocida: las lecturas sin GPS no la borran
     SELECT r.lat, r.lon FROM telemetry_reading r
@@ -27,7 +27,8 @@ LEFT JOIN LATERAL (
 ) t ON true
 LEFT JOIN freights f ON f.trip_id = t.trip_id
 LEFT JOIN drivers d ON d.driver_id = f.driver_id
-ORDER BY l.alias
+WHERE %(alias)s::text IS NULL OR v.alias = %(alias)s
+ORDER BY v.alias
 """
 
 IN_MOTION_KMH = 3.0
@@ -57,7 +58,7 @@ def _rows(conn: psycopg.Connection, hora: datetime, alias: str | None) -> list[d
 
 def fleet_overview(database_url: str) -> tuple[FleetOverview, datetime, datetime, datetime]:
     """Devuelve (datos, desde, hasta, actualizado_en); desde/hasta en hora del evento."""
-    with psycopg.connect(database_url, row_factory=dict_row) as conn:
+    with connect(database_url, dict_rows=True) as conn:
         st = conn.execute("SELECT * FROM replay_state").fetchone()
         rows = _rows(conn, st["hora_replay"], None)
         total = conn.execute("SELECT count(*) AS n FROM vehicles").fetchone()["n"]
@@ -72,7 +73,7 @@ def fleet_overview(database_url: str) -> tuple[FleetOverview, datetime, datetime
 
 def vehicle_status(database_url: str, alias: str) -> tuple[VehicleStatus, datetime, datetime, datetime] | None:
     """None si el alias es desconocido o aún no tiene lecturas visibles."""
-    with psycopg.connect(database_url, row_factory=dict_row) as conn:
+    with connect(database_url, dict_rows=True) as conn:
         st = conn.execute("SELECT * FROM replay_state").fetchone()
         rows = _rows(conn, st["hora_replay"], alias)
     if not rows:
@@ -84,7 +85,7 @@ def vehicle_status(database_url: str, alias: str) -> tuple[VehicleStatus, dateti
 
 def telemetry_provenance(database_url: str) -> list[str]:
     """Procedencia de la telemetría cargada (la carga reemplaza todo, así que basta una muestra de cada tabla)."""
-    with psycopg.connect(database_url) as conn:
+    with connect(database_url) as conn:
         rows = conn.execute(
             "(SELECT provenance FROM telemetry_reading LIMIT 1) UNION (SELECT provenance FROM telemetry_source LIMIT 1)"
         ).fetchall()

@@ -12,6 +12,7 @@ from typing import Callable
 import psycopg
 from psycopg.rows import dict_row
 
+from .db import connect
 from .schemas import ReplayState
 
 Clock = Callable[[], datetime]
@@ -24,17 +25,22 @@ def system_clock() -> datetime:
 
 
 class ReplayEngine:
-    def __init__(self, database_url: str, clock: Clock = system_clock):
+    def __init__(self, database_url: str, clock: Clock = system_clock, reads_url: str | None = None):
         self.database_url = database_url
         self.clock = clock
+        self.reads_url = reads_url  # lecturas por el pool con timeout (db.read_url); el avance va directo
 
     def _connect(self) -> psycopg.Connection:
         return psycopg.connect(self.database_url, row_factory=dict_row)
 
     def state(self) -> tuple[ReplayState, datetime]:
         """Estado actual y hora de última actualización."""
-        with self._connect() as conn:
-            row = conn.execute("SELECT * FROM replay_state").fetchone()
+        if self.reads_url:
+            with connect(self.reads_url, dict_rows=True) as conn:
+                row = conn.execute("SELECT * FROM replay_state").fetchone()
+        else:
+            with self._connect() as conn:
+                row = conn.execute("SELECT * FROM replay_state").fetchone()
         return _model(row), row["updated_at"]
 
     # --- avance ---
