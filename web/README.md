@@ -37,7 +37,7 @@ No se editan a mano; se regeneran desde `web/`:
 1. Importar el repo en Vercel y poner **Root Directory** = `web/`.
 2. `vercel.json` ya indica sitio estático sin build ni install.
 3. Si el dashboard queda en otra URL, cambiar `DASHBOARD_URL` en el `<script>` de `index.html` (y los `href` de respaldo).
-4. La vista previa en redes usa URLs absolutas a `https://certera-landing.vercel.app`. Si el proyecto queda con otro dominio, cambiarlo en `canonical`, `og:url`, `og:image` y `twitter:image` del `<head>`.
+4. La vista previa en redes usa URLs absolutas a `https://fleet-intelligence-ashy.vercel.app`. Si el proyecto queda con otro dominio, cambiarlo en `canonical`, `og:url`, `og:image` y `twitter:image` del `<head>`.
 
 ## Qué hay acá
 

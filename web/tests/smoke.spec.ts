@@ -66,3 +66,17 @@ test("tiene favicon y la vista previa para compartir en redes", async ({ page, r
   ];
   for (const ruta of rutas) expect((await request.get(ruta)).status(), ruta).toBe(200);
 });
+
+test("los enlaces y metadatos apuntan a los dominios desplegados, ninguno con certera", async ({ page }) => {
+  await page.goto("/");
+  const urls = await page.evaluate(() =>
+    [
+      ...Array.from(document.querySelectorAll("a[href], link[href]")).map((e) => e.getAttribute("href") ?? ""),
+      ...Array.from(document.querySelectorAll("meta[content]")).map((e) => e.getAttribute("content") ?? ""),
+    ].filter((u) => /^https?:\/\//.test(u)),
+  );
+  for (const u of urls) expect(new URL(u).hostname, u).not.toMatch(/certera/i);
+  for (const a of await page.locator("a.dashboard-link").all())
+    await expect(a).toHaveAttribute("href", "https://fleet-intelligence-dashboard.vercel.app");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://fleet-intelligence-ashy.vercel.app/");
+});
