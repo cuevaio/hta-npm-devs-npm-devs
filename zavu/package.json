@@ -1,0 +1,12 @@
+{
+  "name": "support-2",
+  "private": true,
+  "type": "module",
+  "dependencies": {},
+  "devDependencies": {
+    "@zavudev/functions": "^0.3.0",
+    "@zavudev/sdk": "^0.51.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.6.0"
+  }
+}
