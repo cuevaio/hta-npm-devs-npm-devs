@@ -323,10 +323,22 @@ stage "Cuenta de servicio del backend"
 SA="$SERVICE@$GCP_PROJECT_ID.iam.gserviceaccount.com"
 gcloud iam service-accounts describe "$SA" >/dev/null 2>&1 \
   || gcloud iam service-accounts create "$SERVICE" --display-name="Fleet backend (Cloud Run)"
+# Una cuenta de servicio recién creada tarda en propagarse en IAM: los
+# primeros intentos de darle permisos pueden fallar con "does not exist".
 for role in roles/cloudsql.client roles/secretmanager.secretAccessor; do
-  gcloud projects add-iam-policy-binding "$GCP_PROJECT_ID" --member="serviceAccount:$SA" \
-    --role="$role" --condition=None >/dev/null
-  printf '  %s✓%s %s → %s\n' "$GREEN" "$RESET" "$SA" "$role"
+  for attempt in 1 2 3 4 5 6; do
+    if gcloud projects add-iam-policy-binding "$GCP_PROJECT_ID" --member="serviceAccount:$SA" \
+      --role="$role" --condition=None >/dev/null 2>&1; then
+      printf '  %s✓%s %s → %s\n' "$GREEN" "$RESET" "$SA" "$role"
+      break
+    fi
+    if (( attempt == 6 )); then
+      echo "No se pudo asignar $role a $SA tras 6 intentos. Vuelve a correr el wizard en un minuto."
+      exit 1
+    fi
+    note "La cuenta de servicio aún se está propagando; reintento en 10 s ($attempt/6)…"
+    sleep 10
+  done
 done
 pause
 
