@@ -1,7 +1,7 @@
 name: mcp
 on:
   push:
-    paths: ["mcp/**", ".github/workflows/mcp.yml"]
+    paths: ["mcp/**", "backend/openapi.json", ".github/workflows/mcp.yml"]
   workflow_dispatch:
 jobs:
   test:
