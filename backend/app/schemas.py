@@ -259,3 +259,35 @@ class FreightBoard(BaseModel):
     por_vehiculo: list[AgregadoFletes]
     por_dia: list[AgregadoFletes] = Field(description="clave = día (YYYY-MM-DD, hora de Lima) de llegada")
     fletes: list[FleteDetalle]
+
+
+class MetricasPeriodo(BaseModel):
+    """Métricas de un vehículo en un día (hora de Lima) o en un viaje. Solo cuenta lo ocurrido hasta la hora de replay."""
+
+    clave: str = Field(description="Día (YYYY-MM-DD, hora de Lima) o identificador del viaje")
+    corredor: str | None = Field(None, description="Solo al agrupar por viaje")
+    sentido: Sentido | None = Field(None, description="Solo al agrupar por viaje")
+    viajes_finalizados: int
+    km: float = Field(description="Km recorridos en pasadas por tramos")
+    litros: float = Field(description="Consumo observado en esas pasadas")
+    l_100km: float | None
+    tramos: int = Field(description="Pasadas por tramos")
+    tramos_con_linea_base: int
+    tramos_sobreconsumo: int
+    litros_linea_base: float = Field(description="Suma de la mediana de los pares en los tramos con línea base")
+    exceso_l: float = Field(description="Litros sobre la mediana de los pares (tramos con línea base)")
+    vs_pares_pct: float | None = Field(description="Consumo frente a sus pares en los tramos con línea base; +28 = 28 % más")
+    horas_en_movimiento: float
+    ralenti_h: float = Field(description="Horas con motor encendido y vehículo detenido")
+    ingresos_pen: float = Field(description="Tarifa sin IGV de los fletes finalizados (al día de llegada)")
+    combustible_pen: float
+    margen_pen: float
+
+
+class VehicleMetrics(BaseModel):
+    alias: str
+    agrupar_por: Literal["dia", "viaje"]
+    desde: str = Field(description="Primer día del rango (YYYY-MM-DD, hora de Lima)")
+    hasta: str = Field(description="Último día del rango (YYYY-MM-DD, hora de Lima), recortado a la hora de replay")
+    resumen: MetricasPeriodo = Field(description="Totales del rango; clave = 'total'")
+    filas: list[MetricasPeriodo]

@@ -9,6 +9,7 @@ const TOOLS = [
   "get_fuel_analysis",
   "get_operational_bottlenecks",
   "get_alerts",
+  "get_vehicle_metrics",
   "control_replay",
 ];
 
@@ -26,7 +27,7 @@ describe("tools/list", () => {
     expect(json.result.serverInfo.name).toBe("certera");
   });
 
-  it("lista exactamente las 7 tools con su esquema de entrada", async () => {
+  it("lista exactamente las 8 tools con su esquema de entrada", async () => {
     const { json } = await rpc("tools/list", {});
     const tools = json.result.tools as { name: string; description: string; inputSchema: any }[];
     expect(tools.map((t) => t.name).sort()).toEqual([...TOOLS].sort());
@@ -35,6 +36,8 @@ describe("tools/list", () => {
     for (const n of ["get_trip_status", "get_fuel_analysis", "get_operational_bottlenecks"]) {
       expect(by[n]!.inputSchema.required).toEqual(["trip_id"]);
     }
+    expect(by.get_vehicle_metrics!.inputSchema.required).toEqual(["alias"]);
+    expect(by.get_vehicle_metrics!.inputSchema.properties.agrupar_por.enum).toEqual(["dia", "viaje"]);
     expect(by.control_replay!.inputSchema.required).toEqual(["action"]);
     expect(by.control_replay!.inputSchema.properties.action.enum).toEqual([
       "play", "pause", "seek", "set_speed",
@@ -51,6 +54,8 @@ describe("tools/call", () => {
     ["get_trip_status", { trip_id: "V-001" }],
     ["get_fuel_analysis", { trip_id: "V-001" }],
     ["get_operational_bottlenecks", { trip_id: "V-001" }],
+    ["get_vehicle_metrics", { alias: "T07" }],
+    ["get_vehicle_metrics", { alias: "T07", desde: "2020-04-01", hasta: "2020-04-19", agrupar_por: "viaje" }],
   ];
 
   it.each(getCases)("%s devuelve el sobre del contrato tal cual", async (name, args) => {
@@ -92,6 +97,8 @@ describe("tools/call", () => {
     const calls = mockUpstream();
     const result = await call("control_replay", { action: "rewind" });
     expect(result.isError).toBe(true);
+    expect((await call("get_vehicle_metrics", { alias: "T07", agrupar_por: "semana" })).isError).toBe(true);
+    expect((await call("get_vehicle_metrics", { alias: "T07", desde: "13/04/2020" })).isError).toBe(true);
     expect(calls).toHaveLength(0);
   });
 });

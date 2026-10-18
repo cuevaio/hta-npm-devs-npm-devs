@@ -46,14 +46,20 @@ def _hora(conn: psycopg.Connection) -> tuple[datetime, datetime]:
     return st["hora_replay"], st["updated_at"]
 
 
-def _pasada(row: dict) -> Pasada:
+def evaluar(row: dict) -> tuple[bool, bool]:
+    """(línea base válida, sobreconsumo) de una pasada con las columnas de su línea base."""
     valid = (row["n_passes"] or 0) >= MIN_PASSES and (row["n_vehicles"] or 0) >= MIN_VEHICLES
-    base = LineaBase(mediana_l=row["median_liters"], p90_l=row["p90_liters"], n_pasadas=row["n_passes"]) if valid else None
     rate = row["l_per_100km"]
     over = bool(
         valid and rate is not None
         and rate >= OVER_FACTOR * row["median_l_per_100km"] and rate > row["p90_l_per_100km"]
     )
+    return valid, over
+
+
+def _pasada(row: dict) -> Pasada:
+    valid, over = evaluar(row)
+    base = LineaBase(mediana_l=row["median_liters"], p90_l=row["p90_liters"], n_pasadas=row["n_passes"]) if valid else None
     return Pasada(
         tramo=Tramo(h3=row["h3_cell"], sentido=row["sentido"]), consumo_observado_l=row["liters"],
         linea_base=base, sobreconsumo=over, exceso_l=round(row["liters"] - row["median_liters"], 3) if valid else None,
