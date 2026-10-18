@@ -198,6 +198,13 @@ DB_USER="fleet"
 SERVICE="fleet-backend"
 AR_REPO="fleet"
 
+# Las respuestas se leen del teclado: con `!` en Claude Code o con stdin
+# redirigido, cada pregunta recibiría una respuesta vacía.
+if [[ ! -t 0 ]]; then
+  echo "Corre este wizard en una terminal interactiva (no con '!' dentro de Claude Code)."
+  exit 1
+fi
+
 for bin in gcloud docker openssl curl; do
   command -v "$bin" >/dev/null 2>&1 || { echo "Falta '$bin' en el PATH."; exit 1; }
 done
@@ -243,7 +250,14 @@ gcloud billing accounts list --filter=open=true --format="table(name.basename():
 note "Si no aparece ninguna, créala en la consola y vuelve a correr el wizard."
 open_url "https://console.cloud.google.com/billing?project=$GCP_PROJECT_ID"
 ask GCP_BILLING_ACCOUNT "Pega el ID de la cuenta de facturación (formato 0X0X0X-0X0X0X-0X0X0X):"
-gcloud billing projects link "$GCP_PROJECT_ID" --billing-account="$GCP_BILLING_ACCOUNT" >/dev/null
+# Volver a vincular la misma cuenta consume cupo de proyectos de la cuenta y
+# puede fallar con "billing quota exceeded"; solo se vincula si hace falta.
+linked=$(gcloud billing projects describe "$GCP_PROJECT_ID" --format='value(billingAccountName)' 2>/dev/null || true)
+if [[ "$linked" == "billingAccounts/$GCP_BILLING_ACCOUNT" ]]; then
+  note "El proyecto ya está vinculado a $GCP_BILLING_ACCOUNT."
+else
+  gcloud billing projects link "$GCP_PROJECT_ID" --billing-account="$GCP_BILLING_ACCOUNT" >/dev/null
+fi
 write_env GCP_BILLING_ACCOUNT "$GCP_BILLING_ACCOUNT"
 pause
 
