@@ -1,0 +1,6 @@
+{
+  "name": "alerta_sobreconsumo_v1",
+  "language": "es",
+  "whatsappCategory": "UTILITY",
+  "body": "Alerta de flota: el vehículo {{1}} (viaje {{2}}) registra posible sobreconsumo de combustible. {{3}} Datos del replay actualizados a las {{4}}. Responde a este mensaje para ver el detalle."
+}
