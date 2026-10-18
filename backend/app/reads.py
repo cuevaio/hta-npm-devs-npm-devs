@@ -8,13 +8,18 @@ from psycopg.rows import dict_row
 from .schemas import FleetOverview, Posicion, VehicleStatus, VehiculoResumen
 
 _LAST_READINGS = """
-SELECT l.*, t.trip_id, t.corridor, t.sentido, d.name AS conductor
+SELECT l.alias, l.event_time, l.speed_kmh, l.rpm, p.lat, p.lon, t.trip_id, t.corridor, t.sentido, d.name AS conductor
 FROM (
-    SELECT DISTINCT ON (r.alias) r.alias, r.event_time, r.lat, r.lon, r.speed_kmh, r.rpm
+    SELECT DISTINCT ON (r.alias) r.alias, r.event_time, r.speed_kmh, r.rpm
     FROM telemetry_reading r
     WHERE r.event_time <= %(hora)s AND (%(alias)s::text IS NULL OR r.alias = %(alias)s)
     ORDER BY r.alias, r.event_time DESC
 ) l
+LEFT JOIN LATERAL (  -- última posición conocida: las lecturas sin GPS no la borran
+    SELECT r.lat, r.lon FROM telemetry_reading r
+    WHERE r.alias = l.alias AND r.event_time <= %(hora)s AND r.lat IS NOT NULL AND r.lon IS NOT NULL
+    ORDER BY r.event_time DESC LIMIT 1
+) p ON true
 LEFT JOIN LATERAL (
     SELECT * FROM trips t
     WHERE t.alias = l.alias AND %(hora)s BETWEEN t.t_start AND t.t_end
@@ -46,7 +51,8 @@ def _resumen(row: dict) -> dict:
 
 
 def _rows(conn: psycopg.Connection, hora: datetime, alias: str | None) -> list[dict]:
-    return conn.execute(_LAST_READINGS, {"hora": hora, "alias": alias}).fetchall()
+    rows = conn.execute(_LAST_READINGS, {"hora": hora, "alias": alias}).fetchall()
+    return [r for r in rows if r["lat"] is not None]  # sin ninguna posición conocida aún no se muestra
 
 
 def fleet_overview(database_url: str) -> tuple[FleetOverview, datetime, datetime, datetime]:

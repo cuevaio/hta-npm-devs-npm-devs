@@ -53,8 +53,8 @@ CREATE TABLE driver_reports (
 CREATE TABLE telemetry_source (
     alias         text NOT NULL,
     event_time    timestamptz NOT NULL,
-    lat           double precision NOT NULL,
-    lon           double precision NOT NULL,
+    lat           double precision,
+    lon           double precision,
     speed_kmh     double precision,
     rpm           double precision,
     fuel_rate_lph double precision,
@@ -72,8 +72,8 @@ CREATE TABLE telemetry_reading (
     event_time    timestamptz NOT NULL,  -- hora del evento
     replayed_at   timestamptz,           -- hora de replay (nula en la historia)
     ingested_at   timestamptz NOT NULL DEFAULT now(),  -- hora de ingesta
-    lat           double precision NOT NULL,
-    lon           double precision NOT NULL,
+    lat           double precision,
+    lon           double precision,
     geom          geography(Point, 4326) GENERATED ALWAYS AS
                   (ST_SetSRID(ST_MakePoint(lon, lat), 4326)::geography) STORED,
     speed_kmh     double precision,
