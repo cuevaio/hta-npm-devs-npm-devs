@@ -3,515 +3,231 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="claude:viewport-fit-sides" content="cover">
-<title>Fleet Intelligence</title>
-<meta name="description" content="Del contrato a la factura: cada entrega respaldada, cada regla validada, cada liquidación trazable. Documentación y facturación agéntica para el transporte de carga en Perú.">
+<title>Fleet Intelligence · Sabe por qué tu flota gasta más combustible</title>
+<meta name="description" content="Fleet Intelligence compara el consumo de cada vehículo con el de sus pares en el mismo tramo y sentido, y avisa al gestor de flota por WhatsApp cuando hay sobreconsumo.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="assets/tokens.css">
 <style>
-/* Layout: una sola superficie de tinta. Tres bloques y nada más —
-   titular, la secuencia y el video. La secuencia es el argumento:
-   los módulos empiezan fuera de la retícula y se asientan uno a uno
-   hasta que la puerta cierra. Marca de un solo mundo visual: sin tema claro. */
-
 *{box-sizing:border-box}
-:root{
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
-  color-scheme:dark;
-}
-html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
-body{
-  margin:0;
-  background:var(--cuadra-tinta);
-  color:var(--cuadra-fg);
-  font-family:var(--cuadra-body);
-  font-size:var(--cuadra-t-body);
-  line-height:1.6;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:31;background:var(--cuadra-tinta)}
-img{max-width:100%;display:block}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--cuadra-tinta);color:var(--cuadra-fg);font-family:var(--cuadra-body);font-size:var(--cuadra-t-body);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--cuadra-sello);color:var(--cuadra-sobre-acento)}
 :focus-visible{outline:2px solid var(--cuadra-sello);outline-offset:2px}
-
-.wrap{
-  max-width:var(--cuadra-ancho);margin-inline:auto;
-  padding-left:max(16px,env(safe-area-inset-left,0px));
-  padding-right:max(16px,env(safe-area-inset-right,0px));
-}
+.wrap{max-width:var(--cuadra-ancho);margin-inline:auto;padding-inline:16px}
 .sec{border-top:1px solid var(--cuadra-linea)}
 .sec>.wrap{padding-block:var(--cuadra-s-11)}
-
-h1,h2{margin:0}
-h1{font-family:var(--cuadra-display);font-size:var(--cuadra-t-mega);line-height:.84;letter-spacing:-.045em;text-transform:uppercase}
-h2{font-family:var(--cuadra-display);font-size:var(--cuadra-t-h1);line-height:.9;letter-spacing:-.038em;text-transform:uppercase}
-p{margin:0}
+h1,h2,h3,p,ol{margin:0}
+h1{font-family:var(--cuadra-display);font-size:var(--cuadra-t-h1);line-height:.9;letter-spacing:-.038em;text-transform:uppercase}
+h2{font-family:var(--cuadra-display);font-size:var(--cuadra-t-h2);line-height:.95;letter-spacing:-.03em;text-transform:uppercase;margin-top:14px}
+h3{font-size:var(--cuadra-t-h3);line-height:1.25;letter-spacing:-.012em;font-weight:700}
 .eyebrow{font-family:var(--cuadra-mono);font-size:var(--cuadra-t-label);font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--cuadra-sello)}
-.lede{font-size:var(--cuadra-t-lede);line-height:1.55;color:var(--cuadra-fg-dim);max-width:54ch}
+.lede{font-size:var(--cuadra-t-lede);line-height:1.55;color:var(--cuadra-fg-dim);max-width:60ch;margin-top:var(--cuadra-s-3)}
 .micro{font-size:var(--cuadra-t-micro);color:var(--cuadra-fg-dim)}
-.dato{font-family:var(--cuadra-mono);font-variant-numeric:tabular-nums;letter-spacing:.01em}
-.cabeza{display:grid;grid-template-columns:1.1fr 1fr;gap:var(--cuadra-s-6);align-items:end}
-.cabeza h2{margin-top:14px}
-@media(max-width:900px){.cabeza{grid-template-columns:1fr;gap:var(--cuadra-s-2)}}
-
-/* ---- nav ---------------------------------------------------------------- */
-nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:rgba(7,9,15,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--cuadra-linea)}
-.navin{display:flex;align-items:center;gap:var(--cuadra-s-3);padding-block:var(--cuadra-s-1);min-height:56px}
-.marca{display:flex;align-items:center;gap:10px;font-family:var(--cuadra-display);font-size:16px;letter-spacing:.02em;text-transform:uppercase;text-decoration:none;color:var(--cuadra-fg);flex:0 0 auto}
-.navlinks{display:flex;gap:var(--cuadra-s-3);margin-left:auto;font-family:var(--cuadra-mono);font-size:var(--cuadra-t-label);letter-spacing:.16em;text-transform:uppercase}
+.dato{font-family:var(--cuadra-mono);font-variant-numeric:tabular-nums}
+nav{position:sticky;top:0;z-index:30;background:var(--cuadra-tinta);border-bottom:1px solid var(--cuadra-linea)}
+.navin{display:flex;align-items:center;gap:var(--cuadra-s-3);min-height:56px}
+.marca{font-family:var(--cuadra-display);font-size:16px;letter-spacing:.02em;text-transform:uppercase;text-decoration:none;color:var(--cuadra-fg)}
+.navlinks{display:flex;gap:var(--cuadra-s-3);margin-left:auto;align-items:center;font-family:var(--cuadra-mono);font-size:var(--cuadra-t-label);letter-spacing:.16em;text-transform:uppercase}
 .navlinks a{color:var(--cuadra-fg-dim);text-decoration:none;transition:color var(--cuadra-dur-rapido)}
 .navlinks a:hover{color:var(--cuadra-sello)}
-@media(max-width:720px){.navlinks{display:none}}
-
-/* ---- hero --------------------------------------------------------------- */
-.hero{position:relative;overflow:hidden}
-.hero>.wrap{padding-block:var(--cuadra-s-6) var(--cuadra-s-8);position:relative;z-index:1}
-#campo{position:absolute;inset:0;z-index:0}
-.herogrid{display:grid;grid-template-columns:1.26fr .74fr;gap:var(--cuadra-s-6);align-items:start;margin-top:var(--cuadra-s-4)}
-.herotxt{display:flex;flex-direction:column;gap:var(--cuadra-s-3);min-width:0}
-.ctas{display:flex;flex-wrap:wrap;gap:var(--cuadra-s-1);margin-top:var(--cuadra-s-1)}
-.heromedia{display:flex;flex-direction:column;gap:10px;min-width:0}
-@media(max-width:900px){.herogrid{grid-template-columns:1fr;gap:var(--cuadra-s-4)}}
-
-.marco-media{background:var(--cuadra-tinta-pozo);border:1px solid var(--cuadra-linea);position:relative;overflow:hidden;max-width:100%}
-.marco-media.r45{aspect-ratio:4/5}
-.marco-media.r169{aspect-ratio:16/9}
-.marco-media canvas,.marco-media img,.marco-media video{width:100%;height:100%;display:block;object-fit:cover}
-
-/* ---- botones ------------------------------------------------------------ */
-.cq-btn{
-  font-family:var(--cuadra-mono);font-size:var(--cuadra-t-label);font-weight:500;letter-spacing:.14em;text-transform:uppercase;
-  padding:13px 20px;border:1px solid var(--cuadra-linea);background:transparent;color:var(--cuadra-fg);
-  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;
-  transition:border-color var(--cuadra-dur-rapido),background var(--cuadra-dur-rapido);
-}
-.cq-btn:hover{border-color:var(--cuadra-fg-dim)}
-.cq-btn.pri{background:var(--cuadra-sello);border-color:var(--cuadra-sello);color:var(--cuadra-sobre-acento);font-weight:600}
-.cq-btn.pri:hover{background:#00EDC5;border-color:#00EDC5}
-
-/* ---- banda -------------------------------------------------------------- */
-.banda{background:var(--cuadra-sello);color:var(--cuadra-sobre-acento);overflow:hidden;white-space:nowrap;border-block:1px solid var(--cuadra-sello)}
-.banda-in{display:inline-flex;animation:corre 38s linear infinite;padding-block:11px;font-family:var(--cuadra-display);font-size:15px;text-transform:uppercase}
-.banda-in span{padding-inline:22px}
-@keyframes corre{to{transform:translateX(-50%)}}
-
-/* ---- la secuencia ------------------------------------------------------- */
-.secuencia{display:grid;grid-template-columns:1fr .92fr;gap:var(--cuadra-s-6);align-items:start;margin-top:var(--cuadra-s-6)}
-@media(max-width:940px){.secuencia{grid-template-columns:1fr;gap:var(--cuadra-s-4)}}
-
-.escena{display:flex;flex-direction:column;gap:14px;min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
-@media(max-width:940px){.escena{position:static}}
-.stage{background:var(--cuadra-tinta-pozo);border:1px solid var(--cuadra-linea);aspect-ratio:1/1;max-width:100%;position:relative}
-.stage canvas{width:100%;height:100%;display:block}
-.stage .contador{position:absolute;left:14px;top:14px;font-family:var(--cuadra-mono);font-size:var(--cuadra-t-label);letter-spacing:.18em;text-transform:uppercase;color:var(--cuadra-fg-mute)}
-.mando{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.riel{flex:1 1 140px;height:2px;background:var(--cuadra-linea);min-width:100px}
-.riel>span{display:block;height:100%;background:var(--cuadra-sello);width:0;transition:width var(--cuadra-dur-medio) var(--cuadra-ease-asiento)}
-
-/* la escalera de pasos */
-.pasos{list-style:none;margin:0;padding:0;border-top:1px solid var(--cuadra-linea)}
-.pasos li{border-bottom:1px solid var(--cuadra-linea)}
-.pasos button{
-  width:100%;display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:baseline;text-align:left;
-  background:transparent;border:0;padding:15px 0;cursor:pointer;color:var(--cuadra-fg-mute);
-  font-family:var(--cuadra-body);font-size:15.5px;transition:color var(--cuadra-dur-rapido);
-}
-.pasos button em{font-style:normal;font-family:var(--cuadra-mono);font-size:var(--cuadra-t-label);letter-spacing:.1em;font-variant-numeric:tabular-nums}
-.pasos button b{font-weight:700;display:block}
-.pasos button span{display:block;font-size:13.5px;line-height:1.5;color:var(--cuadra-fg-mute);margin-top:3px}
-.pasos button:hover{color:var(--cuadra-fg-dim)}
-.pasos li.hecho button{color:var(--cuadra-fg-dim)}
-.pasos li.hecho button em{color:var(--cuadra-sello)}
-.pasos li.vivo button{color:var(--cuadra-fg)}
-.pasos li.vivo button em{color:var(--cuadra-sello)}
-.pasos li.vivo button span{color:var(--cuadra-fg-dim)}
-.pasos li.vivo{background:var(--cuadra-tinta-2);box-shadow:inset 3px 0 0 var(--cuadra-sello)}
-.pasos li.vivo button{padding-inline:14px}
-
-.limite{font-family:var(--cuadra-mono);font-size:var(--cuadra-t-label);letter-spacing:.1em;text-transform:uppercase;color:var(--cuadra-observa)}
-
-/* ---- cierre ------------------------------------------------------------- */
-.cierre{display:grid;grid-template-columns:1.2fr .8fr;gap:var(--cuadra-s-6);align-items:center}
-@media(max-width:900px){.cierre{grid-template-columns:1fr}}
-.plano{background:var(--cuadra-tinta-2);border:1px solid var(--cuadra-linea);padding:var(--cuadra-s-3);min-width:0}
+@media(max-width:720px){.navlinks a.sec-link{display:none}}
+.btn{display:inline-block;padding:14px 24px;background:var(--cuadra-sello);color:var(--cuadra-sobre-acento);font-family:var(--cuadra-mono);font-size:var(--cuadra-t-label);font-weight:600;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;border:1px solid var(--cuadra-sello)}
+.btn:hover{background:var(--cuadra-tinta);color:var(--cuadra-sello)}
+.navlinks a.btn{color:var(--cuadra-sobre-acento);padding:8px 16px}
+.navlinks a.btn:hover{color:var(--cuadra-sello)}
+.herogrid{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--cuadra-s-6);align-items:center}
+.hero .btn{margin-top:var(--cuadra-s-4)}
+@media(max-width:900px){.herogrid{grid-template-columns:1fr}}
+.marco{background:var(--cuadra-tinta-pozo);border:var(--cuadra-borde);padding:var(--cuadra-s-2)}
+.marco canvas{display:block;width:100%;height:auto;aspect-ratio:16/10}
+.marco figcaption{margin-top:var(--cuadra-s-1)}
+figure{margin:0}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--cuadra-s-3);margin-top:var(--cuadra-s-6);padding:0;list-style:none}
+.card{background:var(--cuadra-tinta-2);border:var(--cuadra-borde);padding:var(--cuadra-s-3)}
+.card .n{font-family:var(--cuadra-mono);font-size:var(--cuadra-t-dato);color:var(--cuadra-sello)}
+.card h3{margin:var(--cuadra-s-1) 0}
+.card p{color:var(--cuadra-fg-dim)}
+@media(max-width:900px){.grid3{grid-template-columns:1fr}}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:var(--cuadra-s-3);margin-top:var(--cuadra-s-6)}
+@media(max-width:900px){.dos{grid-template-columns:1fr}}
+.veredicto{border:1px solid var(--cuadra-linea);padding:var(--cuadra-s-3);background:var(--cuadra-tinta-2)}
+.veredicto.no{border-color:var(--cuadra-rechazo);background:var(--cuadra-rechazo-fondo)}
+.veredicto.si{border-color:var(--cuadra-sello-borde);background:var(--cuadra-sello-fondo)}
+.chip{display:inline-block;font-family:var(--cuadra-mono);font-size:var(--cuadra-t-label);letter-spacing:.16em;text-transform:uppercase;padding:2px 8px;border:1px solid currentColor}
+.chip.no{color:var(--cuadra-rechazo)}
+.chip.si{color:var(--cuadra-sello)}
+.veredicto p{margin-top:var(--cuadra-s-1)}
+.aviso{border:1px solid var(--cuadra-observa);background:var(--cuadra-observa-fondo);padding:var(--cuadra-s-3);margin-top:var(--cuadra-s-4);font-size:var(--cuadra-t-lede)}
+.etiquetas{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--cuadra-s-2);margin-top:var(--cuadra-s-4);padding:0;list-style:none}
+.etiquetas li{border:var(--cuadra-borde);padding:var(--cuadra-s-2);background:var(--cuadra-tinta-2)}
+.etiquetas .dato{color:var(--cuadra-sello)}
+@media(max-width:720px){.etiquetas{grid-template-columns:1fr}}
 footer{border-top:1px solid var(--cuadra-linea)}
-footer>.wrap{padding-block:var(--cuadra-s-6);display:flex;flex-direction:column;gap:14px}
-footer .micro{max-width:80ch}
-
-@media(prefers-reduced-motion:reduce){
-  *{animation:none!important;transition:none!important}
-  html{scroll-behavior:auto}
-}
+footer .wrap{padding-block:var(--cuadra-s-4)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-
-<nav>
+<nav aria-label="Principal">
   <div class="wrap navin">
-    <a class="marca" href="#top">Fleet Intelligence</a>
+    <a class="marca" href="#hero">Fleet Intelligence</a>
     <div class="navlinks">
-      <a href="#flujo">Cómo funciona</a>
-      <a href="#video">Video</a>
+      <a class="sec-link" href="#como-funciona">Cómo funciona</a>
+      <a class="sec-link" href="#diferenciador">Diferenciador</a>
+      <a class="sec-link" href="#procedencia">Procedencia</a>
+      <a class="btn dashboard-link" href="https://fleet-intelligence-dashboard.vercel.app">Abrir el dashboard</a>
     </div>
   </div>
 </nav>
 
-<header class="hero" id="top">
-  <canvas id="campo" aria-hidden="true"></canvas>
-  <div class="wrap">
-    <div class="eyebrow">Perú · transporte de carga · del contrato al cobro</div>
-    <div class="herogrid">
-      <div class="herotxt">
-        <h1>Que todo<br>cuadre.</h1>
-        <p class="lede">El servicio se ejecutó, la carga llegó y la factura sigue detenida: falta un sello, un número de orden, una tarifa que nadie puede probar.</p>
-        <div class="ctas">
-          <a class="cq-btn pri" href="#flujo">Ver cómo cuadra</a>
-          <a class="cq-btn" href="#video">Ver el video · 90 s</a>
-        </div>
-      </div>
-
-      <div class="heromedia">
-        <!-- HUECO · imagen de apertura. Ver IDENTIDAD-VISUAL.md §14.1
-             Relación 4:5. Poner el archivo en assets/media/hero.webp y
-             descomentar el <img>. El canvas de abajo es el placeholder.
-        <img src="assets/media/hero.webp" alt="Sello de recepción sobre la guía firmada en la mesa de un centro de distribución">
-        -->
-        <div class="marco-media r45" id="hero-imagen">
-          <canvas id="heroPlaceholder" width="760" height="950" aria-hidden="true"></canvas>
-        </div>
-        <p class="micro dato">Imagen del expediente físico · pendiente de montaje</p>
-      </div>
+<main>
+<section class="sec hero" id="hero">
+  <div class="wrap herogrid">
+    <div>
+      <p class="eyebrow">Fleet Intelligence</p>
+      <h1 style="margin-top:14px">Sabe por qué tu flota gasta más combustible, antes de que cueste.</h1>
+      <p class="lede">Fleet Intelligence compara el consumo de cada vehículo con el de sus pares en el mismo tramo y sentido. Cuando hay sobreconsumo, avisa al gestor de flota por WhatsApp con el porqué.</p>
+      <a class="btn dashboard-link" href="https://fleet-intelligence-dashboard.vercel.app">Ver el dashboard</a>
     </div>
-  </div>
-</header>
-
-<div class="banda" aria-hidden="true"><div class="banda-in" id="banda"></div></div>
-
-<section class="sec" id="flujo">
-  <div class="wrap">
-    <div class="cabeza">
-      <div>
-        <div class="eyebrow">Cómo funciona</div>
-        <h2>Lo disperso<br>se asienta.</h2>
-      </div>
-      <p class="lede">Diez pasos, del contrato al cobro. Cada evidencia entra en su casilla cuando queda atada a la regla que la exige. Cuando la puerta cierra, el expediente cuadra.</p>
-    </div>
-
-    <div class="secuencia">
-      <div class="escena">
-        <div class="stage">
-          <canvas id="simbolo" width="900" height="900" role="img" aria-label="El símbolo de Cuadra: sus módulos se asientan en la retícula a medida que avanza la secuencia"></canvas>
-          <div class="contador dato" id="contador">Paso 01 de 10</div>
-        </div>
-        <div class="mando">
-          <button class="cq-btn pri" id="play">Pausar</button>
-          <button class="cq-btn" id="repetir">Repetir</button>
-          <div class="riel" aria-hidden="true"><span id="riel"></span></div>
-        </div>
-        <p class="limite">No generamos sellos ni firmas · señalamos lo que falta</p>
-      </div>
-
-      <ol class="pasos" id="pasos"></ol>
-    </div>
+    <figure class="marco">
+      <canvas id="tramo-pares" width="640" height="400" role="img" aria-label="Consumo de un vehículo frente a la banda de sus pares en tramos sucesivos"></canvas>
+      <figcaption class="micro">Consumo de un vehículo (L/100 km) frente a la banda mediana–p90 de sus pares, tramo a tramo. Ilustración.</figcaption>
+    </figure>
   </div>
 </section>
 
-<section class="sec" id="video">
+<section class="sec" id="problema">
   <div class="wrap">
-    <div class="cabeza">
-      <div>
-        <div class="eyebrow">El recorrido</div>
-        <h2>El expediente<br>en 90 segundos.</h2>
-      </div>
-      <p class="lede">Un expediente detenido, la cláusula que lo detiene, la subsanación y la puerta que cierra.</p>
-    </div>
-
-    <!-- HUECO · video. Ver IDENTIDAD-VISUAL.md §14.2
-         Relación 16:9. Poner assets/media/demo.mp4 y demo-poster.webp, y
-         descomentar el bloque <video>. Subtítulos .vtt obligatorios.
-    <div class="marco-media r169" style="margin-top:var(--cuadra-s-6)">
-      <video controls preload="none" poster="assets/media/demo-poster.webp">
-        <source src="assets/media/demo.mp4" type="video/mp4">
-        <track kind="captions" src="assets/media/demo-es.vtt" srclang="es" label="Español" default>
-      </video>
-    </div>
-    -->
-    <div class="marco-media r169" style="margin-top:var(--cuadra-s-6)">
-      <canvas id="videoPlaceholder" width="1600" height="900" role="img" aria-label="Espacio reservado para el video de demostración"></canvas>
-    </div>
-    <p class="micro dato" style="margin-top:10px">Video de demostración · pendiente de montaje · 16:9 · subtítulos en español</p>
+    <p class="eyebrow">El problema</p>
+    <h2>El combustible se pierde sin que nadie lo vea</h2>
+    <p class="lede">El gestor de flota ve el gasto al cierre del mes, cuando ya no se puede hacer nada. Y un promedio por vehículo no explica nada: una subida larga hace que cualquier vehículo consuma el doble sin que haya un problema. El resultado son alertas que nadie cree o sobreconsumo que nadie detecta.</p>
   </div>
 </section>
 
-<section class="sec">
+<section class="sec" id="como-funciona">
   <div class="wrap">
-    <div class="cierre">
-      <div style="display:flex;flex-direction:column;gap:var(--cuadra-s-3);min-width:0">
-        <div class="eyebrow">The Andes Hackathon · octubre 2026</div>
-        <h2>Cada entrega<br>respaldada.</h2>
-        <p class="lede">Cada regla validada. Cada liquidación trazable.</p>
-        <div class="ctas"><a class="cq-btn pri" href="#flujo">Ver la secuencia</a></div>
+    <p class="eyebrow">Cómo funciona</p>
+    <h2>Tres pasos, del dato al aviso</h2>
+    <ol class="grid3">
+      <li class="card"><span class="n">01</span><h3>Replay de telemetría</h3><p>Reproducimos telemetría histórica como si llegara en vivo: posición, velocidad y consumo de cada vehículo.</p></li>
+      <li class="card"><span class="n">02</span><h3>Comparación con sus pares</h3><p>Cada vehículo se compara por tramo y sentido con los pares que recorrieron ese mismo tramo. La línea base nunca es por vehículo.</p></li>
+      <li class="card"><span class="n">03</span><h3>Alerta por WhatsApp</h3><p>Si hay sobreconsumo sobre la línea base del tramo, el gestor de flota recibe una alerta con la evidencia.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec" id="diferenciador">
+  <div class="wrap">
+    <p class="eyebrow">Diferenciador</p>
+    <h2>No alerta en una subida normal</h2>
+    <p class="lede">El vehículo T07 sube las montañas de Nanling hacia el norte y consume 82,2 L/100 km, 2,4 veces su mediana. Mirado solo contra sí mismo, parece un problema grave.</p>
+    <div class="dos">
+      <div class="veredicto no">
+        <span class="chip no">Falso positivo</span>
+        <h3 style="margin-top:12px">Frente a una línea base por vehículo</h3>
+        <p>82,2 L/100 km contra su propia mediana: se dispara una alerta que el gestor de flota no puede creer.</p>
       </div>
-      <div class="plano" style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
-        <p class="dato" style="color:var(--cuadra-sello);font-size:15px">Listo para facturar</p>
-        <p class="micro">La marca cerrada solo aparece cuando hay una aceptación registrada, con aprobador identificado y hora.</p>
+      <div class="veredicto si">
+        <span class="chip si">Sin alerta</span>
+        <h3 style="margin-top:12px">Frente a sus pares en el mismo tramo y sentido</h3>
+        <p>La mediana de los 13 vehículos que suben ese tramo es 79,7 L/100 km. T07 consume lo mismo que sus pares: no hay sobreconsumo.</p>
       </div>
     </div>
   </div>
 </section>
 
-<footer>
+<section class="sec" id="procedencia">
   <div class="wrap">
-    <div style="display:flex;align-items:center;gap:10px">
-      <span class="marca" style="font-size:14px">Fleet Intelligence</span>
-    </div>
-    <p class="micro">Contratos, órdenes y montos de esta página son de demostración. Describe una arquitectura operativa; no constituye asesoría legal ni tributaria.</p>
+    <p class="eyebrow">Procedencia de los datos</p>
+    <h2>Qué es real y qué no</h2>
+    <p class="aviso"><strong>Aviso:</strong> telemetría real de una flota en China (FEAD, abril 2020), reproducida; fletes, conductores y mensajes sintéticos.</p>
+    <ul class="etiquetas">
+      <li><span class="dato">fead_observed</span><p class="micro">Telemetría real de FEAD.</p></li>
+      <li><span class="dato">synthetic_demo</span><p class="micro">Fabricado para la demo: fletes y conductores.</p></li>
+      <li><span class="dato">human_reported</span><p class="micro">Escrito por una persona, como un reporte del conductor.</p></li>
+      <li><span class="dato">model_inferred</span><p class="micro">Calculado por el sistema, como la línea base.</p></li>
+    </ul>
+    <p class="micro" style="margin-top:var(--cuadra-s-2)">Toda respuesta del sistema declara su procedencia. El replay nunca es monitoreo en tiempo real.</p>
   </div>
-</footer>
+</section>
+
+<section class="sec" id="cta">
+  <div class="wrap">
+    <p class="eyebrow">Pruébalo</p>
+    <h2>Mira el replay de la flota</h2>
+    <p class="lede">Abre el dashboard y sigue a los vehículos, sus tramos y sus alertas.</p>
+    <a class="btn dashboard-link" style="margin-top:32px" href="https://fleet-intelligence-dashboard.vercel.app">Abrir el dashboard</a>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><p class="micro">Fleet Intelligence · Demo con datos de FEAD (abril 2020) y datos sintéticos.</p></div></footer>
 
 <script>
-(function(){
-  "use strict";
+// URL del dashboard: único lugar. Se ajusta al desplegar el dashboard en Vercel.
+var DASHBOARD_URL = "https://fleet-intelligence-dashboard.vercel.app";
+document.querySelectorAll("a.dashboard-link").forEach(function (a) { a.href = DASHBOARD_URL; });
 
-  var cs = getComputedStyle(document.documentElement);
-  function tok(n, fb){ var v = cs.getPropertyValue(n).trim(); return v || fb; }
-  var SELLO = tok('--cuadra-sello','#00D8B4');
-  var FG    = tok('--cuadra-fg','#EDF1F8');
-  var LINEA = tok('--cuadra-linea','#222A3B');
-  var DIM   = tok('--cuadra-fg-dim','#848FA6');
-  var POZO  = tok('--cuadra-tinta-pozo','#04060B');
-  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Animación "tramo vs pares". Decorativa: la página funciona sin ella.
+(function () {
+  var c = document.getElementById("tramo-pares");
+  if (!c || !c.getContext) return;
+  var ctx = c.getContext("2d");
+  var css = getComputedStyle(document.documentElement);
+  var v = function (n) { return css.getPropertyValue(n).trim(); };
+  var COL = { linea: v("--cuadra-linea"), dim: v("--cuadra-fg-dim"), banda: v("--cuadra-sello-fondo"), bandaB: v("--cuadra-sello-borde"), ok: v("--cuadra-sello"), alerta: v("--cuadra-rechazo"), fg: v("--cuadra-fg"), mono: v("--cuadra-mono") };
+  var W = c.width, H = c.height, PAD = 36, N = 8;
+  // por tramo: [mediana, p90, consumo del vehículo]; el tramo 6 es sobreconsumo
+  var D = [[30,36,31],[32,38,34],[80,92,82],[31,37,30],[33,39,36],[30,36,52],[34,40,35],[31,37,33]];
+  var MAX = 100;
+  var x = function (i) { return PAD + (W - 2 * PAD) * (i + .5) / N; };
+  var y = function (val) { return H - PAD - (H - 2 * PAD) * val / MAX; };
+  var bw = (W - 2 * PAD) / N * .7;
 
-  /* ---- retícula del símbolo: marco de tres lados, puerta y sello -------- */
-  var N = 5, MARCO = [], PUERTA = [];
-  for (var c = 0; c < N; c++){ MARCO.push([c,0]); MARCO.push([c,N-1]); }
-  for (var r = 1; r < N-1; r++){ MARCO.push([0,r]); PUERTA.push([N-1,r]); }
-
-  function ruido(i){ var s = Math.sin(i*127.1)*43758.5453; return s - Math.floor(s); }
-
-  /* Símbolo pequeño y estático: nav, cierre, pie. */
-  function dibujaChico(cv, o){
-    var x = cv.getContext('2d'), W = cv.width, u = W/(N+2), m = u;
-    var g = (cv.clientWidth && cv.clientWidth < 48) ? 0 : u*0.125;
-    x.clearRect(0,0,W,cv.height);
-    x.fillStyle = FG;
-    MARCO.forEach(function(p){ x.fillRect(m+p[0]*u+g, m+p[1]*u+g, u-2*g, u-2*g); });
-    x.fillStyle = SELLO;
-    for (var k = 0; k < (o.puerta||0); k++){
-      var q = PUERTA[k];
-      x.fillRect(m+q[0]*u+g, m+q[1]*u+g, u-2*g, u-2*g);
-    }
-    if (o.sello){ var mid = (N-1)/2; x.fillRect(m+mid*u+g, m+mid*u+g, u-2*g, u-2*g); }
-  }
-
-  /* ---- los diez pasos --------------------------------------------------- */
-  var PASOS = [
-    ['Cotización',        'Llega el pedido. El precio y su vigencia quedan por escrito.'],
-    ['Acuerdo',           'Tarifario y política de POD, con versión y fecha.'],
-    ['Orden de servicio', 'El viaje se acepta contra la tarifa vigente ese día.'],
-    ['Despacho',          'Placa, conductor y guías, atados a la orden.'],
-    ['Ejecución',         'Hitos del viaje: hora del hecho y hora de registro, separadas.'],
-    ['Entrega y POD',     'Firma, sello si fue pactado, cantidades y fotos.'],
-    ['Conformidad',       'Se valida contra la regla. Lo que falta, se pide con la cláusula a la vista.'],
-    ['Liquidación',       'Tarifa, extras y penalidades, línea por línea.'],
-    ['Factura',           'Paquete listo para facturar. La emisión la hace facturación.'],
-    ['Cobro',             'Abono conciliado. El expediente cierra.']
-  ];
-
-  /* Cuántos módulos hay asentados en cada paso.
-     Pasos 1–7 arman el marco; 8, 9 y 10 llenan la puerta; el 10 pone el sello. */
-  function metaMarco(paso){ return paso >= 7 ? MARCO.length : Math.round(MARCO.length * paso/7); }
-  function metaPuerta(paso){ return paso <= 7 ? 0 : paso - 7; }
-
-  /* ---- escena principal -------------------------------------------------- */
-  var cv = document.getElementById('simbolo'), gx = cv.getContext('2d');
-  var paso = 1, jugando = !reduce;
-
-  /* Cada módulo guarda su avance 0..1 entre la posición dispersa y su casilla. */
-  var avanceMarco = MARCO.map(function(){ return 0; });
-
-  function dibujaEscena(t){
-    var W = cv.width, u = W/(N+2), m = u, g = u*0.125;
-    gx.clearRect(0,0,W,W);
-
-    // retícula de fondo: las casillas que esperan
-    gx.strokeStyle = LINEA; gx.lineWidth = 1.5;
-    for (var i = 0; i <= N; i++){
-      gx.beginPath(); gx.moveTo(m+i*u, m); gx.lineTo(m+i*u, m+N*u); gx.stroke();
-      gx.beginPath(); gx.moveTo(m, m+i*u); gx.lineTo(m+N*u, m+i*u); gx.stroke();
-    }
-
-    var objetivo = metaMarco(paso);
-    MARCO.forEach(function(p, i){
-      var meta = i < objetivo ? 1 : 0;
-      avanceMarco[i] += (meta - avanceMarco[i]) * (reduce ? 1 : 0.055);
-      var a = avanceMarco[i];
-      var e = 1 - Math.pow(1-a, 3);              // se asienta, no se desliza
-      var deriva = reduce ? 0 : Math.sin(t/900 + i) * u * 0.18 * (1-e);
-      var dx = (ruido(i)-0.5) * u * 3.2 * (1-e) + deriva;
-      var dy = (ruido(i+41)-0.5) * u * 3.2 * (1-e) + deriva*0.6;
-      var gir = (1-e) * (ruido(i+7)-0.5) * 0.7;
-
-      gx.save();
-      gx.translate(m + p[0]*u + u/2 + dx, m + p[1]*u + u/2 + dy);
-      gx.rotate(gir);
-      gx.fillStyle = e > 0.9 ? FG : 'rgba(132,143,166,' + (0.5 + 0.45*e).toFixed(2) + ')';
-      gx.fillRect(-(u/2 - g), -(u/2 - g), u - 2*g, u - 2*g);
-      gx.restore();
+  function draw(p) { // p: tramos revelados (0..N)
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = COL.linea; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD, H - PAD); ctx.lineTo(W - PAD, H - PAD); ctx.stroke();
+    ctx.font = "11px " + COL.mono; ctx.fillStyle = COL.dim; ctx.textAlign = "center";
+    D.forEach(function (d, i) {
+      ctx.fillStyle = COL.banda; ctx.strokeStyle = COL.bandaB;
+      ctx.fillRect(x(i) - bw / 2, y(d[1]), bw, y(d[0]) - y(d[1]));
+      ctx.strokeRect(x(i) - bw / 2, y(d[1]), bw, y(d[0]) - y(d[1]));
+      ctx.fillStyle = COL.dim; ctx.fillText("T" + (i + 1), x(i), H - PAD + 16);
     });
-
-    var puerta = metaPuerta(paso);
-    gx.fillStyle = SELLO;
-    for (var k = 0; k < puerta; k++){
-      var q = PUERTA[k];
-      gx.fillRect(m+q[0]*u+g, m+q[1]*u+g, u-2*g, u-2*g);
+    var pts = [];
+    for (var i = 0; i < N; i++) {
+      var f = Math.max(0, Math.min(1, p - i));
+      if (f > 0) pts.push([i, f]);
     }
-    if (paso >= 10){
-      var pulso = reduce ? 1 : 0.5 + 0.5*Math.abs(Math.sin(t/900));
-      gx.fillStyle = 'rgba(0,216,180,' + pulso.toFixed(2) + ')';
-      var mid = (N-1)/2;
-      gx.fillRect(m+mid*u+g, m+mid*u+g, u-2*g, u-2*g);
-    }
-  }
-
-  /* ---- la escalera de pasos --------------------------------------------- */
-  var pasosEl = document.getElementById('pasos');
-  pasosEl.innerHTML = PASOS.map(function(p, i){
-    return '<li><button type="button" data-i="'+(i+1)+'">'
-      + '<em>'+(i<9?'0':'')+(i+1)+'</em>'
-      + '<span><b>'+p[0]+'</b><span>'+p[1]+'</span></span>'
-      + '</button></li>';
-  }).join('');
-  var filas = [].slice.call(pasosEl.children);
-
-  var contador = document.getElementById('contador');
-  var riel = document.getElementById('riel');
-  var playBtn = document.getElementById('play');
-
-  function pinta(){
-    filas.forEach(function(li, i){
-      li.className = (i+1) === paso ? 'vivo' : ((i+1) < paso ? 'hecho' : '');
+    ctx.strokeStyle = COL.fg; ctx.lineWidth = 2; ctx.beginPath();
+    pts.forEach(function (q, k) {
+      var px = x(q[0]), py = y(D[q[0]][2]);
+      if (k === 0) { ctx.moveTo(px, py); return; }
+      var pr = pts[k - 1], ppx = x(pr[0]), ppy = y(D[pr[0]][2]);
+      ctx.lineTo(ppx + (px - ppx) * q[1], ppy + (py - ppy) * q[1]);
     });
-    contador.textContent = 'Paso ' + (paso<10?'0':'') + paso + ' de 10';
-    riel.style.width = (paso/10*100) + '%';
-    if (reduce) dibujaEscena(0);
-  }
-
-  function ve(n){
-    paso = Math.min(10, Math.max(1, n));
-    pinta();
-  }
-
-  filas.forEach(function(li){
-    li.querySelector('button').addEventListener('click', function(){
-      jugando = false; playBtn.textContent = 'Reanudar';
-      ve(+this.dataset.i);
+    ctx.stroke();
+    pts.forEach(function (q) {
+      if (q[1] < 1) return;
+      var d = D[q[0]], over = d[2] > d[1];
+      ctx.fillStyle = over ? COL.alerta : COL.fg;
+      ctx.fillRect(x(q[0]) - 4, y(d[2]) - 4, 8, 8);
+      if (over) { ctx.fillStyle = COL.alerta; ctx.fillText("SOBRECONSUMO", x(q[0]), y(d[2]) - 12); }
     });
-  });
-
-  playBtn.addEventListener('click', function(){
-    if (paso >= 10 && !jugando) ve(1);
-    jugando = !jugando;
-    playBtn.textContent = jugando ? 'Pausar' : 'Reanudar';
-  });
-  document.getElementById('repetir').addEventListener('click', function(){
-    ve(1); jugando = true; playBtn.textContent = 'Pausar';
-  });
-
-  /* ---- campo de puntos y placeholder del hero ---------------------------- */
-  var campo = document.getElementById('campo'), fx = campo.getContext('2d');
-  function tamCampo(){ var p = campo.parentElement; campo.width = p.offsetWidth; campo.height = p.offsetHeight; }
-  function dibujaCampo(t){
-    var W = campo.width, H = campo.height, s = 46;
-    fx.clearRect(0,0,W,H);
-    for (var y = s/2; y < H; y += s){
-      for (var x0 = s/2; x0 < W; x0 += s){
-        var d = Math.sin(x0*0.012 + y*0.016 + t/1600);
-        fx.fillStyle = 'rgba(0,216,180,' + (0.05 + 0.09*(d*0.5+0.5)).toFixed(3) + ')';
-        fx.fillRect(x0, y, 2, 2);
-      }
-    }
-  }
-  addEventListener('resize', tamCampo); tamCampo();
-
-  /* El hueco de la imagen cuenta la misma historia en bucle: la evidencia
-     entra fuera de sitio y se asienta. Ciclo de 9 s, asentado en los primeros 5. */
-  var heroCv = document.getElementById('heroPlaceholder'), hx = heroCv.getContext('2d');
-  function dibujaHeroPlaceholder(t){
-    var W = heroCv.width, H = heroCv.height, cols = 7, u = W/cols, filasN = Math.ceil(H/u);
-    hx.fillStyle = POZO; hx.fillRect(0,0,W,H);
-    hx.strokeStyle = LINEA; hx.lineWidth = 1;
-    for (var i = 1; i < cols; i++){ hx.beginPath(); hx.moveTo(i*u,0); hx.lineTo(i*u,H); hx.stroke(); }
-    for (var j = 1; j < filasN; j++){ hx.beginPath(); hx.moveTo(0,j*u); hx.lineTo(W,j*u); hx.stroke(); }
-
-    var p = reduce ? 1 : Math.min(1, (t % 9000)/5000);
-    var e = 1 - Math.pow(1-p, 3);
-    for (var k = 0; k < 22; k++){
-      var cx = Math.floor(ruido(k*3.3)*cols), cy = Math.floor(ruido(k*7.7+5)*filasN);
-      var dx = (ruido(k*5.1)-0.5) * u * 4.6 * (1-e);
-      var dy = (ruido(k*9.3)-0.5) * u * 4.6 * (1-e);
-      var gir = (1-e) * (ruido(k*2.7)-0.5) * 0.9;
-      hx.save();
-      hx.translate(cx*u + u/2 + dx, cy*u + u/2 + dy);
-      hx.rotate(gir);
-      hx.fillStyle = e > 0.9
-        ? (k % 8 === 0 ? SELLO : 'rgba(237,241,248,.86)')
-        : 'rgba(132,143,166,' + (0.45 + 0.4*e).toFixed(2) + ')';
-      hx.fillRect(-(u/2 - 3), -(u/2 - 3), u-6, u-6);
-      hx.restore();
-    }
-    hx.fillStyle = SELLO;
-    hx.fillRect(0, H-3, W*(reduce ? 1 : p), 3);
   }
 
-  (function(){
-    var v = document.getElementById('videoPlaceholder'), x = v.getContext('2d');
-    var W = v.width, H = v.height;
-    x.fillStyle = POZO; x.fillRect(0,0,W,H);
-    x.strokeStyle = LINEA; x.lineWidth = 2;
-    for (var i = 1; i < 16; i++){ x.beginPath(); x.moveTo(i*W/16,0); x.lineTo(i*W/16,H); x.stroke(); }
-    for (var j = 1; j < 9; j++){ x.beginPath(); x.moveTo(0,j*H/9); x.lineTo(W,j*H/9); x.stroke(); }
-    var s = 86, cxp = W/2, cyp = H/2;
-    x.fillStyle = SELLO;
-    x.beginPath(); x.moveTo(cxp-s*0.42, cyp-s*0.58); x.lineTo(cxp+s*0.62, cyp); x.lineTo(cxp-s*0.42, cyp+s*0.58); x.closePath(); x.fill();
-    x.fillStyle = DIM; x.font = '500 26px ui-monospace, monospace'; x.textAlign = 'center';
-    x.fillText('90 SEGUNDOS · DEL EXPEDIENTE DETENIDO AL LISTO PARA FACTURAR', cxp, cyp + s*1.5);
-  })();
-
-  /* ---- banda -------------------------------------------------------------- */
-  var frases = ['Que todo cuadre','·','Cada entrega respaldada','·','Cada regla validada','·','Cada liquidación trazable','·'];
-  document.getElementById('banda').innerHTML =
-    frases.concat(frases).map(function(w){ return '<span>'+w+'</span>'; }).join('');
-
-
-  /* ---- bucle: la secuencia avanza sola hasta cerrar ---------------------- */
-  var ultimo = 0;
-  function bucle(now){
-    dibujaCampo(now);
-    dibujaHeroPlaceholder(now);
-    dibujaEscena(now);
-    if (jugando && now - ultimo > 2000){
-      ultimo = now;
-      if (paso < 10) ve(paso + 1);
-      else { jugando = false; playBtn.textContent = 'Repetir desde el inicio'; }
-    }
-    requestAnimationFrame(bucle);
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) { draw(N); return; }
+  var t0 = null, DUR = 7000, PAUSA = 2500;
+  function frame(t) {
+    if (t0 === null) t0 = t;
+    var e = (t - t0) % (DUR + PAUSA);
+    draw(Math.min(N, N * e / DUR));
+    requestAnimationFrame(frame);
   }
-
-  pinta();
-  if (reduce){
-    dibujaCampo(0);
-    dibujaHeroPlaceholder(0);
-    ve(10);
-    playBtn.hidden = true;
-  } else {
-    ultimo = performance.now();
-    requestAnimationFrame(bucle);
-  }
+  requestAnimationFrame(frame);
 })();
 </script>
-
 </body>
 </html>
