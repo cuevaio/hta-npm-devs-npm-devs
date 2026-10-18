@@ -8,13 +8,15 @@ from typing import Annotated, Callable
 import psycopg
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query, Request, Security
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
+from psycopg_pool import PoolTimeout
 
 from . import examples as ex
 from . import freights as freights_mod
 from . import fuel as fuel_mod
 from . import reads
-from .db import migrate
+from .db import STATEMENT_TIMEOUT_MS, close_pools, migrate, read_url
 from .replay import Clock, ReplayEngine, system_clock
 from .schemas import (
     AlertList, Bottlenecks, ControlReplayRequest, Envelope, ErrorBody, FleetOverview, FreightBoard, FuelAnalysis,
@@ -68,13 +70,18 @@ def create_app(
     cors_origins: list[str] | None = None,
     clock: Clock = system_clock,
     tick_interval: float = 1.0,
+    statement_timeout_ms: int | None = None,
 ) -> FastAPI:
     database_url = database_url or os.environ.get("DATABASE_URL")
     api_key = api_key or os.environ.get("API_KEY") or None
     if cors_origins is None:
         cors_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
 
-    engine = ReplayEngine(database_url, clock) if database_url else None
+    # Las lecturas van por un pool con statement_timeout; el replay y las migraciones usan la URL tal cual
+    # porque un seek largo o una migración pueden pasar del timeout.
+    statement_timeout_ms = statement_timeout_ms or int(os.environ.get("STATEMENT_TIMEOUT_MS", STATEMENT_TIMEOUT_MS))
+    reads_url = read_url(database_url, statement_timeout_ms) if database_url else None
+    engine = ReplayEngine(database_url, clock, reads_url) if database_url else None
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
@@ -85,6 +92,7 @@ def create_app(
         yield
         if task:
             task.cancel()
+        close_pools()
 
     app = FastAPI(
         lifespan=lifespan,
@@ -109,6 +117,12 @@ def create_app(
         allow_headers=["X-API-Key", "Content-Type"],
     )
 
+    # Base saturada: fallar rápido con 503 libera la instancia; esperar sin fin es lo que la tumbó (test_db_busy).
+    @app.exception_handler(PoolTimeout)
+    @app.exception_handler(psycopg.errors.QueryCanceled)
+    async def database_busy(_: Request, exc: Exception) -> JSONResponse:
+        return JSONResponse(status_code=503, content={"detail": "La base de datos está ocupada; reintenta en unos segundos"})
+
     @app.get("/health", include_in_schema=False)
     def health() -> dict:
         if not database_url:
@@ -129,19 +143,19 @@ def create_app(
 
     def telemetry() -> list[Provenance]:
         """Procedencia de la telemetría cargada: synthetic_demo con la flota de Perú (ADR 0012)."""
-        return [Provenance(p) for p in reads.telemetry_provenance(database_url)] or [Provenance.synthetic_demo]
+        return [Provenance(p) for p in reads.telemetry_provenance(reads_url)] or [Provenance.synthetic_demo]
 
     def real() -> list[Provenance]:
         return list(dict.fromkeys([*telemetry(), Provenance.synthetic_demo]))
 
     def fleet() -> dict:
         need_engine()
-        data, desde, hasta, updated = reads.fleet_overview(database_url)
+        data, desde, hasta, updated = reads.fleet_overview(reads_url)
         return envelope(data, real(), TimeRange(from_=desde, to=hasta), updated)
 
     def vehicle(alias: str) -> dict:
         need_engine()
-        found = reads.vehicle_status(database_url, alias)
+        found = reads.vehicle_status(reads_url, alias)
         if found is None:
             raise HTTPException(status_code=404, detail=f"Vehículo desconocido: {alias}")
         data, desde, hasta, updated = found
@@ -149,7 +163,7 @@ def create_app(
 
     def trip(trip_id: str) -> dict:
         need_engine()
-        found = fuel_mod.trip_status(database_url, trip_id)
+        found = fuel_mod.trip_status(reads_url, trip_id)
         if found is None:
             raise HTTPException(status_code=404, detail=f"Viaje desconocido: {trip_id}")
         data, desde, hasta, updated = found
@@ -157,7 +171,7 @@ def create_app(
 
     def fuel(trip_id: str) -> dict:
         need_engine()
-        found = fuel_mod.fuel_analysis(database_url, trip_id)
+        found = fuel_mod.fuel_analysis(reads_url, trip_id)
         if found is None:
             raise HTTPException(status_code=404, detail=f"Viaje desconocido: {trip_id}")
         data, desde, hasta, updated = found
@@ -176,7 +190,7 @@ def create_app(
 
     def freights() -> dict:
         need_engine()
-        data, desde, hasta, updated = freights_mod.freight_board(database_url)
+        data, desde, hasta, updated = freights_mod.freight_board(reads_url)
         return envelope(data, FREIGHT_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
 
     # Ejemplos del contrato (OpenAPI y mock): no dependen de la base.

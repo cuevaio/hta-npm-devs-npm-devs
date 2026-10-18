@@ -48,3 +48,21 @@ test("error 500 de la Domain API", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByText("No se pudo leer la Domain API")).toBeVisible();
 });
+
+test("con la Domain API lenta no acumula peticiones: una a la vez", async ({ page }) => {
+  let inFlight = 0;
+  let max = 0;
+  let done = 0;
+  await page.route(`${API}/v1/fleet`, async (route) => {
+    inFlight++;
+    max = Math.max(max, inFlight);
+    const res = await route.fetch();
+    await new Promise((r) => setTimeout(r, 3000)); // más lento que el intervalo de 2 s
+    await route.fulfill({ response: res });
+    inFlight--;
+    done++;
+  });
+  await page.goto("/");
+  await expect.poll(() => done, { timeout: 15_000 }).toBeGreaterThanOrEqual(2);
+  expect(max).toBe(1);
+});
