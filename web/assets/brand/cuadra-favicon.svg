@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" width="32" height="32" role="img" aria-label="Cuadra"><title>Cuadra</title>
+  <rect width="140" height="140" fill="#07090F"/>
+  <rect x="20" y="20" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="40" y="20" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="60" y="20" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="80" y="20" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="100" y="20" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="20" y="40" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="20" y="60" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="20" y="80" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="20" y="100" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="40" y="100" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="60" y="100" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="80" y="100" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="100" y="100" width="20" height="20" fill="#EDF1F8"/>
+  <rect x="100" y="40" width="20" height="20" fill="#00D8B4"/>
+  <rect x="100" y="60" width="20" height="20" fill="#00D8B4"/>
+  <rect x="100" y="80" width="20" height="20" fill="#00D8B4"/>
+</svg>
