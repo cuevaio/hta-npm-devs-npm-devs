@@ -15,7 +15,7 @@ export interface ToolError {
 }
 
 const REPLAY =
-  "Los datos son un replay de telemetría histórica de FEAD, nunca tiempo real. " +
+  "Los datos son un replay de telemetría histórica de una flota simulada en Perú, nunca tiempo real. " +
   "La respuesta es un sobre con procedencia, rango de tiempo y updated_at.";
 
 const noParams = { type: "object", properties: {} };

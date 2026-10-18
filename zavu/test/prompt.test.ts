@@ -16,7 +16,7 @@ describe("prompt del agente", () => {
     expect(PROMPT).toMatch(/Hechos/);
     expect(PROMPT).toMatch(/Hipótesis/);
     expect(PROMPT).toMatch(/procedencia/i);
-    expect(PROMPT).toMatch(/UTC\+8/);
+    expect(PROMPT).toMatch(/hora de Lima \(UTC−5\)/);
     expect(PROMPT).toMatch(/replay/i);
     expect(PROMPT).toMatch(/Nunca inventes/);
     expect(PROMPT).toMatch(/Nunca decides por el gestor/);

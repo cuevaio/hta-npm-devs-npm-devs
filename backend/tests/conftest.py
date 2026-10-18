@@ -28,10 +28,13 @@ def database_url():
 
 @pytest.fixture
 def source_dir(tmp_path):
-    """Salida de pipeline en miniatura: enlaces al fixture de data/ (sin copiarlo) y a los de pruebas."""
-    for name in ("telemetry.csv", "drivers.csv", "driver_reports.csv"):
-        (tmp_path / name).symlink_to(REPO / "data" / "fixtures" / name)
-    for name in ("trips.csv", "freights.csv", "passes_demo.csv", "baseline.csv"):
+    """Salida de pipeline en miniatura con el fixture propio de los tests (ventana de FEAD previa al ADR 0012).
+
+    Los tests prueban el comportamiento de la API, no la fuente de los datos; el fixture de Perú se usa en
+    test_freights.py.
+    """
+    for name in ("telemetry.csv", "drivers.csv", "driver_reports.csv", "trips.csv", "freights.csv",
+                 "passes_demo.csv", "baseline.csv"):
         shutil.copy(FIXTURES / name, tmp_path / name)
     return tmp_path
 

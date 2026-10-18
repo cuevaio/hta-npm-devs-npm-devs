@@ -69,11 +69,11 @@ _Avoid_: Idle, motor en vacío
 ### Datos y procedencia
 
 **Procedencia**:
-Origen de un dato: `fead_observed` (telemetría real de FEAD), `synthetic_demo` (fabricado para la demo), `human_reported` (escrito por una persona), `external_enrichment` (fuente externa) o `model_inferred` (calculado por el sistema). Toda respuesta la declara.
+Origen de un dato: `fead_observed` (telemetría real de FEAD; la demo ya no la usa, ADR 0012), `synthetic_demo` (fabricado para la demo, incluida toda la telemetría de la flota simulada en Perú), `human_reported` (escrito por una persona), `external_enrichment` (fuente externa) o `model_inferred` (calculado por el sistema). Toda respuesta la declara.
 _Avoid_: Fuente, origen
 
 **Replay**:
-Reproducción controlada de telemetría histórica de FEAD como si llegara en vivo. Nunca es monitoreo en tiempo real.
+Reproducción controlada de la telemetría histórica de la demo (sintética, sobre corredores reales de Perú; ADR 0012) como si llegara en vivo. Nunca es monitoreo en tiempo real.
 _Avoid_: Streaming, simulación, tiempo real
 
 **Hora del evento**:

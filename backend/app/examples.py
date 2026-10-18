@@ -3,6 +3,7 @@
 from datetime import UTC, datetime
 
 from .schemas import (
+    AgregadoFletes, FleteDetalle, FreightBoard, ResumenFletes,
     Alerta, Anomalia, Bottlenecks, CuelloDeBotella, Flete, FleetOverview, FuelAnalysis, LineaBase,
     Pasada, Posicion, Provenance, ReplayState, ReporteConductor, TimeRange, Tramo, TripStatus,
     VehicleStatus, VehiculoResumen,
@@ -16,15 +17,15 @@ def utc(*args: int) -> datetime:
 UPDATED_AT = utc(2020, 4, 14, 3, 30)
 REPLAY_START = utc(2020, 4, 13, 0, 0)
 REPLAY_END = utc(2020, 4, 19, 23, 59)
-CORREDOR = "Harbin-Guangzhou"
+CORREDOR = "LIM-AQP"
 
-PROVENANCE = [Provenance.fead_observed, Provenance.synthetic_demo, Provenance.model_inferred]
+PROVENANCE = [Provenance.synthetic_demo, Provenance.model_inferred]  # flota de Perú (ADR 0012)
 PROVENANCE_ALERTS = [*PROVENANCE, Provenance.human_reported]
 
 T0 = utc(2020, 4, 14, 0, 0)
 NOW = utc(2020, 4, 14, 3, 30)
 
-H3 = ["86309a0f7ffffff", "86309a0efffffff", "86309a0c7ffffff", "86309a0dfffffff"]
+H3 = ["868e6a027ffffff", "868e6a177ffffff", "868e6a8dfffffff", "868e6a8efffffff"]
 
 
 def _t(i: int, sentido="ida") -> Tramo:
@@ -36,16 +37,16 @@ def _pos(lat: float, lon: float) -> Posicion:
 
 
 VEHICLES = {
-    "T03": VehiculoResumen(alias="T03", estado="en_viaje", viaje_id="V-001", velocidad_kmh=72.5, posicion=_pos(28.19, 113.02), hora_evento=NOW),
-    "T07": VehiculoResumen(alias="T07", estado="en_viaje", viaje_id="V-002", velocidad_kmh=64.0, posicion=_pos(30.57, 114.30), hora_evento=NOW),
-    "T28": VehiculoResumen(alias="T28", estado="detenido", velocidad_kmh=0.0, posicion=_pos(45.75, 126.63), hora_evento=NOW),
-    "T04": VehiculoResumen(alias="T04", estado="ralenti", velocidad_kmh=0.0, posicion=_pos(34.75, 113.62), hora_evento=NOW),
-    "T22": VehiculoResumen(alias="T22", estado="detenido", velocidad_kmh=0.0, posicion=_pos(23.13, 113.26), hora_evento=NOW),
-    "T09": VehiculoResumen(alias="T09", estado="detenido", velocidad_kmh=0.0, posicion=_pos(45.80, 126.53), hora_evento=NOW),
+    "T03": VehiculoResumen(alias="T03", estado="en_viaje", viaje_id="V-001", velocidad_kmh=72.5, posicion=_pos(-14.83, -74.94), hora_evento=NOW),
+    "T07": VehiculoResumen(alias="T07", estado="en_viaje", viaje_id="V-002", velocidad_kmh=64.0, posicion=_pos(-14.07, -75.73), hora_evento=NOW),
+    "T28": VehiculoResumen(alias="T28", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-15.49, -70.13), hora_evento=NOW),
+    "T04": VehiculoResumen(alias="T04", estado="ralenti", velocidad_kmh=0.0, posicion=_pos(-15.85, -74.25), hora_evento=NOW),
+    "T22": VehiculoResumen(alias="T22", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-12.06, -75.21), hora_evento=NOW),
+    "T09": VehiculoResumen(alias="T09", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-12.05, -77.09), hora_evento=NOW),
 }
 
 REPORTE = ReporteConductor(
-    texto="Hay obras en el paso de Nanling, estamos parados hace media hora",
+    texto="Hay obras en la Panamericana Sur a la altura de Chala, estamos parados hace media hora",
     recibido_en=utc(2020, 4, 14, 2, 40),
 )
 
@@ -63,14 +64,14 @@ ALERTA = Alerta(
 
 TRIPS = {
     "V-001": TripStatus(
-        viaje_id="V-001", vehiculo_alias="T03", conductor="Wang Lei (sintético)",
-        flete=Flete(id="F-101", carga="Autopartes", cliente="Cliente Demo S.A.", origen="Harbin", destino="Guangzhou"),
-        corredor=CORREDOR, sentido="ida", estado="en_curso", inicio=utc(2020, 4, 13, 18, 0), distancia_km=1840.5, progreso_pct=53.2,
+        viaje_id="V-001", vehiculo_alias="T03", conductor="Marcos Quispe (sintético)",
+        flete=Flete(id="F-101", carga="Autopartes", cliente="Cliente Demo S.A.", origen="LIM", destino="AQP"),
+        corredor=CORREDOR, sentido="ida", estado="en_curso", inicio=utc(2020, 4, 13, 18, 0), distancia_km=520.4, progreso_pct=51.6,
     ),
     "V-002": TripStatus(
-        viaje_id="V-002", vehiculo_alias="T07", conductor="Li Na (sintético)",
-        flete=Flete(id="F-102", carga="Electrodomésticos", cliente="Cliente Demo S.A.", origen="Harbin", destino="Guangzhou"),
-        corredor=CORREDOR, sentido="ida", estado="en_curso", inicio=utc(2020, 4, 13, 20, 0), distancia_km=1320.0, progreso_pct=38.3,
+        viaje_id="V-002", vehiculo_alias="T07", conductor="Hugo Montalvo (sintético)",
+        flete=Flete(id="F-102", carga="Electrodomésticos", cliente="Cliente Demo S.A.", origen="LIM", destino="AQP"),
+        corredor=CORREDOR, sentido="ida", estado="en_curso", inicio=utc(2020, 4, 13, 20, 0), distancia_km=310.0, progreso_pct=30.7,
     ),
 }
 
@@ -110,7 +111,7 @@ BOTTLENECKS = {
             CuelloDeBotella(tipo="parada_sin_explicar", inicio=utc(2020, 4, 14, 1, 10), fin=utc(2020, 4, 14, 1, 52), duracion_min=42.0,
                             impacto_min=42.0, explicada=False, posicion=_pos(28.0, 113.1)),
             CuelloDeBotella(tipo="ralenti_prolongado", inicio=utc(2020, 4, 14, 2, 20), fin=utc(2020, 4, 14, 2, 41), duracion_min=21.0,
-                            impacto_min=20.0, explicada=True, reporte_conductor=REPORTE, posicion=_pos(28.19, 113.02)),
+                            impacto_min=20.0, explicada=True, reporte_conductor=REPORTE, posicion=_pos(-14.83, -74.94)),
         ],
     ),
     "V-002": Bottlenecks(
@@ -123,8 +124,8 @@ BOTTLENECKS = {
 }
 
 VEHICLE_STATUS = {
-    "T03": VehicleStatus(**VEHICLES["T03"].model_dump(), corredor=CORREDOR, sentido="ida", conductor="Wang Lei (sintético)", ultima_alerta_id="AL-001"),
-    "T07": VehicleStatus(**VEHICLES["T07"].model_dump(), corredor=CORREDOR, sentido="ida", conductor="Li Na (sintético)"),
+    "T03": VehicleStatus(**VEHICLES["T03"].model_dump(), corredor=CORREDOR, sentido="ida", conductor="Marcos Quispe (sintético)", ultima_alerta_id="AL-001"),
+    "T07": VehicleStatus(**VEHICLES["T07"].model_dump(), corredor=CORREDOR, sentido="ida", conductor="Hugo Montalvo (sintético)"),
 }
 for _a, _v in VEHICLES.items():
     VEHICLE_STATUS.setdefault(_a, VehicleStatus(**_v.model_dump()))
@@ -136,3 +137,30 @@ INITIAL_REPLAY = ReplayState(estado="paused", velocidad=1.0, hora_replay=REPLAY_
 
 def range_from(*times: datetime) -> TimeRange:
     return TimeRange(from_=min(times), to=max(times))
+
+
+# Tablero de fletes (flota de Perú, ADR 0012).
+_FLETE_FIN = FleteDetalle(
+    flete_id="F-101", viaje_id="T07-V11", vehiculo="T07", conductor="Hugo Montalvo",
+    cliente="Aceros del Norte S.A.", ruc_cliente="20481234565", carga="Perfiles de acero", toneladas=24.4,
+    corredor="LIM-AQP", sentido="vuelta", origen="AQP", destino="LIM", salida=utc(2020, 4, 13, 14, 18),
+    llegada=utc(2020, 4, 14, 6, 2), estado="finalizado", gre_remitente="T001-00031415",
+    gre_transportista="V001-00000101", tarifa_pen=4190.0, igv_pen=754.2, total_pen=4944.2, detraccion_pen=197.77,
+    km=1009.4, litros=479.6, l_100km=47.51, combustible_pen=2062.28, margen_pen=2127.72,
+)
+_FLETE_CURSO = _FLETE_FIN.model_copy(update=dict(
+    flete_id="F-102", viaje_id="T03-V12", vehiculo="T03", conductor="Marcos Quispe", sentido="ida", origen="LIM",
+    destino="AQP", salida=utc(2020, 4, 14, 1, 30), llegada=None, estado="en_curso", gre_transportista="V001-00000102",
+    km=None, litros=None, l_100km=None, combustible_pen=None, margen_pen=None,
+))
+_AGG = dict(fletes=1, toneladas=24.4, ingresos_pen=4190.0, combustible_pen=2062.28, margen_pen=2127.72,
+            margen_pct=50.8, l_100km=47.51)
+FREIGHT_BOARD = FreightBoard(
+    resumen=ResumenFletes(clave="total", en_curso=1, programados=0, igv_pen=754.2, detraccion_pen=197.77,
+                          litros=479.6, km=1009.4, **_AGG),
+    por_corredor=[AgregadoFletes(clave="LIM-AQP", **_AGG)],
+    por_cliente=[AgregadoFletes(clave="Aceros del Norte S.A.", **_AGG)],
+    por_vehiculo=[AgregadoFletes(clave="T07", **_AGG)],
+    por_dia=[AgregadoFletes(clave="2020-04-14", **_AGG)],
+    fletes=[_FLETE_FIN, _FLETE_CURSO],
+)

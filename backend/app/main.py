@@ -11,12 +11,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader
 
 from . import examples as ex
+from . import freights as freights_mod
 from . import fuel as fuel_mod
 from . import reads
 from .db import migrate
 from .replay import Clock, ReplayEngine, system_clock
 from .schemas import (
-    AlertList, Bottlenecks, ControlReplayRequest, Envelope, ErrorBody, FleetOverview, FuelAnalysis,
+    AlertList, Bottlenecks, ControlReplayRequest, Envelope, ErrorBody, FleetOverview, FreightBoard, FuelAnalysis,
     Provenance, ReplayState, TimeRange, TripStatus, VehicleStatus,
 )
 
@@ -46,9 +47,7 @@ def example_response(model, body: dict) -> dict:
     }
 
 
-REAL_PROVENANCE = [Provenance.fead_observed, Provenance.synthetic_demo]
-TRIP_PROVENANCE = [Provenance.synthetic_demo, Provenance.fead_observed]
-FUEL_PROVENANCE = [Provenance.fead_observed, Provenance.model_inferred, Provenance.synthetic_demo]
+FREIGHT_PROVENANCE = [Provenance.synthetic_demo, Provenance.model_inferred]
 
 NOT_FOUND = {404: {"model": ErrorBody, "description": "Alias o viaje desconocido"}}
 AUTH_ERRORS = {
@@ -128,10 +127,17 @@ def create_app(
             raise HTTPException(status_code=503, detail="database unavailable: DATABASE_URL not set")
         return engine
 
+    def telemetry() -> list[Provenance]:
+        """Procedencia de la telemetría cargada: synthetic_demo con la flota de Perú (ADR 0012)."""
+        return [Provenance(p) for p in reads.telemetry_provenance(database_url)] or [Provenance.synthetic_demo]
+
+    def real() -> list[Provenance]:
+        return list(dict.fromkeys([*telemetry(), Provenance.synthetic_demo]))
+
     def fleet() -> dict:
         need_engine()
         data, desde, hasta, updated = reads.fleet_overview(database_url)
-        return envelope(data, REAL_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
+        return envelope(data, real(), TimeRange(from_=desde, to=hasta), updated)
 
     def vehicle(alias: str) -> dict:
         need_engine()
@@ -139,7 +145,7 @@ def create_app(
         if found is None:
             raise HTTPException(status_code=404, detail=f"Vehículo desconocido: {alias}")
         data, desde, hasta, updated = found
-        return envelope(data, REAL_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
+        return envelope(data, real(), TimeRange(from_=desde, to=hasta), updated)
 
     def trip(trip_id: str) -> dict:
         need_engine()
@@ -147,7 +153,7 @@ def create_app(
         if found is None:
             raise HTTPException(status_code=404, detail=f"Viaje desconocido: {trip_id}")
         data, desde, hasta, updated = found
-        return envelope(data, TRIP_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
+        return envelope(data, real(), TimeRange(from_=desde, to=hasta), updated)
 
     def fuel(trip_id: str) -> dict:
         need_engine()
@@ -155,7 +161,7 @@ def create_app(
         if found is None:
             raise HTTPException(status_code=404, detail=f"Viaje desconocido: {trip_id}")
         data, desde, hasta, updated = found
-        return envelope(data, FUEL_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
+        return envelope(data, [*real(), Provenance.model_inferred], TimeRange(from_=desde, to=hasta), updated)
 
     def bottlenecks(trip_id: str) -> dict:
         t = ex.TRIPS[_trip_id(trip_id)]
@@ -166,7 +172,12 @@ def create_app(
 
     def replay_state() -> dict:
         r, updated = need_engine().state()
-        return envelope(r, [Provenance.fead_observed], TimeRange(from_=r.inicio, to=r.fin), updated)
+        return envelope(r, telemetry(), TimeRange(from_=r.inicio, to=r.fin), updated)
+
+    def freights() -> dict:
+        need_engine()
+        data, desde, hasta, updated = freights_mod.freight_board(database_url)
+        return envelope(data, FREIGHT_PROVENANCE, TimeRange(from_=desde, to=hasta), updated)
 
     # Ejemplos del contrato (OpenAPI y mock): no dependen de la base.
     v_ex = ex.VEHICLE_STATUS["T03"]
@@ -178,7 +189,8 @@ def create_app(
     ex_bottlenecks = bottlenecks("V-001")
     ex_alerts = alerts()
     r_ex = ex.INITIAL_REPLAY
-    ex_replay = envelope(r_ex, [Provenance.fead_observed], TimeRange(from_=r_ex.inicio, to=r_ex.fin), ex.UPDATED_AT)
+    ex_replay = envelope(r_ex, [Provenance.synthetic_demo], TimeRange(from_=r_ex.inicio, to=r_ex.fin), ex.UPDATED_AT)
+    ex_freights = envelope(ex.FREIGHT_BOARD, FREIGHT_PROVENANCE, TimeRange(from_=ex.T0, to=ex.NOW))
 
     public = APIRouter(prefix="/v1", tags=["dashboard (público)"])
     tools = APIRouter(prefix="/v1/tools", tags=["tools (X-API-Key)"], dependencies=[Depends(require_api_key)])
@@ -199,6 +211,7 @@ def create_app(
     add(public, "/trips/{trip_id}/fuel", "read_trip_fuel", lambda trip_id: fuel(trip_id), FuelAnalysis, ex_fuel, "Análisis de combustible de un viaje", NOT_FOUND)
     add(public, "/trips/{trip_id}/bottlenecks", "read_trip_bottlenecks", lambda trip_id: bottlenecks(trip_id), Bottlenecks, ex_bottlenecks, "Cuellos de botella de un viaje", NOT_FOUND)
     add(public, "/alerts", "read_alerts", lambda: alerts(), AlertList, ex_alerts, "Alertas enviadas al gestor de flota", {})
+    add(public, "/freights", "read_freights", lambda: freights(), FreightBoard, ex_freights, "Tablero de fletes: ingresos, combustible y margen", {})
     add(public, "/replay", "read_replay", lambda: replay_state(), ReplayState, ex_replay, "Estado del replay", {})
 
     # Tools (MCP, Zavu): operationId = nombre de la tool

@@ -13,7 +13,7 @@ def test_fixture_versionado_existe_y_cumple_el_esquema_normalizado():
     df = pl.read_csv(FIXTURES / "telemetry.csv")
     assert tuple(df.columns) == NORMALIZED_COLUMNS
     assert set(df["alias"]) <= {"T03", "T07"} and len(df) > 100
-    assert df["provenance"].unique().to_list() == ["fead_observed"]
+    assert df["provenance"].unique().to_list() == ["synthetic_demo"]  # ADR 0012
     assert df["event_time"].str.ends_with("Z").all()
 
 
@@ -25,5 +25,7 @@ def test_fixture_es_chico():
 
 def test_fixture_incluye_linea_base_y_logistica_sintetica():
     assert pl.read_csv(FIXTURES / "baseline_sample.csv")["n_passes"].min() >= 3
-    assert pl.read_csv(FIXTURES / "freights.csv")["provenance"].unique().to_list() == ["synthetic_demo"]
+    fr = pl.read_csv(FIXTURES / "freights.csv")
+    assert fr["provenance"].unique().to_list() == ["synthetic_demo"]
+    assert set(fr["trip_id"]) == set(pl.read_csv(FIXTURES / "trips.csv")["trip_id"])
     assert pl.read_csv(FIXTURES / "driver_reports.csv")["provenance"].unique().to_list() == ["synthetic_demo"]
