@@ -39,8 +39,16 @@ Dirección en que un vehículo recorre un corredor (ida o vuelta). El consumo de
 _Avoid_: Dirección, rumbo
 
 **Tramo**:
-Trecho de unos 10 km de un corredor, recorrido en un sentido. Es la unidad de comparación del consumo.
+Trecho de unos 6–7 km de un corredor, recorrido en un sentido. Es la unidad de comparación del consumo.
 _Avoid_: Segmento, celda, sección
+
+**Pasada**:
+Recorrido de un tramo por un vehículo durante un viaje, con su consumo observado. La línea base de un tramo se calcula con las pasadas de sus pares.
+_Avoid_: Tránsito, paso, traversal
+
+**Terminal**:
+Extremo de un corredor donde los viajes empiezan y terminan con una parada larga.
+_Avoid_: Depósito, base, origen (como lugar)
 
 **Parada**:
 Vehículo detenido durante 10 minutos o más.
@@ -83,7 +91,7 @@ Vehículos de la flota que recorrieron el mismo tramo del mismo corredor en el m
 _Avoid_: Flota (como referencia de comparación), benchmark
 
 **Línea base**:
-Consumo esperado para un tramo y sentido de un corredor, calculado a partir de sus pares. Nunca es por vehículo.
+Consumo esperado para un tramo, calculado con las pasadas de sus pares. Nunca es por vehículo. Un tramo sin suficientes pasadas no tiene línea base.
 _Avoid_: Promedio, consumo esperado del camión, baseline del vehículo
 
 **Sobreconsumo**:
