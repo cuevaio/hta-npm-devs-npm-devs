@@ -5,7 +5,7 @@
 ## Cómo leer este mapa
 
 - Cada issue tiene un ID `Ixx`, un dueño y la lista de issues de los que depende.
-- Un issue está **listo para empezar** cuando todas sus dependencias están en `hecho` en [`status.md`](status.md).
+- Un issue está **listo para empezar** cuando todos sus bloqueos están cerrados en GitHub Issues.
 - Los issues sin dependencias entre sí pueden ir en paralelo, cada uno en su worktree (ver [`README.md`](README.md)).
 
 ## Frentes provisionales (del documento de producto §16)

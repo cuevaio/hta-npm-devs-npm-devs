@@ -30,7 +30,7 @@ Registro de las decisiones tomadas en las sesiones de grilling (skill `grilling`
 | D14 | Tools | 7: `get_fleet_overview`, `get_vehicle_status`, `get_trip_status`, `get_fuel_analysis` (incluye desglose por tramo y sentido; `r_level` no sirve, ver D27), `get_operational_bottlenecks`, `get_alerts` + `control_replay` (escritura, solo MCP). Sin `predict_trip_fuel`. | 2026-10-18 |
 | D15 | Base de datos | **Cloud SQL** Postgres 16 + PostGIS (no Supabase: el subconjunto ronda 0,8–1,3 GB y el free de Supabase es 500 MB). Telemetría 1 Hz solo de 3–5 camiones; agregados por minuto/tramo; días 1–12 = baseline, 13–19 = replay. | 2026-10-18 |
 | D16 | Cloud Run | `min=max=1`, `--no-cpu-throttling`; replay como tarea asyncio dentro de FastAPI. | 2026-10-18 |
-| D17 | Tickets | GitHub Issues con dependencias nativas (`to-tickets`); `docs/dev/mapa-dependencias.md` como vista Mermaid. | 2026-10-18 |
+| D17 | Tickets | GitHub Issues con dependencias nativas (`to-tickets`); `docs/dev/mapa-dependencias.md` como vista Mermaid. **Sin PRs**: merge local a `main` con tests en verde, como en Tesorito. | 2026-10-18 |
 | D18 | Grilling por dev | Ticket de `grill-with-docs` (máx. 1 h) que bloquea los tickets de cada dev; produce ADRs y términos en `CONTEXT.md`. | 2026-10-18 |
 | D19 | Repo | `backend/`, `data/` (Juan) · `mcp/`, `zavu/` (Joseph) · `web/` (Lian) · `e2e/` compartido · `CONTEXT.md` en la raíz. | 2026-10-18 |
 | D20 | Contrato | OpenAPI de FastAPI versionado en `backend/openapi.json`; tipos TS generados para `mcp/`, `zavu/`, `web/`. Primer ticket de Juan publica el contrato con datos de ejemplo. | 2026-10-18 |
