@@ -12,7 +12,7 @@ const REPLAY =
 const tripId = z.string().describe("Identificador del viaje, p. ej. V-001");
 
 export function createServer(env: DomainApiEnv): McpServer {
-  const server = new McpServer({ name: "fleet-intelligence", version: "1.0.0" });
+  const server = new McpServer({ name: "certera", version: "1.0.0" });
 
   // Adaptador delgado: llama a la Domain API y devuelve el sobre sin tocarlo.
   const adapt =

@@ -1,6 +1,6 @@
 # Zavu + WhatsApp: capacidades para el MVP de inteligencia de flota
 
-> Investigado el 2026-10-18 contra fuentes primarias: docs oficiales de Zavu (`docs.zavu.dev`, servidas como `.md`), página de precios `zavu.dev/pricing`, paquetes npm `zavudev@0.14.1` (CLI) y `@zavudev/functions@0.3.1`, y documentación/términos oficiales de Meta. Cada afirmación cita URL + sección. Contexto: `docs/product/PRODUCT_CONTEXT_FLEET_INTELLIGENCE.md` §9 y §11; agente base en `zavu/index.ts`.
+> Investigado el 2026-10-18 contra fuentes primarias: docs oficiales de Zavu (`docs.zavu.dev`, servidas como `.md`), página de precios `zavu.dev/pricing`, paquetes npm `zavudev@0.14.1` (CLI) y `@zavudev/functions@0.3.1`, y documentación/términos oficiales de Meta. Cada afirmación cita URL + sección. Contexto: `docs/product/PRODUCT_CONTEXT_CERTERA.md` §9 y §11; agente base en `zavu/index.ts`.
 >
 > Leyenda: **CONFIRMADO** = la fuente lo dice explícitamente. **LIMITACIÓN** = confirmado, pero restringe nuestro diseño. **NO ENCONTRADO** = ninguna fuente primaria lo documenta (no asumir).
 

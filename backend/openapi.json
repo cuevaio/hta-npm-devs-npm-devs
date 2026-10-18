@@ -1658,7 +1658,7 @@
   },
   "info": {
     "description": "Contrato de la Domain API con datos de ejemplo. Toda respuesta va en un sobre con procedencia, rango de tiempo (hora del evento, UTC) y hora de última actualización. Las rutas `/v1/tools/*` (MCP, Zavu y control del replay) exigen `X-API-Key`; las lecturas `/v1/*` del dashboard son públicas.",
-    "title": "Fleet Intelligence · Domain API",
+    "title": "Certera · Domain API",
     "version": "0.1.0"
   },
   "openapi": "3.1.0",

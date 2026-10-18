@@ -63,7 +63,7 @@ class Ruta:
 
 
 def _get_json(url: str) -> dict:
-    req = urllib.request.Request(url, headers={"User-Agent": "fleet-intelligence-demo/0.1"})
+    req = urllib.request.Request(url, headers={"User-Agent": "certera-demo/0.1"})
     with urllib.request.urlopen(req, timeout=60) as r:
         return json.load(r)
 

@@ -2,7 +2,7 @@
 
 > Fecha de la investigación: 2026-10-18. Alcance: MVP de hackathon de Certera (antes "Fleet Intelligence").
 > Metodología: solo fuentes primarias (docs oficiales, repos de los propios proyectos, especificaciones, paper original). Cada afirmación lleva su URL. Lo que no se pudo verificar está marcado como **[NO VERIFICADO]**. Los bloques SQL son **bosquejos** (sketches), no probados contra los datos reales de FEAD.
-> Contexto leído: `docs/product/PRODUCT_CONTEXT_FLEET_INTELLIGENCE.md` (secciones 6-12), y de `/home/user/Projects/luca`: `docs/dev/plan-mcp-m5.md`, `CONTEXT.md`, `services/luca-mcp/src/{index,gasClient}.ts`, `wrangler.toml`, `README.md`.
+> Contexto leído: `docs/product/PRODUCT_CONTEXT_CERTERA.md` (secciones 6-12), y de `/home/user/Projects/luca`: `docs/dev/plan-mcp-m5.md`, `CONTEXT.md`, `services/luca-mcp/src/{index,gasClient}.ts`, `wrangler.toml`, `README.md`.
 
 ---
 
@@ -36,7 +36,7 @@ Razones, en una línea cada una:
 
 ### 1.2 Qué necesita este proyecto
 
-Según el handoff (`docs/product/PRODUCT_CONTEXT_FLEET_INTELLIGENCE.md`, secs. 7-12):
+Según el handoff (`docs/product/PRODUCT_CONTEXT_CERTERA.md`, secs. 7-12):
 
 | Necesidad | Naturaleza | Ajuste |
 |---|---|---|
@@ -459,5 +459,5 @@ Zavu (WhatsApp) -> webhook tool (HTTPS) -> FastAPI /reports  -> extracción LLM 
 - FEAD: <https://github.com/Torreskai0722/FEAD>
 
 **Locales (repos del usuario)**
-- `/home/user/Projects/npm-devs/docs/product/PRODUCT_CONTEXT_FLEET_INTELLIGENCE.md`
+- `/home/user/Projects/npm-devs/docs/product/PRODUCT_CONTEXT_CERTERA.md`
 - `/home/user/Projects/luca/docs/dev/plan-mcp-m5.md`, `/home/user/Projects/luca/CONTEXT.md`, `/home/user/Projects/luca/services/luca-mcp/`

@@ -5,7 +5,7 @@ model: claude-opus-5-5
 tools: Agent(implementador), Bash, Read, Grep, Glob, Edit, Write, Skill
 ---
 
-Eres el orquestador de Fleet Intelligence. **Planificas, delegas y verificas; no implementas.** El código lo escriben subagentes `implementador`, cada uno en su propio worktree.
+Eres el orquestador de Certera. **Planificas, delegas y verificas; no implementas.** El código lo escriben subagentes `implementador`, cada uno en su propio worktree.
 
 ## Antes de empezar
 

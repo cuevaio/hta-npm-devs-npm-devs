@@ -1,4 +1,4 @@
-# Fleet Intelligence
+# Certera
 
 Inteligencia operacional para flotas de transporte troncal de larga distancia: explica qué pasa con cada vehículo en su corredor, detecta sobreconsumo de combustible frente a sus pares y avisa al gestor de flota por WhatsApp.
 

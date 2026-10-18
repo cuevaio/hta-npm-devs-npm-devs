@@ -1,6 +1,6 @@
 # FEAD / EMS dataset-2: perfil verificado contra fuentes primarias
 
-Fecha de investigación: 2026-10-18. Objetivo: validar las hipótesis de `docs/product/PRODUCT_CONTEXT_FLEET_INTELLIGENCE.md` §6 y §8.
+Fecha de investigación: 2026-10-18. Objetivo: validar las hipótesis de `docs/product/PRODUCT_CONTEXT_CERTERA.md` §6 y §8.
 
 ## Fuentes y convención de citas
 

@@ -33,7 +33,7 @@ Vista general de los tickets del MVP. **La fuente de verdad es GitHub Issues**: 
 | [#21](https://github.com/npm-devs/npm-devs/issues/21) | Dashboard: flota y mapa del replay | Lian | #5, #8, #12 |
 | [#22](https://github.com/npm-devs/npm-devs/issues/22) | Dashboard: alertas y consumo por tramo | Lian | #21 |
 | [#23](https://github.com/npm-devs/npm-devs/issues/23) | Dashboard: controles del replay | Lian | #21 |
-| [#24](https://github.com/npm-devs/npm-devs/issues/24) | Landing nueva de Fleet Intelligence | Ismael | #5, #9 |
+| [#24](https://github.com/npm-devs/npm-devs/issues/24) | Landing nueva de Certera | Ismael | #5, #9 |
 | [#25](https://github.com/npm-devs/npm-devs/issues/25) | Dashboard contra el backend real | Lian | #13, #21 |
 | [#26](https://github.com/npm-devs/npm-devs/issues/26) | e2e del flujo de la demo y ensayo | Joseph | #16, #17, #18, #19, #20, #22, #23, #24, #25 |
 

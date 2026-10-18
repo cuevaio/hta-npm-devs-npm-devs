@@ -1,4 +1,4 @@
-# data/: pipeline de datos de Fleet Intelligence
+# data/: pipeline de datos de Certera
 
 ## Flota sintética en Perú (la de la demo, ADR 0012)
 

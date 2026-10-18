@@ -18,7 +18,7 @@ export function App() {
   return (
     <div className="app">
       <header className="top">
-        <h1>Fleet Intelligence</h1>
+        <h1>Certera</h1>
         <nav className="tabs" role="tablist" aria-label="Vistas">
           <button type="button" role="tab" aria-selected={view === "operacion"} onClick={() => setView("operacion")}>Operación</button>
           <button type="button" role="tab" aria-selected={view === "fletes"} onClick={() => setView("fletes")}>Fletes</button>

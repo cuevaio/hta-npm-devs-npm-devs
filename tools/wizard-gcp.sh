@@ -186,7 +186,7 @@ finish() {
 
 TOTAL_STAGES=10
 
-# Ticket #10: infraestructura GCP de Fleet Intelligence. Idempotente: se puede
+# Ticket #10: infraestructura GCP de Certera. Idempotente: se puede
 # volver a correr y reutiliza lo que ya existe. Valores locales en .env.gcp
 # (ignorado por git). Requiere gcloud, docker, openssl y curl.
 cd "$(dirname "$0")/.."
@@ -219,7 +219,7 @@ upsert_secret() {
   printf '  %s✓ secreto%s %s\n' "$GREEN" "$RESET" "$1"
 }
 
-banner "Fleet Intelligence · infraestructura GCP (#10)"
+banner "Certera · infraestructura GCP (#10)"
 
 # ── 1 ─────────────────────────────────────────────────────────────────────
 stage "Cuenta de Google Cloud"
@@ -237,7 +237,7 @@ stage "Proyecto y facturación"
 ask GCP_PROJECT_ID "ID del proyecto (p. ej. fleet-intel-hackathon; único en todo GCP):"
 if ! gcloud projects describe "$GCP_PROJECT_ID" >/dev/null 2>&1; then
   if confirm "El proyecto $GCP_PROJECT_ID no existe. ¿Lo creo?"; then
-    gcloud projects create "$GCP_PROJECT_ID" --name="Fleet Intelligence"
+    gcloud projects create "$GCP_PROJECT_ID" --name="Certera"
   else
     echo "Sin proyecto no se puede seguir."; exit 1
   fi

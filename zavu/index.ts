@@ -2,7 +2,7 @@ import { defineAgent, defineTool } from "@zavudev/functions"
 import { agentConfig } from "./agent"
 import { TOOL_DEFS, callDomainApi } from "./tools"
 
-// Fleet Intelligence: agente de WhatsApp para el gestor de flota.
+// Certera: agente de WhatsApp para el gestor de flota.
 // Las tools de lectura solo hacen fetch a la Domain API (ADR 0004).
 // Solo se despliega lo que se importa por ruta relativa desde este archivo.
 

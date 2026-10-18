@@ -1,5 +1,5 @@
 {
-  "name": "fleet-intelligence-zavu",
+  "name": "certera-zavu",
   "private": true,
   "type": "module",
   "devDependencies": {

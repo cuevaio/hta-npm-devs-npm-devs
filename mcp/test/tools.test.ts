@@ -23,7 +23,7 @@ describe("tools/list", () => {
   it("responde initialize", async () => {
     const { status, json } = await rpc("initialize", initializeParams);
     expect(status).toBe(200);
-    expect(json.result.serverInfo.name).toBe("fleet-intelligence");
+    expect(json.result.serverInfo.name).toBe("certera");
   });
 
   it("lista exactamente las 7 tools con su esquema de entrada", async () => {

@@ -15,7 +15,7 @@ test("el dashboard público carga", async ({ page }) => {
 
   await page.goto(urls.dashboard!);
 
-  await expect(page.getByRole("heading", { name: "Fleet Intelligence" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Certera" })).toBeVisible();
 });
 
 test("la landing pública carga", async ({ page }) => {

@@ -37,7 +37,7 @@ function consentPage(d: ConsentDescription, handle: string) {
     ? "<p><strong>El acceso irá a una aplicación de tu computadora.</strong> Continúa solo si acabas de iniciar sesión desde ella.</p>"
     : "";
   return `<title>Autorizar ${name}</title>
-<h1>¿Permitir que ${name} consulte Fleet Intelligence?</h1>
+<h1>¿Permitir que ${name} consulte Certera?</h1>
 <p>${origin} El acceso se enviará a <strong>${escape(d.redirectHost)}</strong>.</p>${local}
 <p>Podrá leer la flota y controlar el replay de la demo. Te pediremos iniciar sesión con GitHub.</p>
 <form method="post">

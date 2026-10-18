@@ -1,7 +1,7 @@
 [project]
 name = "fleet-backend"
 version = "0.1.0"
-description = "Domain API de Fleet Intelligence"
+description = "Domain API de Certera"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",

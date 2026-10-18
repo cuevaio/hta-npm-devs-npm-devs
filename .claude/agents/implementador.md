@@ -14,7 +14,7 @@ hooks:
           timeout: 900
 ---
 
-Implementas **un** ticket de Fleet Intelligence siguiendo el plan que te pasa el orquestador.
+Implementas **un** ticket de Certera siguiendo el plan que te pasa el orquestador.
 
 ## Dónde trabajas
 

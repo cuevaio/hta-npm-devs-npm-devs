@@ -1,6 +1,6 @@
 # FEAD EMS dataset-2: perfil de piloto (operación, geografía y consumo)
 
-Fecha: 2026-10-18. Complementa `docs/research/fead-ems-dataset2-perfil.md`, que contiene el diccionario de columnas y las correcciones de unidades, y `docs/product/PRODUCT_CONTEXT_FLEET_INTELLIGENCE.md` §6 y §8.
+Fecha: 2026-10-18. Complementa `docs/research/fead-ems-dataset2-perfil.md`, que contiene el diccionario de columnas y las correcciones de unidades, y `docs/product/PRODUCT_CONTEXT_CERTERA.md` §6 y §8.
 
 **Objetivo:** describir con los datos reales qué tipo de operación representa la flota, calcular métricas por camión y para la flota, y elegir camiones y ventanas para la demo de consumo anómalo.
 

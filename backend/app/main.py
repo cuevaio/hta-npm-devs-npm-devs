@@ -88,7 +88,7 @@ def create_app(
 
     app = FastAPI(
         lifespan=lifespan,
-        title="Fleet Intelligence · Domain API",
+        title="Certera · Domain API",
         version="0.1.0",
         description=(
             "Contrato de la Domain API con datos de ejemplo. Toda respuesta va en un sobre con "

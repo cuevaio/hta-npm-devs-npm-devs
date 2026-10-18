@@ -1,11 +1,11 @@
-<h1 align="center">Fleet Intelligence</h1>
+<h1 align="center">Certera</h1>
 
 <p align="center">
   Sabe por qué tu flota gasta más combustible, antes de que cueste.
 </p>
 
 <p align="center">
-  <a href="https://fleet-intelligence-dashboard.vercel.app">Dashboard</a> ·
+  <a href="https://certera-dashboard.vercel.app">Dashboard</a> ·
   <a href="#cómo-funciona">Cómo funciona</a> ·
   <a href="#arquitectura">Arquitectura</a> ·
   <a href="#la-demo">La demo</a> ·
@@ -25,7 +25,7 @@
 
 ---
 
-Fleet Intelligence es inteligencia operacional para flotas de **transporte troncal de larga distancia**. Sigue a cada
+Certera es inteligencia operacional para flotas de **transporte troncal de larga distancia**. Sigue a cada
 vehículo en su corredor, detecta **sobreconsumo de combustible comparándolo con sus pares en el mismo tramo y
 sentido**, explica la causa probable con evidencia y avisa al **gestor de flota por WhatsApp**. El gestor puede
 preguntarle al agente por WhatsApp, o desde cualquier cliente MCP, "¿por qué consumió más?" o "¿qué cuellos de
@@ -299,7 +299,7 @@ harness de tests y CI, infraestructura GCP, dataset anónimo, contrato OpenAPI y
 
 | Tema | Dónde |
 |---|---|
-| Contexto de producto | [`docs/product/PRODUCT_CONTEXT_FLEET_INTELLIGENCE.md`](docs/product/PRODUCT_CONTEXT_FLEET_INTELLIGENCE.md) |
+| Contexto de producto | [`docs/product/PRODUCT_CONTEXT_CERTERA.md`](docs/product/PRODUCT_CONTEXT_CERTERA.md) |
 | Glosario del dominio | [`CONTEXT.md`](CONTEXT.md) |
 | Decisiones de arquitectura | [`docs/adr/`](docs/adr/) (ADR 0001…0011) |
 | Decisiones del grilling (D1…D35) | [`docs/research/validacion-producto-decisiones.md`](docs/research/validacion-producto-decisiones.md) |
@@ -326,5 +326,5 @@ licencia, así que no se redistribuye. Las trayectorias se muestran en China, si
 
 El código todavía no tiene licencia publicada.
 
-Fleet Intelligence no está afiliado a Zavu, Meta, Google, Cloudflare, Vercel ni Anthropic. Las marcas pertenecen a
+Certera no está afiliado a Zavu, Meta, Google, Cloudflare, Vercel ni Anthropic. Las marcas pertenecen a
 sus dueños.

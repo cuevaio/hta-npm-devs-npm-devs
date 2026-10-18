@@ -1,7 +1,7 @@
 [project]
 name = "fleet-data"
 version = "0.1.0"
-description = "Pipeline de datos de Fleet Intelligence: FEAD EMS dataset-2 a telemetría anónima, línea base offline y logística sintética"
+description = "Pipeline de datos de Certera: FEAD EMS dataset-2 a telemetría anónima, línea base offline y logística sintética"
 requires-python = ">=3.12"
 dependencies = ["h3>=4.1", "numpy>=2.0", "polars>=1.0"]
 

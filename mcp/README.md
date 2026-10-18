@@ -82,7 +82,7 @@ Con `mcp-remote` (en `claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
-    "fleet-intelligence": {
+    "certera": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://fleet-mcp.chif-of-staff.workers.dev/mcp",
                "--header", "Authorization:${AUTH}"],

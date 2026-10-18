@@ -1,4 +1,4 @@
-# Zavu · agente Fleet Intelligence
+# Zavu · agente Certera
 
 Zavu Function con el agente de WhatsApp del gestor de flota (`defineAgent`, español, solo WhatsApp, sin voz) y las 6 tools de lectura de la Domain API: `get_fleet_overview`, `get_vehicle_status`, `get_trip_status`, `get_fuel_analysis`, `get_operational_bottlenecks`, `get_alerts`. `control_replay` no está aquí (solo MCP).
 

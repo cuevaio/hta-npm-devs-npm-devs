@@ -6,6 +6,6 @@ test("el dashboard carga sin errores de consola", async ({ page }) => {
 
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { name: "Fleet Intelligence" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Certera" })).toBeVisible();
   expect(errors).toEqual([]);
 });

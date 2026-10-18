@@ -7,7 +7,7 @@ Esta carpeta coordina al equipo: quién hace qué, en qué orden y cómo integra
 | [GitHub Issues](https://github.com/npm-devs/npm-devs/issues) | **Fuente de verdad de los tickets**: dueño, estado (labels de triage) y dependencias nativas (`blocked by`). |
 | [`mapa-dependencias.md`](mapa-dependencias.md) | Vista general en Mermaid de los tickets y sus dependencias, con enlace a cada issue. |
 
-El producto que construimos está descrito en [`docs/product/PRODUCT_CONTEXT_FLEET_INTELLIGENCE.md`](../product/PRODUCT_CONTEXT_FLEET_INTELLIGENCE.md). La investigación y las decisiones que lo respaldan viven en [`docs/research/`](../research/), en particular [`validacion-producto-decisiones.md`](../research/validacion-producto-decisiones.md).
+El producto que construimos está descrito en [`docs/product/PRODUCT_CONTEXT_CERTERA.md`](../product/PRODUCT_CONTEXT_CERTERA.md). La investigación y las decisiones que lo respaldan viven en [`docs/research/`](../research/), en particular [`validacion-producto-decisiones.md`](../research/validacion-producto-decisiones.md).
 
 ## Equipo
 

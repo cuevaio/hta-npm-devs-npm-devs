@@ -1,8 +1,8 @@
-# Fleet Intelligence — Product Context & Technical Handoff
+# Certera — Product Context & Technical Handoff
 
 > **Estado:** Documento de contexto inicial para equipo de desarrollo (18 de octubre de 2026).  
 > **Objetivo:** Alinear problemática, visión, alcance del MVP, flujos, fuentes de datos, arquitectura propuesta y decisiones abiertas.  
-> **Nombre del producto:** Provisional; *Fleet Intelligence* es solo un placeholder.
+> **Nombre del producto:** Certera (antes se usaba *Fleet Intelligence* como placeholder; ver D38).
 
 ## 1. Resumen ejecutivo
 

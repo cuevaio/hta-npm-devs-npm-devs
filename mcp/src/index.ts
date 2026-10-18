@@ -31,7 +31,7 @@ function provider(publicUrl: string) {
       resourceMetadata: {
         resource: `${publicUrl}/mcp`,
         authorization_servers: [publicUrl],
-        resource_name: "Fleet Intelligence",
+        resource_name: "Certera",
       },
     });
     providers.set(publicUrl, p);

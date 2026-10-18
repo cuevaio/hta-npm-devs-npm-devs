@@ -17,7 +17,7 @@ export function agentConfig(env: Env) {
   }
   return {
     senderId: env.SENDER_ID!,
-    name: "Fleet Intelligence",
+    name: "Certera",
     provider: "google" as const,
     model: AGENT_MODEL,
     apiKey,
