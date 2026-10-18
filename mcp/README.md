@@ -34,28 +34,48 @@ Siete adaptadores delgados de la Domain API (ADR 0004), que devuelven el sobre t
 
 Un error de la Domain API (p. ej. 404 por alias desconocido) vuelve como resultado con `isError: true` y el `detail` original.
 
+## Auth
+
+`/mcp` acepta dos credenciales:
+
+1. **OAuth 2.1** (`@cloudflare/workers-oauth-provider`). El Worker es servidor de autorización y recurso a la vez. Los clientes descubren todo desde el 401 (`/.well-known/oauth-protected-resource/mcp` y `/.well-known/oauth-authorization-server`). Se registran por DCR (`/oauth/register`) o CIMD, y usan PKCE S256. `/authorize` muestra una página de consentimiento y luego manda al usuario a iniciar sesión con GitHub. `/callback` solo emite el código si el login de GitHub está en `GITHUB_ALLOWED_USERS`; si no, devuelve `access_denied` al cliente. Tokens y grants viven en el KV `OAUTH_KV` (namespace `fleet-mcp-oauth`).
+2. **API key estática**: `Authorization: Bearer <MCP_API_KEY>` o `X-API-Key`, para `mcp-remote`, los tests y el e2e. Si `MCP_API_KEY` no está configurada, este camino queda cerrado.
+
 ## Variables
 
 | Nombre | Tipo | Uso |
 |---|---|---|
-| `DOMAIN_API_URL` | var en `wrangler.jsonc` | URL base de la Domain API (hoy un placeholder) |
-| `MCP_API_KEY` | secreto | key que deben presentar los clientes MCP |
+| `DOMAIN_API_URL` | var en `wrangler.jsonc` | URL base de la Domain API |
+| `PUBLIC_URL` | var en `wrangler.jsonc` | URL pública del Worker; emisor OAuth y recurso `${PUBLIC_URL}/mcp` |
+| `GITHUB_ALLOWED_USERS` | var en `wrangler.jsonc` | logins de GitHub permitidos, separados por coma |
+| `MCP_API_KEY` | secreto | key estática de los clientes MCP |
 | `DOMAIN_API_KEY` | secreto | key de servicio que el Worker envía como `X-API-Key` a la Domain API |
+| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | secretos | OAuth App de GitHub |
 
-`/mcp` exige `Authorization: Bearer <MCP_API_KEY>` o `X-API-Key: <MCP_API_KEY>`: 401 sin key o con key incorrecta, 503 si `MCP_API_KEY` no está configurada. En local, copia `.dev.vars.example` a `.dev.vars`.
+En local, copia `.dev.vars.example` a `.dev.vars`.
 
 ## Desplegar
 
+La OAuth App de GitHub se crea en <https://github.com/settings/applications/new>:
+
+- **Homepage URL**: `https://fleet-mcp.chif-of-staff.workers.dev`
+- **Authorization callback URL**: `https://fleet-mcp.chif-of-staff.workers.dev/callback`
+
 ```sh
 cd mcp
-# 1. poner la URL real de la Domain API en vars.DOMAIN_API_URL de wrangler.jsonc
 npx wrangler secret put MCP_API_KEY
 npx wrangler secret put DOMAIN_API_KEY
+npx wrangler secret put GITHUB_CLIENT_ID
+npx wrangler secret put GITHUB_CLIENT_SECRET
 npm run deploy
-curl https://fleet-mcp.<subdominio>.workers.dev/health
+curl https://fleet-mcp.chif-of-staff.workers.dev/health
 ```
 
-## Conectar Claude Desktop
+## Conectar Claude (OAuth)
+
+En claude.ai o Claude Desktop, ve a *Settings → Connectors → Add custom connector*, pega `https://fleet-mcp.chif-of-staff.workers.dev/mcp`, deja vacíos los campos de OAuth Client ID y Secret, y conecta. Se abre la página de consentimiento y después GitHub.
+
+## Conectar con la API key
 
 Con `mcp-remote` (en `claude_desktop_config.json`):
 
@@ -64,7 +84,7 @@ Con `mcp-remote` (en `claude_desktop_config.json`):
   "mcpServers": {
     "fleet-intelligence": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://fleet-mcp.<subdominio>.workers.dev/mcp",
+      "args": ["-y", "mcp-remote", "https://fleet-mcp.chif-of-staff.workers.dev/mcp",
                "--header", "Authorization:${AUTH}"],
       "env": { "AUTH": "Bearer <MCP_API_KEY>" }
     }

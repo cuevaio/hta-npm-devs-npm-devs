@@ -3,10 +3,16 @@
   "name": "fleet-mcp",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
-  "compatibility_flags": ["nodejs_compat"],
+  // global_fetch_strictly_public: protección SSRF al leer Client ID Metadata Documents (OAuth).
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "vars": {
     // URL base de la Domain API (Cloud Run, #10), sin barra final.
-    "DOMAIN_API_URL": "https://fleet-backend-qp3hzsyoka-uc.a.run.app"
-  }
-  // Secretos (no van en el repo): `wrangler secret put MCP_API_KEY` y `wrangler secret put DOMAIN_API_KEY`.
+    "DOMAIN_API_URL": "https://fleet-backend-qp3hzsyoka-uc.a.run.app",
+    // URL pública del Worker: emisor OAuth y recurso `${PUBLIC_URL}/mcp`.
+    "PUBLIC_URL": "https://fleet-mcp.chif-of-staff.workers.dev",
+    // Usuarios de GitHub (login, separados por coma) que pueden autorizar clientes MCP.
+    "GITHUB_ALLOWED_USERS": "JosephRobles23,JuanMontreuil08,KevinPinto123,Ismaelrojas0112"
+  },
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "01196f0f1e9745ada71038087322ec11" }]
+  // Secretos (no van en el repo): MCP_API_KEY, DOMAIN_API_KEY, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET.
 }

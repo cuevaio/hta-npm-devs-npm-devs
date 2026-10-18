@@ -3,5 +3,10 @@
 MCP_API_KEY=cambia-esto
 # Key de servicio con la que el Worker llama a la Domain API (X-API-Key).
 DOMAIN_API_KEY=cambia-esto
+# OAuth App de GitHub para desarrollo (callback http://localhost:8787/callback).
+GITHUB_CLIENT_ID=cambia-esto
+GITHUB_CLIENT_SECRET=cambia-esto
+# En local el emisor OAuth es el propio wrangler dev.
+PUBLIC_URL=http://localhost:8787
 # Opcional en local (sobrescribe vars.DOMAIN_API_URL), p. ej. el servidor simulado Prism.
 # DOMAIN_API_URL=http://localhost:4010

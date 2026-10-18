@@ -16,18 +16,3 @@ export function presentedKey(request: Request): string | null {
   const bearer = request.headers.get("Authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
   return bearer ?? request.headers.get("X-API-Key");
 }
-
-/** Devuelve una respuesta de error si la petición no está autorizada, o null si pasa. */
-export async function checkAuth(request: Request, expected: string | undefined) {
-  if (!expected) {
-    return Response.json({ error: "MCP_API_KEY no está configurada" }, { status: 503 });
-  }
-  const key = presentedKey(request);
-  if (!key || !(await safeEqual(key, expected))) {
-    return Response.json(
-      { error: "API key ausente o incorrecta" },
-      { status: 401, headers: { "WWW-Authenticate": "Bearer" } },
-    );
-  }
-  return null;
-}

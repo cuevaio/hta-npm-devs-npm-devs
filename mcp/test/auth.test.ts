@@ -1,4 +1,5 @@
-import { exports } from "cloudflare:workers";
+import { createExecutionContext } from "cloudflare:test";
+import { env, exports } from "cloudflare:workers";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MCP_KEY, initializeParams, mockUpstream } from "./helpers";
 
@@ -36,16 +37,18 @@ describe("auth de /mcp", () => {
     expect(calls).toHaveLength(0);
   });
 
-  it("sin MCP_API_KEY configurada responde 503 (nunca abierto)", async () => {
+  it("sin MCP_API_KEY configurada ninguna key estática da acceso", async () => {
     const { default: worker } = await import("../src/index");
-    const env = { DOMAIN_API_URL: "https://domain-api.test", DOMAIN_API_KEY: "x" } as unknown as Env;
-    const request = new Request("https://mcp.test/mcp", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${MCP_KEY}` },
-      body: "{}",
-    });
-    const response = await worker.fetch(request, env, {} as ExecutionContext);
-    expect(response.status).toBe(503);
+    const noKey = { ...env, MCP_API_KEY: undefined } as unknown as Env;
+    for (const key of [MCP_KEY, "undefined", ""]) {
+      const request = new Request("https://mcp.test/mcp", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: "{}",
+      });
+      const response = await worker.fetch(request, noKey, createExecutionContext());
+      expect(response.status).toBe(401);
+    }
   });
 
   it("/health es público", async () => {
