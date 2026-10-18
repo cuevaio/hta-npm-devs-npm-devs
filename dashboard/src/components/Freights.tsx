@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Aggregate, FreightBoardResponse, Freight } from "../api/client";
 import { horaLima, pen } from "../format";
+import { Num } from "./Num";
 import { ProvenanceChips } from "./Provenance";
 
 const ESTADO_FLETE: Record<Freight["estado"], string> = {
@@ -40,7 +41,7 @@ function StackedBars({ title, rows, horizontal, onTip }: {
         </span>
       </figcaption>
       <div className={horizontal ? "hbars" : "vbars"}>
-        {rows.map((r) => {
+        {rows.map((r, i) => {
           const fuel = (r.combustible_pen / max) * 100;
           const margin = (Math.max(0, r.margen_pen) / max) * 100;
           return (
@@ -48,6 +49,7 @@ function StackedBars({ title, rows, horizontal, onTip }: {
               key={r.clave}
               className="bar"
               data-clave={r.clave}
+              style={{ "--i": i } as React.CSSProperties}
               onMouseMove={(e) => tip(e, r)}
               onMouseLeave={() => onTip(null)}
             >
@@ -69,9 +71,9 @@ function StackedBars({ title, rows, horizontal, onTip }: {
   );
 }
 
-function Kpi({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Kpi({ label, value, sub, i }: { label: string; value: React.ReactNode; sub?: string; i: number }) {
   return (
-    <div className="kpi">
+    <div className="kpi" style={{ "--i": i } as React.CSSProperties}>
       <span className="kpi-label">{label}</span>
       <strong className="kpi-value">{value}</strong>
       {sub && <span className="dato">{sub}</span>}
@@ -96,12 +98,12 @@ export function Freights({ board }: { board: FreightBoardResponse }) {
         <ProvenanceChips items={board.provenance} />
       </div>
       <section className="kpis" aria-label="Resumen de fletes finalizados">
-        <Kpi label="Ingresos" value={pen(r.ingresos_pen)} sub={`${r.fletes} finalizados · ${r.toneladas.toFixed(0)} t`} />
-        <Kpi label="Combustible" value={pen(r.combustible_pen)} sub={`${r.litros.toLocaleString("es-PE", { maximumFractionDigits: 0 })} L`} />
-        <Kpi label="Margen tras combustible" value={pen(r.margen_pen)} sub={r.margen_pct != null ? `${r.margen_pct.toFixed(1)} % de los ingresos` : "–"} />
-        <Kpi label="Rendimiento" value={r.l_100km != null ? `${r.l_100km.toFixed(1)} L/100 km` : "–"} sub={`${r.km.toLocaleString("es-PE", { maximumFractionDigits: 0 })} km`} />
-        <Kpi label="Detracción (4 %)" value={pen(r.detraccion_pen)} sub={`IGV ${pen(r.igv_pen)}`} />
-        <Kpi label="En operación" value={`${r.en_curso} en curso`} sub={`${r.programados} programados`} />
+        <Kpi i={0} label="Ingresos" value={<Num value={r.ingresos_pen} format={pen} />} sub={`${r.fletes} finalizados · ${r.toneladas.toFixed(0)} t`} />
+        <Kpi i={1} label="Combustible" value={<Num value={r.combustible_pen} format={pen} />} sub={`${r.litros.toLocaleString("es-PE", { maximumFractionDigits: 0 })} L`} />
+        <Kpi i={2} label="Margen tras combustible" value={<Num value={r.margen_pen} format={pen} />} sub={r.margen_pct != null ? `${r.margen_pct.toFixed(1)} % de los ingresos` : "–"} />
+        <Kpi i={3} label="Rendimiento" value={<Num value={r.l_100km} format={(v) => `${v.toFixed(1)} L/100 km`} />} sub={`${r.km.toLocaleString("es-PE", { maximumFractionDigits: 0 })} km`} />
+        <Kpi i={4} label="Detracción (4 %)" value={<Num value={r.detraccion_pen} format={pen} />} sub={`IGV ${pen(r.igv_pen)}`} />
+        <Kpi i={5} label="En operación" value={<Num value={r.en_curso} format={(v) => `${Math.round(v)} en curso`} />} sub={`${r.programados} programados`} />
       </section>
       {r.fletes === 0 ? (
         <p className="state">Aún no hay fletes finalizados en el replay</p>
@@ -145,7 +147,7 @@ export function Freights({ board }: { board: FreightBoardResponse }) {
               {fletes.map((f) => (
                 <tr key={f.flete_id} data-flete={f.flete_id}>
                   <td>{f.flete_id}<br /><span className="dato">{f.viaje_id}</span></td>
-                  <td><span className={`chip flete-${f.estado}`}>{ESTADO_FLETE[f.estado]}</span></td>
+                  <td><span className={`estado flete-${f.estado}`}><i aria-hidden="true" />{ESTADO_FLETE[f.estado]}</span></td>
                   <td>{f.vehiculo}<br /><span className="dato">{f.conductor ?? ""}</span></td>
                   <td>{f.cliente}<br /><span className="dato">RUC {f.ruc_cliente ?? "–"}</span></td>
                   <td>{f.carga}<br /><span className="dato">{f.toneladas?.toFixed(1) ?? "–"} t</span></td>

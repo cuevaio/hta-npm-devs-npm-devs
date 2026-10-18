@@ -41,3 +41,25 @@ test("muestra la procedencia y el aviso de replay", async ({ page }) => {
   await expect(page.getByText("Sintético", { exact: true })).toBeVisible();
   await expect(page.getByRole("note")).toContainText("No es tiempo real");
 });
+
+test("cada vehículo es un tractocamión en el mapa que gira hacia donde avanza", async ({ page }) => {
+  let n = 0;
+  await page.route("http://127.0.0.1:4010/v1/fleet", async (route) => {
+    const res = await route.fetch();
+    const body = await res.json();
+    n++;
+    const t03 = body.data.vehiculos.find((v: { alias: string }) => v.alias === "T03");
+    t03.posicion.lat -= 0.01 * n; // hacia el sureste
+    t03.posicion.lon += 0.01 * n;
+    await route.fulfill({ response: res, json: body });
+  });
+  await page.goto("/");
+  const marker = page.locator('.marker[aria-label="T03"]');
+  await expect(marker.locator("svg.camion")).toHaveCount(1);
+  await expect(marker).toHaveAttribute("data-estado", "en_viaje");
+  await expect
+    .poll(async () => parseFloat(await marker.evaluate((el) => el.style.getPropertyValue("--rumbo"))), { timeout: 10_000 })
+    .toBeGreaterThan(90);
+  const rumbo = parseFloat(await marker.evaluate((el) => el.style.getPropertyValue("--rumbo")));
+  expect(rumbo).toBeLessThan(180);
+});
