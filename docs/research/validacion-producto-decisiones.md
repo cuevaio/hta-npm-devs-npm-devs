@@ -41,8 +41,9 @@ Registro de las decisiones tomadas en las sesiones de grilling (skill `grilling`
 | D25 | Perfil del piloto | **Transporte troncal interprovincial de larga distancia** con tractocamiones pesados en relevo 24/7, en corredores fijos (p. ej. Harbin–Guangzhou ~3 450 km). Fuente: `fead-perfil-piloto.md`. | 2026-10-18 |
 | D26 | Geografía y narrativa | Se muestran las trayectorias reales en China, sin reproyectar a Perú: "telemetría real de una flota en China (FEAD, abril 2020), reproducida; fletes, conductores y mensajes sintéticos". Panamericana / Carretera Central solo como analogía oral. | 2026-10-18 |
 | D27 | Línea base | **Por tramo y sentido de corredor, comparando con pares**, no por camión (una baseline por camión da falsos positivos en cada subida). El ralentí se muestra como evidencia, no como causa principal del sobreconsumo. Candidatos: T03, T04, T28, T22, T09 (control) y T07 (falso positivo evitado). | 2026-10-18 |
+| D28 | Región GCP | `us-central1` para Cloud Run y Cloud SQL (misma región). | 2026-10-18 |
+| D29 | Modelo de dominio | Viaje ≠ flete (1:1 en la demo); tramo ≈ 10 km por sentido; sobreconsumo → anomalía → alerta; parada ≥ 10 min; cuello de botella = tiempo perdido sin explicar; reporte en vivo = `human_reported`; roles: solo gestor de flota y conductor. Glosario en [`CONTEXT.md`](../../CONTEXT.md), ADRs 0001–0007 en [`docs/adr/`](../adr/). | 2026-10-18 |
 
 ## Preguntas abiertas
 
-- Región de GCP (recomendado `us-central1`).
 - Usuarios de GitHub de Juan y Lian.
