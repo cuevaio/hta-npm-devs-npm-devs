@@ -9,6 +9,7 @@ idempotente: recarga todo desde cero y deja el replay en pausa al inicio.
 
 import argparse
 import io
+import json
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -81,6 +82,22 @@ def _read_telemetry(path: Path) -> pl.DataFrame:
     return _utc(df, "event_time")
 
 
+def _load_corridors(conn: psycopg.Connection, path: Path) -> int:
+    """Geometría de los corredores (solo la trae la flota de Perú); sin el archivo la tabla queda vacía."""
+    conn.execute("TRUNCATE corridors")
+    if not path.exists():
+        return 0
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    for c in rows:
+        conn.execute(
+            "INSERT INTO corridors (corridor, via, origin_terminal, dest_terminal, km, geom)"
+            " VALUES (%s, %s, %s, %s, %s, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326))",
+            (c["corridor"], c["via"], c["origin_terminal"], c["dest_terminal"], c["km"],
+             json.dumps({"type": "LineString", "coordinates": c["coords"]})),
+        )
+    return len(rows)
+
+
 def load(source: Path, database_url: str, replay_start: datetime = REPLAY_START) -> dict[str, int]:
     migrate(database_url)
     counts = {"history": 0, "source": 0}
@@ -108,6 +125,7 @@ def load(source: Path, database_url: str, replay_start: datetime = REPLAY_START)
         _copy(conn, "passes", _utc(pl.read_csv(source / "passes_demo.csv"), "t_start", "t_end"), PASSES)
         _copy(conn, "baselines", pl.read_csv(source / "baseline.csv"), BASELINES)
         _copy(conn, "driver_reports", _utc(pl.read_csv(source / "driver_reports.csv"), "reported_at"), REPORTS)
+        _load_corridors(conn, source / "corridors.json")
         conn.execute(
             "UPDATE replay_state SET estado = 'paused', velocidad = 1, hora_replay = %s, inicio = %s, fin = %s,"
             " last_tick_at = now(), updated_at = now()",

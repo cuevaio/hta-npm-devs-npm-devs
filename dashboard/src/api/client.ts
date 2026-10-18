@@ -16,6 +16,7 @@ export type Replay = components["schemas"]["ReplayState"];
 export type FreightBoard = components["schemas"]["FreightBoard"];
 export type Freight = components["schemas"]["FleteDetalle"];
 export type Aggregate = components["schemas"]["AgregadoFletes"];
+export type Corridor = components["schemas"]["Corredor"];
 
 type JsonOf<P extends keyof paths> = paths[P] extends {
   get: { responses: { 200: { content: { "application/json": infer B } } } };
@@ -28,6 +29,7 @@ export type FleetResponse = JsonOf<"/v1/fleet"> & Envelope<Fleet>;
 export type ReplayResponse = JsonOf<"/v1/replay"> & Envelope<Replay>;
 export type TripResponse = JsonOf<"/v1/trips/{trip_id}"> & Envelope<Trip>;
 export type FreightBoardResponse = JsonOf<"/v1/freights"> & Envelope<FreightBoard>;
+export type CorridorsResponse = JsonOf<"/v1/corridors"> & Envelope<components["schemas"]["CorridorList"]>;
 
 export const API_URL = (import.meta.env.VITE_API_URL ?? "http://127.0.0.1:4010").replace(/\/$/, "");
 
@@ -40,6 +42,7 @@ async function get<T>(path: string): Promise<T> {
 export const readFleet = () => get<FleetResponse>("/v1/fleet");
 export const readReplay = () => get<ReplayResponse>("/v1/replay");
 export const readFreights = () => get<FreightBoardResponse>("/v1/freights");
+export const readCorridors = () => get<CorridorsResponse>("/v1/corridors");
 export const readTrip = (tripId: string) =>
   get<TripResponse>(`/v1/trips/${encodeURIComponent(tripId)}`);
 

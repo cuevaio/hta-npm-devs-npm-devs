@@ -134,3 +134,59 @@ def test_determinista(out, tmp_path):
 
 def test_sin_datos_personales(out):
     assert scan_dir(out, []) == []
+
+
+def _distancia_a_la_via_m(lat, lon, ruta) -> "np.ndarray":
+    """Distancia de cada punto a la polilínea de la vía (proyección local en metros, ventana por cercanía)."""
+    import numpy as np
+
+    _, la, lo = ruta._linea()
+    k = np.cos(np.radians(la.mean()))
+    vx, vy = lo * 111_195 * k, la * 111_195
+    px, py = lon * 111_195 * k, lat * 111_195
+    ax, ay, dx, dy = vx[:-1], vy[:-1], np.diff(vx), np.diff(vy)
+    l2 = np.maximum(dx * dx + dy * dy, 1e-9)
+    out = np.empty(len(px))
+    for i, (x, y) in enumerate(zip(px, py)):  # distancia exacta a todos los segmentos
+        t = np.clip(((x - ax) * dx + (y - ay) * dy) / l2, 0, 1)
+        out[i] = np.sqrt(((x - ax - t * dx) ** 2 + (y - ay - t * dy) ** 2).min())
+    return out
+
+
+def test_en_marcha_el_camion_va_sobre_la_pista_real(out):
+    """Con zoom alto el camión no debe pisar casas: p95 a menos de 5 m de la vía, nunca a más de 12 m."""
+    import numpy as np
+
+    rutas = cargar()
+    trips = _read(out, "trips.csv")
+    for alias in ("T22", "T03"):  # Carretera Central (serpentines) y Panamericana Sur
+        df = pl.read_parquet(out / "out" / "telemetry" / f"{alias}.parquet").filter(pl.col("speed_kmh") > 5)
+        corredor = trips.filter(pl.col("alias") == alias)["corridor"][0]
+        muestra = df.gather_every(97)
+        d = _distancia_a_la_via_m(muestra["lat"].to_numpy(), muestra["lon"].to_numpy(), rutas[corredor])
+        assert np.percentile(d, 95) < 5 and d.max() < 12, (alias, np.percentile(d, 95), d.max())
+
+
+def test_la_parada_en_ralenti_queda_en_la_berma_derecha():
+    import numpy as np
+
+    ruta = cargar()["LIM-AQP"]
+    km = 500.0
+    lat, lon = ruta.berma(km)
+    d = _distancia_a_la_via_m(np.array([lat]), np.array([lon]), ruta)[0]
+    assert 4 < d < 8
+    # a la derecha: el producto vectorial (avance x desplazamiento) es negativo en el plano lon/lat
+    la, lo = ruta.punto(np.array([km - 0.05, km, km + 0.05]))
+    ax, ay = lo[2] - lo[0], la[2] - la[0]
+    assert ax * (lat - la[1]) - ay * (lon - lo[1]) < 0
+    lat_v, lon_v = ruta.invertida().berma(ruta.largo_km - km)
+    assert np.hypot(lat_v - lat, lon_v - lon) > 5e-5  # en vuelta queda del otro lado
+
+
+def test_corredores_para_el_mapa(out):
+    import json
+
+    cs = json.loads((out / "out" / "corridors.json").read_text())
+    assert {c["corridor"] for c in cs} == set(CORREDORES)
+    lim_hyo = next(c for c in cs if c["corridor"] == "LIM-HYO")
+    assert len(lim_hyo["coords"]) > 2000 and 300 < lim_hyo["km"] < 320

@@ -1,9 +1,11 @@
 """Datos de ejemplo coherentes (sintéticos) para el contrato. Sin base de datos."""
 
+import json
 from datetime import UTC, datetime
+from pathlib import Path
 
 from .schemas import (
-    AgregadoFletes, FleteDetalle, FreightBoard, ResumenFletes,
+    AgregadoFletes, Corredor, CorridorList, FleteDetalle, FreightBoard, ResumenFletes,
     Alerta, Anomalia, Bottlenecks, CuelloDeBotella, Flete, FleetOverview, FuelAnalysis, LineaBase,
     Pasada, Posicion, Provenance, ReplayState, ReporteConductor, TimeRange, Tramo, TripStatus,
     MetricasPeriodo, VehicleMetrics, VehicleStatus, VehiculoResumen,
@@ -38,10 +40,10 @@ def _pos(lat: float, lon: float) -> Posicion:
 
 # altitud_m: SRTM del punto de rutas_peru.json más cercano a cada posición (todas a ≤ 1 km de su ruta)
 VEHICLES = {
-    "T03": VehiculoResumen(alias="T03", estado="en_viaje", viaje_id="V-001", velocidad_kmh=72.5, posicion=_pos(-14.83, -74.94), altitud_m=575.0, hora_evento=NOW),
-    "T07": VehiculoResumen(alias="T07", estado="en_viaje", viaje_id="V-002", velocidad_kmh=64.0, posicion=_pos(-14.07, -75.73), altitud_m=407.0, hora_evento=NOW),
+    "T03": VehiculoResumen(alias="T03", estado="en_viaje", viaje_id="V-001", velocidad_kmh=72.5, posicion=_pos(-15.4502, -74.86845), altitud_m=575.0, hora_evento=NOW),
+    "T07": VehiculoResumen(alias="T07", estado="en_viaje", viaje_id="V-002", velocidad_kmh=64.0, posicion=_pos(-14.12562, -75.71631), altitud_m=407.0, hora_evento=NOW),
     "T28": VehiculoResumen(alias="T28", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-15.49, -70.13), altitud_m=3831.0, hora_evento=NOW),
-    "T04": VehiculoResumen(alias="T04", estado="ralenti", velocidad_kmh=0.0, posicion=_pos(-15.85, -74.25), altitud_m=23.0, hora_evento=NOW),
+    "T04": VehiculoResumen(alias="T04", estado="ralenti", velocidad_kmh=0.0, posicion=_pos(-15.83621, -74.27996), altitud_m=23.0, hora_evento=NOW),
     "T22": VehiculoResumen(alias="T22", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-12.06, -75.21), altitud_m=3266.0, hora_evento=NOW),
     "T09": VehiculoResumen(alias="T09", estado="detenido", velocidad_kmh=0.0, posicion=_pos(-12.05, -77.09), altitud_m=63.0, hora_evento=NOW),
 }
@@ -110,16 +112,16 @@ BOTTLENECKS = {
         viaje_id="V-001", tiempo_perdido_min=62.0,
         cuellos_de_botella=[
             CuelloDeBotella(tipo="parada_sin_explicar", inicio=utc(2020, 4, 14, 1, 10), fin=utc(2020, 4, 14, 1, 52), duracion_min=42.0,
-                            impacto_min=42.0, explicada=False, posicion=_pos(28.0, 113.1)),
+                            impacto_min=42.0, explicada=False, posicion=_pos(-15.6602, -74.6489)),
             CuelloDeBotella(tipo="ralenti_prolongado", inicio=utc(2020, 4, 14, 2, 20), fin=utc(2020, 4, 14, 2, 41), duracion_min=21.0,
-                            impacto_min=20.0, explicada=True, reporte_conductor=REPORTE, posicion=_pos(-14.83, -74.94)),
+                            impacto_min=20.0, explicada=True, reporte_conductor=REPORTE, posicion=_pos(-15.4502, -74.86845)),
         ],
     ),
     "V-002": Bottlenecks(
         viaje_id="V-002", tiempo_perdido_min=0.0,
         cuellos_de_botella=[
             CuelloDeBotella(tipo="parada_explicada", inicio=utc(2020, 4, 14, 0, 30), fin=utc(2020, 4, 14, 0, 55), duracion_min=25.0,
-                            impacto_min=0.0, explicada=True, posicion=_pos(30.5, 114.2)),
+                            impacto_min=0.0, explicada=True, posicion=_pos(-14.8411, -74.9683)),
         ],
     ),
 }
@@ -185,3 +187,9 @@ VEHICLE_METRICS = VehicleMetrics(
     )),
     filas=[_DIA_13, _DIA_14],
 )
+
+
+# Lima–Arequipa real, simplificado a ~150 m para que el contrato sea liviano; T03, T07 y T04 están sobre él.
+CORRIDORS = CorridorList(corredores=[
+    Corredor(**json.loads((Path(__file__).with_name("examples_corredor.json")).read_text(encoding="utf-8")))
+])

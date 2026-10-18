@@ -18,12 +18,19 @@ npm run dev
 | --- | --- | --- |
 | `VITE_API_URL` | `http://127.0.0.1:4010` | Base de la Domain API |
 | `VITE_MAP_STYLE` | CARTO dark-matter | URL de estilo MapLibre; `empty` = estilo vacío local (tests) |
+| `VITE_MAPBOX_TOKEN` (o `NEXT_PUBLIC_MAPBOX_TOKEN`) | — | Token público de Mapbox (`pk.…`), restringido por URL en la cuenta. Con él el mapa usa Mapbox Standard de noche; sin él, MapLibre (CI y Playwright). Va en `dashboard/.env` (ignorado por git) o en las variables de Vercel, nunca en el repo |
+
+## Mapa (docs/dev/plan-mapa-mapbox.md)
+
+- `src/map/engine.ts` elige el motor; `src/map/motion.ts` (puro, con tests en Vitest) mueve cada camión sobre la vía real de su corredor (`GET /v1/corridors`) a su velocidad por la del replay, con el rumbo de la vía.
+- Al elegir un tráiler la cámara vuela hasta él, se inclina a 60° mirando hacia donde va y lo sigue. Arrastrar o hacer zoom con la rueda suelta el seguimiento; "Seguir" lo retoma y "Ver flota" vuelve a la vista general. Con movimiento reducido, salta sin animar.
+- El camión se acuesta sobre la pista y escala a su tamaño real (~18 m) con zoom alto.
 
 ## Tests
 
 ```sh
 npx playwright install chromium   # una vez
-npm test
+npm test                          # vitest (src/**/*.test.ts) y luego Playwright (tests/)
 ```
 
 Playwright levanta el servidor simulado (Prism) y el build servido con `vite preview` (con `VITE_API_URL` apuntando al simulado y mapa vacío), y sobrescribe respuestas con `page.route` para los estados vacío, carga, error y desactualizado.

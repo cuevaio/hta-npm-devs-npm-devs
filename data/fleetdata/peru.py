@@ -37,6 +37,7 @@ N_DIAS = 19
 FIN = INICIO + N_DIAS * 86400
 REPLAY_DESDE = INICIO + bl.BASELINE_LAST_DAY * 86400
 PASO_S = 2
+GPS_SIGMA_DEG = 1.35e-5  # ~1,5 m por eje: GNSS de un camión en carretera abierta
 DEMO_ALIASES = ("T03", "T04", "T07", "T22", "T09", "T28")
 DEFAULT_FIXTURES = Path(__file__).resolve().parent.parent / "fixtures"
 
@@ -145,12 +146,13 @@ def simular_viaje(ruta: Ruta, masa_t: float, pf: Perfil, t0: float, paradas, len
             ts = np.arange(tb[0], tb[-1], PASO_S)
             km = np.interp(ts, tb, ruta.km[a : b + 1])
             i = np.clip(np.searchsorted(km_mid, km), 0, len(vm) - 1)
-            tramos.append(Tramo(ts, np.interp(km, ruta.km, ruta.lat), np.interp(km, ruta.km, ruta.lon),
-                                np.interp(km, ruta.km, ruta.alt_m), np.interp(km, km_mid, vm) * 3.6, lph[i], carga[i]))
+            lat, lon = ruta.punto(km)  # sobre la vía real, no sobre la malla de 100 m
+            tramos.append(Tramo(ts, lat, lon, np.interp(km, ruta.km, ruta.alt_m), np.interp(km, km_mid, vm) * 3.6,
+                                lph[i], carga[i]))
         if n < len(paradas):
             _, dur, ralenti = paradas[n]
-            if ralenti:  # al costado de la vía, unos 30 m
-                tramos.append(_quieto(tb[-1], dur, ruta.lat[b] + 0.00027, ruta.lon[b], ruta.alt_m[b], pf.camion))
+            if ralenti:  # en la berma, a la derecha del sentido de marcha
+                tramos.append(_quieto(tb[-1], dur, *ruta.berma(float(ruta.km[b])), ruta.alt_m[b], pf.camion))
             retraso += dur
     return tramos, float(manejo_t[-1] + retraso)
 
@@ -159,7 +161,7 @@ def _ruido(tr: Tramo, rng: np.random.Generator) -> Tramo:
     n = len(tr.t)
     mov = tr.v_kmh > 0.5
     # la altitud no lleva ruido: no consume números del generador y el resto de la salida no cambia
-    return Tramo(tr.t, tr.lat + rng.normal(0, 3e-5, n) * mov, tr.lon + rng.normal(0, 3e-5, n) * mov, tr.alt,
+    return Tramo(tr.t, tr.lat + rng.normal(0, GPS_SIGMA_DEG, n) * mov, tr.lon + rng.normal(0, GPS_SIGMA_DEG, n) * mov, tr.alt,
                  np.maximum(0, tr.v_kmh + rng.normal(0, 0.6, n) * mov),
                  np.maximum(0.2, tr.lph * rng.normal(1, 0.04, n)), tr.carga)
 
@@ -309,6 +311,20 @@ def resumen_viajes(frames: dict[str, pl.DataFrame], viajes: pl.DataFrame) -> pl.
     return pl.DataFrame(rows)
 
 
+def escribir_corredores(path: Path, rutas: dict[str, Ruta] | None = None) -> list[dict]:
+    """Geometría de la vía de cada corredor en sentido ida, para el mapa: [{corridor, via, …, coords}]."""
+    import json
+
+    out = []
+    for corredor, ruta in (rutas or cargar()).items():
+        via, a, b = CORREDORES[corredor]
+        _, lat, lon = ruta._linea()
+        out.append({"corridor": corredor, "via": via, "origin_terminal": a, "dest_terminal": b,
+                    "km": round(ruta.largo_km, 1), "coords": [[round(x, 6), round(y, 6)] for x, y in zip(lon, lat)]})
+    path.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
+    return out
+
+
 def log(*a):
     print(*a, file=sys.stderr, flush=True)
 
@@ -343,6 +359,7 @@ def run(out: Path, fixtures: Path | None = DEFAULT_FIXTURES, seed: int = SEED, d
         df.write_csv(out / f"{name}.csv")
     terminales = pl.DataFrame([{"terminal": k, "ciudad": c, "lat": la, "lon": lo} for k, (c, la, lo) in TERMINALES.items()])
     terminales.write_csv(out / "terminals.csv")
+    escribir_corredores(out / "corridors.json")
     info = {}
     if fixtures is not None:
         log("5/5 fixture")

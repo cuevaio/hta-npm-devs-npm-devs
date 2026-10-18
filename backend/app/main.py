@@ -13,6 +13,7 @@ from fastapi.security import APIKeyHeader
 from psycopg_pool import PoolTimeout
 
 from . import examples as ex
+from . import corridors as corridors_mod
 from . import freights as freights_mod
 from . import fuel as fuel_mod
 from . import metrics as metrics_mod
@@ -20,7 +21,7 @@ from . import reads
 from .db import STATEMENT_TIMEOUT_MS, close_pools, migrate, read_url
 from .replay import Clock, ReplayEngine, system_clock
 from .schemas import (
-    AlertList, Bottlenecks, ControlReplayRequest, Envelope, ErrorBody, FleetOverview, FreightBoard, FuelAnalysis,
+    AlertList, Bottlenecks, CorridorList, ControlReplayRequest, Envelope, ErrorBody, FleetOverview, FreightBoard, FuelAnalysis,
     Provenance, ReplayState, TimeRange, TripStatus, VehicleMetrics, VehicleStatus,
 )
 
@@ -199,6 +200,11 @@ def create_app(
         r, updated = need_engine().state()
         return envelope(r, telemetry(), TimeRange(from_=r.inicio, to=r.fin), updated)
 
+    def corridors() -> dict:
+        r, updated = need_engine().state()
+        data = corridors_mod.corridor_list(reads_url)
+        return envelope(data, [Provenance.external_enrichment], TimeRange(from_=r.inicio, to=r.fin), updated)
+
     def freights() -> dict:
         need_engine()
         data, desde, hasta, updated = freights_mod.freight_board(reads_url)
@@ -215,6 +221,7 @@ def create_app(
     ex_alerts = alerts()
     r_ex = ex.INITIAL_REPLAY
     ex_replay = envelope(r_ex, [Provenance.synthetic_demo], TimeRange(from_=r_ex.inicio, to=r_ex.fin), ex.UPDATED_AT)
+    ex_corridors = envelope(ex.CORRIDORS, [Provenance.external_enrichment], TimeRange(from_=r_ex.inicio, to=r_ex.fin), ex.UPDATED_AT)
     ex_freights = envelope(ex.FREIGHT_BOARD, FREIGHT_PROVENANCE, TimeRange(from_=ex.T0, to=ex.NOW))
     ex_metrics = envelope(ex.VEHICLE_METRICS, ex.PROVENANCE, TimeRange(from_=ex.REPLAY_START, to=ex.NOW))
 
@@ -246,6 +253,8 @@ def create_app(
     add(public, "/trips/{trip_id}/bottlenecks", "read_trip_bottlenecks", lambda trip_id: bottlenecks(trip_id), Bottlenecks, ex_bottlenecks, "Cuellos de botella de un viaje", NOT_FOUND)
     add(public, "/alerts", "read_alerts", lambda: alerts(), AlertList, ex_alerts, "Alertas enviadas al gestor de flota", {})
     add(public, "/freights", "read_freights", lambda: freights(), FreightBoard, ex_freights, "Tablero de fletes: ingresos, combustible y margen", {})
+    add(public, "/corridors", "read_corridors", lambda: corridors(), CorridorList, ex_corridors,
+        "Vía real de cada corredor (OpenStreetMap), para el mapa", {})
     add(public, "/replay", "read_replay", lambda: replay_state(), ReplayState, ex_replay, "Estado del replay", {})
 
     # Tools (MCP, Zavu): operationId = nombre de la tool
