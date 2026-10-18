@@ -1,4 +1,7 @@
 import * as maplibregl from "maplibre-gl";
+// MapLibre 6 arma la URL de su worker en tiempo de ejecución y Vite no la detecta al compilar:
+// sin esto el build no incluye el worker y el mapa base queda en negro ("Worker failed to load").
+import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import { useEffect, useRef } from "react";
 import type { Vehicle } from "../api/client";
 
@@ -7,6 +10,8 @@ const configured = import.meta.env.VITE_MAP_STYLE as string | undefined;
 // "empty" = estilo vacío local, para tests sin red.
 const STYLE: string | maplibregl.StyleSpecification =
   configured === "empty" ? { version: 8, sources: {}, layers: [] } : configured || DEFAULT_STYLE;
+
+maplibregl.setWorkerUrl(workerUrl);
 
 type Props = { vehicles: Vehicle[]; selected: string | null; onSelect: (alias: string) => void };
 
@@ -19,7 +24,7 @@ export function FleetMap({ vehicles, selected, onSelect }: Props) {
   onSelectRef.current = onSelect;
 
   useEffect(() => {
-    const m = new maplibregl.Map({ container: box.current!, style: STYLE, center: [114, 34], zoom: 3 });
+    const m = new maplibregl.Map({ container: box.current!, style: STYLE, center: [-75.5, -12.5], zoom: 5 });
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     map.current = m;
     const current = markers.current;
