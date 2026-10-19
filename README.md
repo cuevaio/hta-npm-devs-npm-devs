@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/img/certera-logo.png" alt="Logo de Certera" width="120">
+</p>
+
 <h1 align="center">Certera</h1>
 
 <p align="center">
@@ -5,10 +9,19 @@
 </p>
 
 <p align="center">
+  <a href="docs/media/certera-chatgpt-demo-15s.mp4">
+    <img src="docs/media/certera-chatgpt-demo-15s.gif" alt="Demo de 15 s: ChatGPT consulta la flota de Certera por MCP" width="640">
+  </a>
+  <br>
+  <sub>Demo de 15 s: ChatGPT consulta la flota por MCP · <a href="docs/media/certera-chatgpt-demo-15s.mp4">ver en video (1280p)</a></sub>
+</p>
+
+<p align="center">
   <a href="https://certera-landing.vercel.app">Landing</a> ·
   <a href="https://certera-dashboard.vercel.app">Dashboard</a> ·
   <a href="#cómo-funciona">Cómo funciona</a> ·
   <a href="#arquitectura">Arquitectura</a> ·
+  <a href="#cómo-se-consulta-un-viaje">Secuencia</a> ·
   <a href="#desarrollo">Desarrollo</a> ·
   <a href="CONTEXT.md">Glosario</a>
 </p>
@@ -75,12 +88,40 @@ flowchart LR
     IA(["Cliente de IA<br/>de la empresa"]) --> MCP
 ```
 
+### Cómo se consulta un viaje
+
+Una pregunta como *"¿cuánto se pasó de consumo el viaje V-001?"* recorre este camino. El MCP no tiene lógica: valida,
+reenvía a la Domain API con una key de servicio y devuelve el sobre sin tocarlo.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as Cliente de IA
+    participant M as Servidor MCP<br/>(Cloudflare Worker)
+    participant A as Domain API<br/>(FastAPI · Cloud Run)
+    participant P as Postgres + PostGIS
+
+    C->>M: tools/call get_fuel_analysis {trip_id}
+    M->>M: OAuth 2.1 / API key · valida entrada (zod)
+    M->>A: GET /v1/tools/get_fuel_analysis?trip_id=… (X-API-Key)
+    A->>P: viaje + hora_replay + passes ⋈ baselines
+    P-->>A: pasadas con su línea base
+    Note over A: pasada válida si n ≥ 3 y ≥ 2 vehículos<br/>sobreconsumo si ≥ 1,25 × mediana y > p90
+    A-->>M: sobre {data, provenance, time_range, updated_at}
+    M-->>C: content + structuredContent (sin modificar)
+    Note over C,M: error 4xx/5xx → isError: true con el detail original
+```
+
+La telemetría "llega" desde `telemetry_source` a `telemetry_reading` según una hora de replay que avanza con la
+velocidad configurada, así que toda consulta solo ve lo ya reproducido. Más detalle, con diagramas de datos, replay y
+algoritmo, en [`docs/arquitectura-tecnica.html`](docs/arquitectura-tecnica.html) (descárgalo y ábrelo en el navegador).
+
 | Pieza | Carpeta | Qué hace |
 |---|---|---|
 | Domain API | [`backend/`](backend/) | Replay, línea base, anomalías, alertas, cuellos de botella y fletes. Única pieza con lógica y base. Contrato en [`openapi.json`](backend/openapi.json) |
 | Datos | [`data/`](data/) | Genera la flota sobre 4 corredores reales con un modelo físico calibrado con [FEAD](https://github.com/Torreskai0722/FEAD) |
 | Agente | [`zavu/`](zavu/) | WhatsApp del gestor: alertas y preguntas en español con las tools de lectura |
-| MCP | [`mcp/`](mcp/) | 6 tools de **solo lectura** y una de control del replay, para que la IA de la empresa consulte la flota sin tocar la base |
+| MCP | [`mcp/`](mcp/) | 7 tools de **solo lectura** y una de control del replay, para que la IA de la empresa consulte la flota sin tocar la base |
 | Dashboard | [`dashboard/`](dashboard/) | Mapa del replay, vehículos, alertas, consumo por tramo y fletes en soles |
 | Landing | [`web/`](web/) | Página estática del producto |
 

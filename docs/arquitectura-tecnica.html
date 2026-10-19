@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Certera · Arquitectura técnica</title>
+<style>
+:root{
+  --bg:#0b0f14; --bg2:#10161e; --card:#141c26; --line:#243142; --text:#e6edf5; --mute:#8fa1b6;
+  --acc:#2dd4bf; --acc2:#818cf8; --warn:#fbbf24; --bad:#fb7185; --ok:#4ade80;
+  --glow:rgba(45,212,191,.12); --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+@media (prefers-color-scheme: light){
+  :root{--bg:#f6f8fb; --bg2:#eef2f7; --card:#ffffff; --line:#d6dfea; --text:#0f1b2a; --mute:#566a80;
+  --acc:#0d9488; --acc2:#4f46e5; --warn:#b45309; --bad:#e11d48; --ok:#15803d; --glow:rgba(13,148,136,.10); --shadow:0 10px 30px rgba(15,27,42,.08);}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+  radial-gradient(900px 500px at 85% -10%,var(--glow),transparent 60%),
+  radial-gradient(700px 400px at -10% 20%,rgba(129,140,248,.10),transparent 60%)}
+code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+a{color:var(--acc);text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);background:color-mix(in srgb,var(--bg) 80%,transparent);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:6px;align-items:center;overflow-x:auto;padding-top:10px;padding-bottom:10px;scrollbar-width:none}
+nav b{margin-right:12px;letter-spacing:.04em;white-space:nowrap}
+nav a{color:var(--mute);font-size:13.5px;padding:5px 11px;border-radius:99px;white-space:nowrap;border:1px solid transparent}
+nav a:hover{color:var(--text);border-color:var(--line)}
+
+header.hero{padding:84px 0 56px}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 40%,transparent);padding:5px 12px;border-radius:99px;background:var(--glow)}
+h1{font-size:clamp(34px,6vw,60px);line-height:1.05;margin:20px 0 18px;letter-spacing:-.03em}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:19px;color:var(--mute);max-width:720px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:36px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.kpi b{display:block;font-size:28px;letter-spacing:-.02em}
+.kpi span{color:var(--mute);font-size:13px}
+
+section{padding:56px 0;border-top:1px solid var(--line)}
+.num{font-family:ui-monospace,monospace;color:var(--acc);font-size:13px;letter-spacing:.1em}
+h2{font-size:clamp(26px,4vw,36px);letter-spacing:-.02em;margin:6px 0 12px}
+h3{font-size:18px;margin:28px 0 8px}
+p{margin:0 0 14px}
+.sub{color:var(--mute);max-width:760px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.card h4{margin:0 0 6px;font-size:15.5px}
+.card p{color:var(--mute);font-size:14.5px;margin:0}
+.tag{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:99px;border:1px solid var(--line);color:var(--mute);margin-right:4px}
+.tag.a{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 45%,transparent)}
+.tag.b{color:var(--acc2);border-color:color-mix(in srgb,var(--acc2) 45%,transparent)}
+.tag.w{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.tag.r{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+.diagram{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:12px;margin:22px 0;overflow-x:auto}
+.diagram svg{display:block;width:100%;height:auto;min-width:640px}
+.cap{font-size:13px;color:var(--mute);margin:8px 6px 2px}
+pre{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;overflow-x:auto;font-size:13.5px;line-height:1.55;margin:16px 0}
+pre .k{color:var(--acc2)} pre .c{color:var(--mute)} pre .n{color:var(--warn)} pre .s{color:var(--acc)}
+:not(pre)>code{background:var(--bg2);border:1px solid var(--line);padding:1px 6px;border-radius:6px;font-size:.88em}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:14px 0}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mute);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.06em}
+.tbl{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 10px}
+.callout{border:1px solid color-mix(in srgb,var(--warn) 50%,transparent);background:color-mix(in srgb,var(--warn) 9%,transparent);border-radius:14px;padding:14px 18px;margin:18px 0;font-size:14.5px}
+.callout b{color:var(--warn)}
+.steps{counter-reset:s;display:grid;gap:12px;margin:18px 0}
+.steps li{list-style:none;counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px 14px 58px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--glow);color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 45%,transparent);font-weight:700;font-size:13px}
+.steps{padding:0}
+footer{padding:40px 0 70px;color:var(--mute);font-size:13.5px;border-top:1px solid var(--line)}
+
+/* svg */
+svg text{font-family:Inter,ui-sans-serif,system-ui,sans-serif;fill:var(--text);font-size:13px}
+svg .m{fill:var(--mute)} svg .t{font-weight:600} svg .s{font-size:11.5px}
+svg .box{fill:var(--card);stroke:var(--line);stroke-width:1.3}
+svg .boxa{fill:color-mix(in srgb,var(--acc) 10%,var(--card));stroke:var(--acc);stroke-width:1.4}
+svg .boxb{fill:color-mix(in srgb,var(--acc2) 10%,var(--card));stroke:var(--acc2);stroke-width:1.4}
+svg .boxw{fill:color-mix(in srgb,var(--warn) 10%,var(--card));stroke:var(--warn);stroke-width:1.4}
+svg .ln{stroke:var(--mute);stroke-width:1.5;fill:none}
+svg .lna{stroke:var(--acc);stroke-width:1.8;fill:none}
+svg .dash{stroke-dasharray:5 5}
+svg .life{stroke:var(--line);stroke-width:1.5;stroke-dasharray:4 6}
+.flow{stroke-dasharray:6 6;animation:dash 1.4s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-24}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <b>Certera</b>
+  <a href="#vision">Visión</a><a href="#datos">Datos</a><a href="#replay">Replay</a><a href="#mcp">MCP</a><a href="#algoritmo">Algoritmo</a><a href="#deteccion">Detección</a><a href="#decisiones">Decisiones</a><a href="#limites">Límites</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <span class="eyebrow">Documentación técnica · high level</span>
+  <h1>Cómo Certera guarda, consulta y <em>juzga</em> el consumo de una flota</h1>
+  <p class="lead">Un solo Postgres con PostGIS, una Domain API que es la única que lo toca, un servidor MCP que no tiene lógica propia, y una línea base de combustible calculada entre pares sobre celdas H3. Esta página resume cómo encaja todo.</p>
+  <div class="kpis">
+    <div class="kpi"><b>28</b><span>tractocamiones (T01…T28)</span></div>
+    <div class="kpi"><b>4</b><span>corredores reales de Perú</span></div>
+    <div class="kpi"><b>~6–7 km</b><span>por tramo (celda H3 res. 6)</span></div>
+    <div class="kpi"><b>8</b><span>tools MCP</span></div>
+    <div class="kpi"><b>≥ 3</b><span>pasadas para tener línea base</span></div>
+  </div>
+</div></header>
+
+<main class="wrap">
+
+<!-- 1 -->
+<section id="vision">
+  <span class="num">01</span>
+  <h2>Visión general</h2>
+  <p class="sub">Certera explica qué pasa con cada <b>vehículo</b> en su <b>corredor</b>, detecta sobreconsumo frente a sus pares y avisa al gestor de flota por WhatsApp. Los datos son una <b>flota simulada sobre carreteras reales</b>, reproducida como <i>replay</i>: nunca se presenta como tiempo real.</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1040 470" role="img" aria-label="Arquitectura general">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--acc)"/></marker>
+    <marker id="am" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--mute)"/></marker></defs>
+
+    <text x="20" y="26" class="m s">OFFLINE · carpeta data/</text>
+    <rect x="20" y="36" width="210" height="150" rx="14" class="boxw"/>
+    <text x="38" y="62" class="t">Pipeline de datos</text>
+    <text x="38" y="84" class="m s">Modelo físico (fisica.py)</text>
+    <text x="38" y="102" class="m s">Geometría OSRM · altitud SRTM</text>
+    <text x="38" y="120" class="m s">Viajes → pasadas H3</text>
+    <text x="38" y="138" class="m s">Línea base (mediana, p90)</text>
+    <text x="38" y="168" class="m s">determinista con semilla</text>
+
+    <text x="330" y="26" class="m s">ALMACÉN ÚNICO · Cloud SQL (us-central1)</text>
+    <rect x="330" y="36" width="250" height="150" rx="14" class="boxa"/>
+    <text x="350" y="62" class="t">Postgres 16 + PostGIS</text>
+    <text x="350" y="86" class="m s">trips · freights · drivers</text>
+    <text x="350" y="104" class="m s">telemetry_source / _reading</text>
+    <text x="350" y="122" class="m s">passes · baselines</text>
+    <text x="350" y="140" class="m s">replay_state · driver_reports</text>
+    <text x="350" y="168" class="m s">sin vector store ni grafo (ADR 0003)</text>
+
+    <text x="680" y="26" class="m s">CLOUD RUN · 1 instancia fija</text>
+    <rect x="680" y="36" width="340" height="150" rx="14" class="boxb"/>
+    <text x="700" y="62" class="t">Domain API · FastAPI</text>
+    <text x="700" y="86" class="m s">Única capa que toca la base</text>
+    <text x="700" y="104" class="m s">Contrato OpenAPI · sobre con procedencia</text>
+    <text x="700" y="122" class="m s">Motor de replay (tarea asyncio)</text>
+    <text x="700" y="140" class="m s">/v1/tools/* y /v1/* (REST)</text>
+    <text x="700" y="168" class="m s">min = max = 1 instancia (ADR 0005)</text>
+
+    <path d="M230 111H326" class="lna dash flow" marker-end="url(#ar)"/>
+    <text x="236" y="102" class="m s">carga</text>
+    <path d="M680 111H584" class="lna" marker-end="url(#ar)"/>
+    <path d="M584 130H680" class="lna" marker-end="url(#ar)" style="display:none"/>
+    <text x="602" y="102" class="m s">SQL</text>
+
+    <text x="20" y="266" class="m s">CONSUMIDORES · adaptadores delgados, sin lógica de dominio</text>
+    <rect x="680" y="276" width="160" height="82" rx="14" class="box"/>
+    <text x="698" y="304" class="t">MCP Worker</text>
+    <text x="698" y="324" class="m s">Cloudflare · /mcp</text>
+    <text x="698" y="342" class="m s">OAuth 2.1 / API key</text>
+
+    <rect x="860" y="276" width="160" height="82" rx="14" class="box"/>
+    <text x="878" y="304" class="t">Agente Zavu</text>
+    <text x="878" y="324" class="m s">WhatsApp Cloud API</text>
+    <text x="878" y="342" class="m s">tools por HTTP</text>
+
+    <rect x="500" y="276" width="160" height="82" rx="14" class="box"/>
+    <text x="518" y="304" class="t">Dashboard</text>
+    <text x="518" y="324" class="m s">React · Mapbox</text>
+    <text x="518" y="342" class="m s">REST /v1</text>
+
+    <path d="M760 276V190" class="ln" marker-end="url(#am)"/>
+    <path d="M940 276V232H800V190" class="ln" marker-end="url(#am)"/>
+    <path d="M580 276V232H720V190" class="ln" marker-end="url(#am)"/>
+
+    <text x="20" y="420" class="m s">CLIENTES FINALES</text>
+    <rect x="680" y="400" width="160" height="50" rx="12" class="box"/>
+    <text x="698" y="430" class="s">Claude · agentes externos</text>
+    <rect x="860" y="400" width="160" height="50" rx="12" class="box"/>
+    <text x="880" y="430" class="s">Gestor · Conductor</text>
+    <rect x="500" y="400" width="160" height="50" rx="12" class="box"/>
+    <text x="528" y="430" class="s">Gestor de flota</text>
+    <path d="M760 400V360" class="ln" marker-end="url(#am)"/>
+    <path d="M940 400V360" class="ln" marker-end="url(#am)"/>
+    <path d="M580 400V360" class="ln" marker-end="url(#am)"/>
+  </svg>
+  <div class="cap">Regla de oro: toda la lógica vive en la Domain API. MCP y Zavu parecen duplicados, pero no se fusionan ni se les mueve lógica (ADR 0004).</div>
+  </div>
+
+  <div class="grid g3">
+    <div class="card"><h4>Un solo almacén</h4><p>Las preguntas son hechos estructurados (posición, consumo por tramo, paradas). SQL + PostGIS las resuelve con exactitud; no hace falta RAG.</p></div>
+    <div class="card"><h4>Contexto bajo demanda</h4><p>El agente arma su contexto llamando tools, no desde memoria vectorial. Si algún día hay mucho texto libre, <code>pgvector</code> en la misma base.</p></div>
+    <div class="card"><h4>Honestidad de datos</h4><p>Cada respuesta declara su <b>procedencia</b> y el rango de tiempo que cubre. La demo nunca dice “telemetría real”.</p></div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="datos">
+  <span class="num">02</span>
+  <h2>Cómo se guarda la data</h2>
+  <p class="sub">Todo vive en Postgres con migraciones SQL numeradas (<code>backend/migrations/0001…0005</code>), aplicadas al arrancar bajo un advisory lock. La data se genera <b>offline</b> y se carga; en runtime solo se lee y se reproduce.</p>
+
+  <h3>Del dato crudo al agregado</h3>
+  <div class="diagram">
+  <svg viewBox="0 0 1040 200" role="img" aria-label="Pipeline de datos">
+    <defs><marker id="p1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--acc)"/></marker></defs>
+    <g>
+      <rect x="10" y="50" width="170" height="100" rx="14" class="boxw"/><text x="28" y="80" class="t">Rutas reales</text><text x="28" y="100" class="m s">OSRM (OpenStreetMap)</text><text x="28" y="116" class="m s">SRTM 90 m (altitud)</text><text x="28" y="132" class="m s">rutas_peru.json</text>
+      <rect x="220" y="50" width="170" height="100" rx="14" class="box"/><text x="238" y="80" class="t">Modelo físico</text><text x="238" y="100" class="m s">masa · pendiente · curvas</text><text x="238" y="116" class="m s">altitud · aerodinámica</text><text x="238" y="132" class="m s">telemetría a 1 Hz</text>
+      <rect x="430" y="50" width="170" height="100" rx="14" class="box"/><text x="448" y="80" class="t">Viajes y pasadas</text><text x="448" y="100" class="m s">estancias ≥ 3 h → viaje</text><text x="448" y="116" class="m s">celdas H3 res. 6</text><text x="448" y="132" class="m s">∫ L/h · distancia GPS</text>
+      <rect x="640" y="50" width="170" height="100" rx="14" class="box"/><text x="658" y="80" class="t">Línea base</text><text x="658" y="100" class="m s">por tramo + sentido</text><text x="658" y="116" class="m s">días 1–12, toda la flota</text><text x="658" y="132" class="m s">mediana · p90 · n</text>
+      <rect x="850" y="50" width="180" height="100" rx="14" class="boxa"/><text x="868" y="80" class="t">Cloud SQL</text><text x="868" y="100" class="m s">cruda: solo flota demo</text><text x="868" y="116" class="m s">pasadas + baselines</text><text x="868" y="132" class="m s">solo agregados del resto</text>
+    </g>
+    <path d="M180 100H216" class="lna" marker-end="url(#p1)"/><path d="M390 100H426" class="lna" marker-end="url(#p1)"/><path d="M600 100H636" class="lna" marker-end="url(#p1)"/><path d="M810 100H846" class="lna" marker-end="url(#p1)"/>
+    <text x="10" y="30" class="m s">determinista: misma semilla, misma salida</text>
+  </svg>
+  </div>
+
+  <h3>Las tablas, por rol</h3>
+  <div class="grid g3">
+    <div class="card"><span class="tag a">Catálogo</span><h4 style="margin-top:8px">vehicles · drivers</h4><p><code>alias</code> T01…T28 como PK. Conductores con procedencia.</p></div>
+    <div class="card"><span class="tag a">Catálogo</span><h4 style="margin-top:8px">trips · freights</h4><p>Un viaje = vehículo + corredor + <code>sentido</code> (ida/vuelta). Un flete tiene exactamente un viaje (<code>trip_id</code> PK, 1:1).</p></div>
+    <div class="card"><span class="tag w">Texto</span><h4 style="margin-top:8px">driver_reports</h4><p>Mensaje de WhatsApp con su texto original, ligado a un viaje. Procedencia <code>human_reported</code>.</p></div>
+    <div class="card"><span class="tag b">Replay</span><h4 style="margin-top:8px">telemetry_source</h4><p>Telemetría por reproducir: lat, lon, altitud, velocidad, rpm, <code>fuel_rate_lph</code>, odómetro, motor.</p></div>
+    <div class="card"><span class="tag b">Replay</span><h4 style="margin-top:8px">telemetry_reading</h4><p>Lo visible: historia + lo ya reproducido. Guarda <code>geom geography(Point)</code> generada con PostGIS y las <b>tres horas</b>.</p></div>
+    <div class="card"><span class="tag b">Replay</span><h4 style="margin-top:8px">replay_state</h4><p>Fila única (<code>id boolean</code> con CHECK): estado, velocidad, <code>hora_replay</code>, inicio, fin.</p></div>
+    <div class="card"><span class="tag r">Derivado</span><h4 style="margin-top:8px">passes</h4><p>Una fila por (viaje, celda H3): km, litros, L/100 km. Índice por <code>(corridor, sentido, h3_cell)</code>.</p></div>
+    <div class="card"><span class="tag r">Derivado</span><h4 style="margin-top:8px">baselines</h4><p>PK <code>(corridor, sentido, h3_cell)</code>: <code>n_passes</code>, <code>n_vehicles</code>, mediana y p90 de L/100 km y litros. Procedencia <code>model_inferred</code>.</p></div>
+  </div>
+
+  <h3>Tres relojes por lectura</h3>
+  <div class="tbl"><table>
+    <tr><th>Columna</th><th>Qué es</th><th>Ejemplo mental</th></tr>
+    <tr><td><code>event_time</code></td><td>Hora del evento: cuándo ocurrió en el vehículo</td><td>“el camión pasó por Nasca a las 03:12”</td></tr>
+    <tr><td><code>replayed_at</code></td><td>Hora de replay: cuándo se reemitió (nula en la historia)</td><td>“lo reproduje a velocidad 60×”</td></tr>
+    <tr><td><code>ingested_at</code></td><td>Hora de ingesta: cuándo la recibió el sistema</td><td>“entró a la base ahora”</td></tr>
+  </table></div>
+
+  <h3>Procedencia en cada dato</h3>
+  <p>
+    <span class="tag a">synthetic_demo</span> telemetría, viajes, fletes, conductores y reportes precargados ·
+    <span class="tag w">human_reported</span> lo que escribe un conductor ·
+    <span class="tag r">model_inferred</span> línea base y análisis ·
+    <span class="tag">external_enrichment</span> fuentes externas ·
+    <span class="tag">fead_observed</span> histórico, ya no se usa en la demo (ADR 0012).
+  </p>
+</section>
+
+<!-- 3 -->
+<section id="replay">
+  <span class="num">03</span>
+  <h2>El replay: reloj propio, sin tiempo real</h2>
+  <p class="sub">La telemetría “llega” desde <code>telemetry_source</code> a <code>telemetry_reading</code> según una hora de replay que avanza a la velocidad configurada. El motor corre dentro del proceso FastAPI como tarea asyncio, una vez por segundo.</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1040 250" role="img" aria-label="Línea de tiempo del replay">
+    <defs><marker id="r1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--acc)"/></marker></defs>
+    <text x="20" y="28" class="m s">EJE DE HORA DEL EVENTO (19 días)</text>
+    <rect x="20" y="44" width="590" height="34" rx="8" class="boxa"/>
+    <text x="36" y="66" class="t">Historia · días 1–12</text>
+    <rect x="610" y="44" width="410" height="34" rx="8" class="boxb" style="stroke-dasharray:4 4"/>
+    <text x="626" y="66" class="t">Replay · días 13–19</text>
+    <text x="20" y="98" class="m s">Visible desde el inicio · alimenta la línea base</text>
+    <text x="626" y="98" class="m s">Aparece según avanza hora_replay</text>
+
+    <rect x="610" y="44" width="170" height="34" rx="8" fill="var(--acc2)" opacity=".28"/>
+    <line x1="780" y1="34" x2="780" y2="92" stroke="var(--acc2)" stroke-width="2.5"/>
+    <text x="780" y="24" class="s t" text-anchor="middle">hora_replay</text>
+
+    <rect x="120" y="140" width="230" height="74" rx="12" class="box"/>
+    <text x="138" y="168" class="t">telemetry_source</text><text x="138" y="188" class="m s">todo lo que falta por mostrar</text>
+    <rect x="690" y="140" width="230" height="74" rx="12" class="boxa"/>
+    <text x="708" y="168" class="t">telemetry_reading</text><text x="708" y="188" class="m s">lo ya visible (+ replayed_at)</text>
+    <path d="M350 177H686" class="lna flow" marker-end="url(#r1)"/>
+    <text x="520" y="168" text-anchor="middle" class="s">INSERT … WHERE event_time ∈ (anterior, nueva]</text>
+    <text x="520" y="200" text-anchor="middle" class="m s">nueva = min(hora + Δreal × velocidad, fin)</text>
+  </svg>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h4>Controles (<code>control_replay</code>)</h4>
+      <p><b>play / pause</b> cierran el tramo anterior con la velocidad vieja y cambian el estado. <b>set_speed</b> exige <code>speed &gt; 0</code>. <b>seek</b> salta: hacia adelante copia lo intermedio; hacia atrás <b>borra</b> lo reproducido después de ese instante.</p>
+    </div>
+    <div class="card">
+      <h4>Por qué una sola instancia</h4>
+      <p>El replay necesita estado único y un proceso vivo. Cloud Run con <code>min = max = 1</code> y CPU siempre asignada evita coordinar réplicas. <b>No subir <code>max-instances</code></b>: habría dos replays y datos duplicados.</p>
+    </div>
+  </div>
+  <p style="margin-top:14px">Toda consulta que habla del “presente” filtra por <code>hora_replay</code>: p. ej. un análisis solo considera pasadas con <code>t_end ≤ hora_replay</code>.</p>
+</section>
+
+<!-- 4 -->
+<section id="mcp">
+  <span class="num">04</span>
+  <h2>Cómo se consulta mediante el MCP</h2>
+  <p class="sub">El servidor MCP es un Worker de Cloudflare sin estado (<code>createMcpHandler</code>, Streamable HTTP en <code>/mcp</code>). Cada tool es un adaptador: traduce los argumentos a una petición HTTP a la Domain API y devuelve la respuesta sin tocarla.</p>
+
+  <div class="diagram">
+  <svg viewBox="0 0 1040 470" role="img" aria-label="Secuencia de una consulta MCP">
+    <defs><marker id="s1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--acc)"/></marker>
+    <marker id="s2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--mute)"/></marker></defs>
+    <g class="s">
+      <rect x="30" y="14" width="170" height="40" rx="10" class="box"/><text x="115" y="39" text-anchor="middle" class="t">Cliente (Claude)</text>
+      <rect x="270" y="14" width="170" height="40" rx="10" class="box"/><text x="355" y="39" text-anchor="middle" class="t">MCP Worker</text>
+      <rect x="520" y="14" width="190" height="40" rx="10" class="boxb"/><text x="615" y="39" text-anchor="middle" class="t">Domain API</text>
+      <rect x="800" y="14" width="190" height="40" rx="10" class="boxa"/><text x="895" y="39" text-anchor="middle" class="t">Postgres + PostGIS</text>
+    </g>
+    <line x1="115" y1="54" x2="115" y2="450" class="life"/><line x1="355" y1="54" x2="355" y2="450" class="life"/><line x1="615" y1="54" x2="615" y2="450" class="life"/><line x1="895" y1="54" x2="895" y2="450" class="life"/>
+
+    <path d="M115 92H351" class="lna" marker-end="url(#s1)"/>
+    <text x="123" y="84" class="s">1 · tools/call get_fuel_analysis {trip_id}</text>
+    <path d="M355 128H355" class="ln"/>
+    <rect x="285" y="112" width="140" height="0" />
+    <text x="365" y="130" class="m s">2 · valida (zod) + auth</text>
+    <path d="M355 160H611" class="lna" marker-end="url(#s1)"/>
+    <text x="363" y="152" class="s">3 · GET /v1/tools/get_fuel_analysis?trip_id=…</text>
+    <text x="363" y="174" class="m s">header X-API-Key (key de servicio)</text>
+    <path d="M615 214H891" class="lna" marker-end="url(#s1)"/>
+    <text x="623" y="206" class="s">4 · SQL (pool con timeout)</text>
+    <text x="623" y="228" class="m s">trip + hora_replay + passes ⋈ baselines</text>
+    <path d="M891 268H619" class="ln" marker-end="url(#s2)"/>
+    <text x="640" y="260" class="s m">5 · filas</text>
+    <text x="625" y="298" class="m s">6 · evalúa regla (n ≥ 3, ≥ 1,25× mediana, &gt; p90)</text>
+    <text x="625" y="316" class="m s">   arma el sobre: data + provenance + time_range</text>
+    <path d="M611 346H359" class="ln" marker-end="url(#s2)"/>
+    <text x="395" y="338" class="s m">7 · JSON (sobre)</text>
+    <path d="M351 394H119" class="ln" marker-end="url(#s2)"/>
+    <text x="150" y="386" class="s m">8 · content + structuredContent (sin modificar)</text>
+    <text x="365" y="432" class="m s">Error 4xx/5xx → isError:true con el detail original</text>
+  </svg>
+  </div>
+
+  <h3>Las 8 tools</h3>
+  <div class="tbl"><table>
+    <tr><th>Tool</th><th>Entrada</th><th>Qué responde</th></tr>
+    <tr><td><code>get_fleet_overview</code></td><td>—</td><td>Estado de cada vehículo y viajes en curso del replay</td></tr>
+    <tr><td><code>get_vehicle_status</code></td><td><code>alias</code></td><td>Viaje actual, posición y última lectura. Estado: <code>en_viaje</code> (&gt; 3 km/h), <code>ralenti</code> (≤ 0,5 km/h con rpm &gt; 0) o <code>detenido</code></td></tr>
+    <tr><td><code>get_trip_status</code></td><td><code>trip_id</code></td><td>Avance %, distancia, estado <code>en_curso</code>/<code>finalizado</code>, flete y conductor</td></tr>
+    <tr><td><code>get_fuel_analysis</code></td><td><code>trip_id</code></td><td>Consumo por tramo vs línea base de pares, sobreconsumo, exceso en litros, ralentí</td></tr>
+    <tr><td><code>get_operational_bottlenecks</code></td><td><code>trip_id</code></td><td>Tiempo perdido por paradas sin explicar o ralentí, ordenado por impacto</td></tr>
+    <tr><td><code>get_alerts</code></td><td>—</td><td>Alertas vigentes con su procedencia</td></tr>
+    <tr><td><code>get_vehicle_metrics</code></td><td><code>alias</code>, <code>desde?</code>, <code>hasta?</code>, <code>agrupar_por?</code></td><td>Una fila por día (hora de Lima) o por viaje: km, litros, L/100 km, margen en soles…</td></tr>
+    <tr><td><code>control_replay</code></td><td><code>action</code>, <code>speed?</code>, <code>to_event_time?</code></td><td>Único tool de escritura (POST): play, pause, seek, set_speed</td></tr>
+  </table></div>
+
+  <h3>El sobre de respuesta</h3>
+<pre><span class="c">// Toda respuesta de la Domain API (y por tanto del MCP) tiene esta forma</span>
+{
+  <span class="k">"data"</span>:       { <span class="c">/* payload específico del tool */</span> },
+  <span class="k">"provenance"</span>: [<span class="s">"synthetic_demo"</span>, <span class="s">"model_inferred"</span>],
+  <span class="k">"time_range"</span>: { <span class="k">"from"</span>: <span class="s">"…"</span>, <span class="k">"to"</span>: <span class="s">"…"</span> },   <span class="c">// hasta min(hora_replay, fin del viaje)</span>
+  <span class="k">"updated_at"</span>: <span class="s">"…"</span>
+}</pre>
+
+  <h3>Autenticación</h3>
+  <div class="grid g2">
+    <div class="card"><span class="tag b">Recomendado</span><h4 style="margin-top:8px">OAuth 2.1 + PKCE</h4><p>El Worker es servidor de autorización y recurso. Descubrimiento desde el 401, registro por DCR/CIMD, login con GitHub filtrado por <code>GITHUB_ALLOWED_USERS</code>. Tokens y grants en KV.</p></div>
+    <div class="card"><span class="tag w">Automatización</span><h4 style="margin-top:8px">API key estática</h4><p><code>Authorization: Bearer</code> o <code>X-API-Key</code>, para <code>mcp-remote</code>, tests y e2e. Sin <code>MCP_API_KEY</code> configurada, este camino queda cerrado. El Worker habla con la Domain API con otra key de servicio.</p></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="algoritmo">
+  <span class="num">05</span>
+  <h2>El algoritmo: línea base entre pares por tramo</h2>
+  <p class="sub">La pendiente domina el consumo: en una subida la mediana puede ser ~7× la de la bajada (79,7 vs 10,8 L/100 km en el paso de Nanling). Comparar un camión con su propio historial marcaría sobreconsumo en cada subida. Por eso Certera compara contra <b>otros vehículos que recorrieron el mismo trecho en el mismo sentido</b>.</p>
+
+  <h3>Paso 1 · Cortar el corredor en tramos</h3>
+  <p>Un <b>tramo</b> es una celda hexagonal <b>H3 de resolución 6</b> (~6–7 km) más el <b>sentido</b>. Los camiones que siguen la misma carretera caen en las mismas celdas sin necesitar la geometría de la vía, y el corte tolera huecos de GPS.</p>
+  <div class="diagram">
+    <svg id="hexsvg" viewBox="0 0 1040 250" role="img" aria-label="Corredor cortado en celdas H3"></svg>
+    <div class="cap">Ilustración: un corredor atravesando celdas H3 (res. 6). Cada celda recorrida en un sentido es un tramo; cada recorrido de un vehículo es una pasada.</div>
+  </div>
+
+  <h3>Paso 2 · Medir cada pasada</h3>
+  <ul class="steps">
+    <li><b>Litros</b> = integral de <code>fuel_rate_lph</code> en el tiempo. Un hueco de más de 10 s no se integra como consumo.</li>
+    <li><b>Kilómetros</b> = suma de distancias GPS (haversine). Ni el odómetro (resolución de 1 km y huecos) ni el contador acumulado de litros (resolución de 0,5 L).</li>
+    <li><b>Se descarta</b> una pasada de menos de 2 km o con menos del 80 % de cobertura.</li>
+    <li><b>L/100 km</b> = litros ÷ km × 100.</li>
+  </ul>
+
+  <h3>Paso 3 · Agregar entre pares (offline)</h3>
+<pre><span class="c"># data/fleetdata/baseline.py</span>
+passes.filter(day <= <span class="n">12</span>)                          <span class="c"># solo historia, toda la flota</span>
+      .group_by([<span class="s">"corridor"</span>, <span class="s">"sentido"</span>, <span class="s">"h3_cell"</span>])
+      .agg(n_passes, n_vehicles,
+           median(l_per_100km), quantile(l_per_100km, <span class="n">0.9</span>),
+           median(liters),      quantile(liters,      <span class="n">0.9</span>), median(km))
+      .filter(n_passes >= <span class="n">3</span>)                     <span class="c"># sin pares suficientes → sin línea base</span></pre>
+  <p>Solo los <b>agregados</b> llegan a la base desplegada, nunca la telemetría cruda de los otros camiones. Recalcular la línea base es un paso offline, no algo que haga la API.</p>
+
+  <h3>Paso 4 · Juzgar una pasada (en la Domain API)</h3>
+  <div class="diagram">
+    <svg id="distsvg" viewBox="0 0 1040 260" role="img" aria-label="Distribución de pares y umbral de sobreconsumo"></svg>
+    <div class="cap">Valores ilustrativos. Puntos grises: pares en el mismo tramo y sentido. Punto rojo: una pasada que supera ambos umbrales.</div>
+  </div>
+
+<pre><span class="c"># backend/app/fuel.py</span>
+valid = n_passes >= <span class="n">3</span> <span class="k">and</span> n_vehicles >= <span class="n">2</span>
+over  = valid <span class="k">and</span> rate >= <span class="n">1.25</span> * median_l_per_100km <span class="k">and</span> rate > p90_l_per_100km
+exceso_l = liters - median_liters           <span class="c"># solo si valid</span></pre>
+  <div class="callout"><b>Doble condición a propósito.</b> Superar 1,25× la mediana evita alertar por diferencias pequeñas; superar el p90 evita alertar en tramos donde todos los pares son muy dispersos. Si el tramo no tiene línea base válida, el sistema <b>no lo juzga y lo dice</b> (<code>linea_base: null</code>).</div>
+</section>
+
+<!-- 6 -->
+<section id="deteccion">
+  <span class="num">06</span>
+  <h2>Detección operativa y datos simulados</h2>
+
+  <div class="grid g2">
+    <div class="card">
+      <h4>Ralentí y paradas</h4>
+      <p>Ralentí: <code>speed ≤ 0,5 km/h</code> con <code>rpm &gt; 0</code>, sumando el intervalo hasta la lectura siguiente con tope de 10 s por hueco. Una <b>parada</b> es un vehículo detenido ≥ 10 min. Un <b>cuello de botella</b> es tiempo perdido por paradas sin explicar o ralentí prolongado; una parada explicada por el conductor deja de serlo, pero sigue visible.</p>
+    </div>
+    <div class="card">
+      <h4>Viajes y terminales (pipeline)</h4>
+      <p>Estancia: vehículo casi quieto ≥ 3 h. Terminal: celdas H3 res. 5 donde coinciden varias estancias de la flota. Viaje: recorrido entre dos estancias consecutivas en terminales distintos; el <b>sentido</b> sale del terminal de origen.</p>
+    </div>
+  </div>
+
+  <h3>Modelo físico de consumo</h3>
+<pre>F = m·a + m·g·(Crr + pendiente) + ½·ρ(h)·CdA·v²
+L/h = ralentí + (P⁺ / η) · BSFC(h) / 835 g/L</pre>
+  <p>Masa, pendiente, curvas, altitud y resistencia aerodinámica. La altitud resta potencia al motor y aire a la resistencia. Calibrado contra FEAD: ~33 L/100 km en llano con 40 t y una mediana cercana a 21,6 L/h. Sobre esa base hay casos <b>guionados y deterministas</b> (sobreconsumo de T07, ralentí de T04, parada sin explicar de T28, subida a Ticlio de T22) que los tests verifican.</p>
+
+  <div class="callout"><b>Estado actual.</b> En el código de la Domain API, <code>get_operational_bottlenecks</code> y <code>get_alerts</code> aún devuelven respuestas de ejemplo (<code>examples.py</code>) y el campo <code>anomalias</code> del análisis de combustible está vacío (ticket #15). <code>get_fuel_analysis</code>, <code>get_trip_status</code>, <code>get_vehicle_status</code> y <code>get_vehicle_metrics</code> sí se calculan desde Postgres.</div>
+</section>
+
+<!-- 7 -->
+<section id="decisiones">
+  <span class="num">07</span>
+  <h2>Decisiones de arquitectura clave</h2>
+  <div class="tbl"><table>
+    <tr><th>ADR</th><th>Decisión</th><th>Por qué</th></tr>
+    <tr><td>0002</td><td>Línea base por tramo y sentido entre pares</td><td>Por vehículo marcaría falso sobreconsumo en cada subida</td></tr>
+    <tr><td>0003</td><td>Cloud SQL + PostGIS como único almacén</td><td>Hechos estructurados; sin RAG ni grafo en el MVP</td></tr>
+    <tr><td>0004</td><td>MCP en Cloudflare; tools de Zavu por HTTP</td><td>Zavu no consume MCP; ambos son adaptadores sin lógica</td></tr>
+    <tr><td>0005</td><td>Cloud Run con 1 instancia y replay en proceso</td><td>Estado único del replay, sin arranques en frío</td></tr>
+    <tr><td>0008</td><td>Tramo = celda H3 res. 6 + sentido</td><td>Cortes comparables sin map-matching; tolera huecos de GPS</td></tr>
+    <tr><td>0009</td><td>Línea base offline con toda la flota</td><td>Con 6 camiones casi ningún tramo tendría pares suficientes</td></tr>
+    <tr><td>0012</td><td>Telemetría sintética sobre corredores reales de Perú</td><td>Reproyectar datos de China era fabricar datos con apariencia de reales</td></tr>
+  </table></div>
+</section>
+
+<!-- 8 -->
+<section id="limites">
+  <span class="num">08</span>
+  <h2>Límites y cuidados</h2>
+  <div class="grid g3">
+    <div class="card"><span class="tag r">Operación</span><h4 style="margin-top:8px">No escalar horizontalmente</h4><p>Más de una instancia duplica el replay. Escalar exigiría mover el estado fuera del proceso.</p></div>
+    <div class="card"><span class="tag w">Modelo</span><h4 style="margin-top:8px">Pares insuficientes</h4><p>Con menos de 3 pasadas o menos de 2 vehículos no hay juicio. Corredores con un solo vehículo no tienen línea base.</p></div>
+    <div class="card"><span class="tag w">Cambios</span><h4 style="margin-top:8px">Recalcular al cambiar H3</h4><p>Cambiar la resolución H3 obliga a rehacer pasadas y línea base.</p></div>
+    <div class="card"><span class="tag b">Datos</span><h4 style="margin-top:8px">Nunca “tiempo real”</h4><p>Todo es un replay de una flota simulada. Los textos de producto deben decirlo.</p></div>
+    <div class="card"><span class="tag b">Fechas</span><h4 style="margin-top:8px">Corte a las 16:00 UTC</h4><p>Se conservan las fechas de abril de 2020 y el corte del replay para no mover el contrato; pasar a hora de Lima es un cambio aparte.</p></div>
+    <div class="card"><span class="tag a">Base</span><h4 style="margin-top:8px">Lecturas con timeout</h4><p>Pool de hasta 8 conexiones y <code>statement_timeout</code> de 10 s; si no hay conexión libre, 503 en vez de esperar sin fin.</p></div>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  Generado a partir de <code>CONTEXT.md</code>, <code>docs/adr/</code>, <code>backend/</code>, <code>mcp/</code> y <code>data/</code>. Los diagramas de hexágonos y de distribución son ilustrativos; las reglas y umbrales vienen del código.
+</div></footer>
+
+<script>
+(function(){
+  var NS="http://www.w3.org/2000/svg";
+  function el(n,a,p){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+
+  // Hexágonos H3 a lo largo de un corredor
+  var s=document.getElementById("hexsvg"),R=34,w=Math.sqrt(3)*R;
+  var cells=[[0,0],[1,0],[2,-.5],[3,-.5],[4,0],[5,.5],[6,.5],[7,0],[8,-.5],[9,-.5]];
+  var path=[];
+  cells.forEach(function(c,i){
+    var cx=70+c[0]*w*1.0+(c[1]%1?w/2:0), cy=130+c[1]*R*1.5;
+    cx=70+i*w*0.92; cy=125+Math.sin(i*0.7)*38;
+    var pts=[];for(var k=0;k<6;k++){var a=Math.PI/180*(60*k-30);pts.push((cx+R*Math.cos(a)).toFixed(1)+","+(cy+R*Math.sin(a)).toFixed(1))}
+    var hot=i===4;
+    el("polygon",{points:pts.join(" "),fill:hot?"color-mix(in srgb,var(--bad) 18%,var(--card))":"color-mix(in srgb,var(--acc) 8%,var(--card))",stroke:hot?"var(--bad)":"var(--acc)","stroke-width":hot?2:1.2},s);
+    var t=el("text",{x:cx,y:cy+4,"text-anchor":"middle","font-size":11,class:"m"},s);t.textContent="T"+(i+1);
+    path.push([cx,cy]);
+  });
+  el("path",{d:"M"+path.map(function(p){return p[0].toFixed(1)+" "+p[1].toFixed(1)}).join(" L"),fill:"none",stroke:"var(--acc2)","stroke-width":3,"stroke-linecap":"round","stroke-linejoin":"round",opacity:.85},s);
+  var tt=el("text",{x:20,y:26,class:"m",style:"font-size:12px"},s);tt.textContent="Sentido: ida  →";
+  var t2=el("text",{x:path[4][0],y:path[4][1]-R-10,"text-anchor":"middle",style:"font-size:12px;fill:var(--bad)"},s);t2.textContent="tramo con sobreconsumo";
+
+  // Distribución de pares
+  var d=document.getElementById("distsvg"),X0=70,X1=990,min=60,max=115;
+  function x(v){return X0+(v-min)/(max-min)*(X1-X0)}
+  el("line",{x1:X0,y1:150,x2:X1,y2:150,stroke:"var(--line)","stroke-width":2},d);
+  for(var v=60;v<=110;v+=10){el("line",{x1:x(v),y1:150,x2:x(v),y2:156,stroke:"var(--mute)"},d);var q=el("text",{x:x(v),y:174,"text-anchor":"middle",class:"m",style:"font-size:11.5px"},d);q.textContent=v}
+  var ax=el("text",{x:X1,y:196,"text-anchor":"end",class:"m",style:"font-size:11.5px"},d);ax.textContent="L / 100 km (ilustrativo)";
+  var peers=[71,74,76,78,79,81,84,88];
+  peers.forEach(function(v,i){el("circle",{cx:x(v),cy:128-(i%2)*14,r:8,fill:"var(--mute)",opacity:.75},d)});
+  var med=78.5,p90=86.6,thr=1.25*med;
+  function mark(v,label,col,y,dy){
+    el("line",{x1:x(v),y1:y,x2:x(v),y2:150,stroke:col,"stroke-width":2,"stroke-dasharray":"5 4"},d);
+    var t=el("text",{x:x(v),y:y-8+(dy||0),"text-anchor":"middle",style:"font-size:12px;font-weight:600;fill:"+col},d);t.textContent=label}
+  mark(med,"mediana","var(--acc)",70);
+  mark(p90,"p90","var(--acc2)",44);
+  mark(thr,"1,25 × mediana","var(--warn)",70);
+  el("circle",{cx:x(104),cy:128,r:10,fill:"var(--bad)"},d);
+  var r=el("text",{x:x(104),y:106,"text-anchor":"middle",style:"font-size:12px;font-weight:700;fill:var(--bad)"},d);r.textContent="pasada con sobreconsumo";
+  var z=el("rect",{x:x(thr),y:210,width:X1-x(thr),height:6,rx:3,fill:"var(--bad)",opacity:.5},d);
+  var zt=el("text",{x:x(thr)+8,y:240,class:"m",style:"font-size:12px"},d);zt.textContent="zona de alerta: ≥ 1,25 × mediana  y  > p90";
+})();
+</script>
+</body>
+</html>
