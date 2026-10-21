@@ -121,8 +121,10 @@ class NotesMemory:
             "content_class": "summary",
             "metadata": {"externalId": self._external_id(alias)},
         })
-        if result and (result.get("stored_memory_ids") or result.get("updated_memory_ids")):
-            return
+        if result:
+            confirmed = [result.get("stored_memory_ids", []), result.get("updated_memory_ids", [])]
+            if all(isinstance(ids, list) and all(isinstance(id_, str) and id_ for id_ in ids) for ids in confirmed) and any(confirmed):
+                return
         # Sin ids (p. ej. texto idéntico): solo se confirma si el registro ya tiene ese contenido.
         found = self._find(alias)
         if not found or found.get("content") != content:

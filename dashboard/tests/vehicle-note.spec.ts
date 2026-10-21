@@ -132,3 +132,11 @@ test("sin notas configuradas en el servidor el panel no aparece ni pide clave", 
   await expect(page.locator('button.vehicle[data-alias="T07"]')).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("region", { name: /Nota revisada/ })).toHaveCount(0);
 });
+
+test("una respuesta inválida no rompe el dashboard ni se presenta como una nota vacía", async ({ page }) => {
+  await page.route(/\/v1\/vehicles\/T07\/note$/, route => route.fulfill({ json: { habilitada: true, nota: { texto: 42 } } }));
+  await abrir(page, "T07");
+  await expect(page.getByRole("region", { name: "Nota revisada de T07" }).getByRole("alert"))
+    .toHaveText("No se pudo leer la nota: respuesta inválida del servidor");
+  await expect(page.locator('button.vehicle[data-alias="T07"]')).toHaveAttribute("aria-pressed", "true");
+});
