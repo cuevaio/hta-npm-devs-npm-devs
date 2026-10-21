@@ -62,3 +62,32 @@ export async function readSnapshot(): Promise<Snapshot> {
   });
   return { fleet, replay, trips };
 }
+
+// Nota revisada (Atomic Memory, opcional): memoria compartida del operador de la flota. La clave de notas
+// la escribe el operador en pantalla y viaja en X-Notes-Key; nunca va en el build ni en el almacenamiento.
+export type VehicleNote = components["schemas"]["VehicleNote"];
+
+export class NoteError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+  }
+}
+
+async function note(method: "GET" | "PUT" | "DELETE", alias: string, key: string | null, body?: unknown): Promise<VehicleNote> {
+  const headers: Record<string, string> = {};
+  if (key) headers["X-Notes-Key"] = key;
+  if (body) headers["Content-Type"] = "application/json";
+  const res = await fetch(`${API_URL}/v1/vehicles/${encodeURIComponent(alias)}/note`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const json = await res.json().catch(() => null);
+  if (!res.ok) throw new NoteError(typeof json?.detail === "string" ? json.detail : `HTTP ${res.status}`, res.status);
+  return json as VehicleNote;
+}
+
+export const readVehicleNote = (alias: string, key: string | null) => note("GET", alias, key);
+export const saveVehicleNote = (alias: string, key: string, texto: string) =>
+  note("PUT", alias, key, { texto, consentimiento: true });
+export const deleteVehicleNote = (alias: string, key: string) => note("DELETE", alias, key);
