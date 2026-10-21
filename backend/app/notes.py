@@ -16,11 +16,16 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 from urllib import error, request
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlsplit
 
 SOURCE_SITE = "certera-dashboard"
 DEFAULT_TIMEOUT_MS = 2500
 MIN_TIMEOUT_MS, MAX_TIMEOUT_MS = 100, 5000  # cada llamada queda acotada aunque la variable venga mal
+
+
+class NoRedirect(request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
 
 
 class MemoryUnavailable(Exception):
@@ -51,7 +56,14 @@ def _prefix(alias: str) -> str:
 
 class NotesMemory:
     def __init__(self, api_url: str, subject: str, api_key: str | None = None, timeout_ms: int = DEFAULT_TIMEOUT_MS):
+        parsed = urlsplit(api_url)
+        loopback = parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+        if not parsed.hostname or parsed.username is not None or parsed.password is not None or parsed.query or parsed.fragment:
+            raise ValueError("ATOMICMEMORY_API_URL inválida")
+        if parsed.scheme != "https" and not (parsed.scheme == "http" and loopback):
+            raise ValueError("Atomic Memory requiere HTTPS, salvo en loopback")
         self.api_url = api_url.rstrip("/")
+        self._http = request.build_opener(NoRedirect())
         self.subject = subject
         self.api_key = api_key
         self.timeout = min(max(timeout_ms, MIN_TIMEOUT_MS), MAX_TIMEOUT_MS) / 1000
@@ -68,7 +80,10 @@ class NotesMemory:
             timeout = int(os.environ.get("ATOMICMEMORY_TIMEOUT_MS", DEFAULT_TIMEOUT_MS))
         except ValueError:
             timeout = DEFAULT_TIMEOUT_MS
-        return cls(url, subject, os.environ.get("ATOMICMEMORY_API_KEY") or None, timeout)
+        try:
+            return cls(url, subject, os.environ.get("ATOMICMEMORY_API_KEY") or None, timeout)
+        except ValueError:
+            return None
 
     def _external_id(self, alias: str) -> str:
         return f"certera-{self._ns}-nota-{alias}"
@@ -81,8 +96,8 @@ class NotesMemory:
         data = json.dumps(body).encode() if body is not None else None
         req = request.Request(f"{self.api_url}{path}", data=data, method=method, headers=headers)
         try:
-            with request.urlopen(req, timeout=self.timeout) as res:
-                if res.status != 200:
+            with self._http.open(req, timeout=self.timeout) as res:
+                if not 200 <= res.status < 300:
                     raise MemoryUnavailable(f"Atomic Memory respondió {res.status}")
                 payload = json.loads(res.read() or b"{}")
         except error.HTTPError as exc:
@@ -138,3 +153,5 @@ class NotesMemory:
             raise MemoryUnavailable("Atomic Memory devolvió una nota sin id")
         qs = urlencode({"user_id": self.subject})
         self._call("DELETE", f"/v1/memories/{quote(str(found['id']), safe='')}?{qs}")
+        if self._find(alias) is not None:
+            raise MemoryUnavailable("Atomic Memory no confirmó el borrado")

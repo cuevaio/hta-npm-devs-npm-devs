@@ -51,7 +51,7 @@ El operador puede dejar una nota revisada por vehículo (p. ej. "sobreconsumo de
 
 | Variable | Uso |
 |---|---|
-| `ATOMICMEMORY_API_URL` | URL de Atomic Memory / atomicmemory-core (sin `/v1`) |
+| `ATOMICMEMORY_API_URL` | URL HTTPS de Atomic Memory / atomicmemory-core (sin `/v1`; HTTP solo en loopback, sin credenciales en la URL) |
 | `ATOMICMEMORY_API_KEY` | Clave del proyecto (`Authorization: Bearer`), solo en el servidor |
 | `ATOMICMEMORY_SUBJECT` | Sujeto de la memoria, p. ej. `certera-flota-demo`. Lo fija el servidor; el navegador no lo elige |
 | `NOTES_API_KEY` | Clave del operador para leer, guardar y borrar notas (`X-Notes-Key`). Usa una distinta de `API_KEY` |
@@ -61,6 +61,7 @@ El operador puede dejar una nota revisada por vehículo (p. ej. "sobreconsumo de
 - Es **memoria compartida del operador de la flota**: un solo sujeto por despliegue, protegido con `NOTES_API_KEY`. No separa notas por persona. El dashboard pide la clave en pantalla y la guarda solo en memoria de la pestaña; no va en variables `VITE_*`.
 - `GET`/`PUT`/`DELETE /v1/vehicles/{alias}/note` exigen `X-Notes-Key` (401 si falta o es incorrecta). `PUT` exige además `consentimiento: true` y corrige la nota en su lugar (ingesta verbatim con `metadata.externalId`); `DELETE` la borra por id.
 - Si Atomic Memory falla, tarda más del límite o devuelve algo inválido, la API responde 503 con "No se guardó/leyó/borró la nota" y el resto de la API sigue igual.
+- Los redireccionamientos del proveedor se rechazan para evitar reenviar la credencial. El borrado se confirma leyendo de nuevo hasta obtener ausencia.
 - Tests: `tests/test_vehicle_notes.py` usa `tests/fake_atomicmemory.py`, un **fixture HTTP local** que imita las rutas de atomicmemory-core; no es el servicio real.
 
 ### Regenerar contrato y tipos

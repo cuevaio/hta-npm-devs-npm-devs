@@ -140,8 +140,7 @@ def test_malformed_provider_payload_is_a_failure_not_an_empty_note(memory, body)
 
     assert api.get(NOTE, headers=OP).status_code == 503
     assert api.put(NOTE, json=OK, headers=OP).status_code == 503
-    if body != b'{"id": "x", "content": 42}':  # con un id válido el borrado sí puede completarse
-        assert api.delete(NOTE, headers=OP).status_code == 503
+    assert api.delete(NOTE, headers=OP).status_code == 503
 
 
 def test_slow_provider_is_cut_at_the_timeout(memory):
@@ -175,3 +174,38 @@ def test_dashboard_reads_still_work_while_memory_is_down(memory):
     api = api_for(memory)
 
     assert api.get("/v1/alerts").status_code == 200
+
+
+def test_created_response_confirms_save_and_recall(memory):
+    memory.ingest_status = 201
+    api = api_for(memory)
+    assert api.put(NOTE, json=OK, headers=OP).status_code == 200
+    assert api.get(NOTE, headers=OP).json()["nota"]["texto"] == OK["texto"]
+
+
+@pytest.mark.parametrize("response", [{"success": False}, {}, {"success": True}])
+def test_delete_requires_record_to_be_absent(memory, response):
+    api = api_for(memory)
+    assert api.put(NOTE, json=OK, headers=OP).status_code == 200
+    memory.delete_body = response  # provider acknowledges without deleting the record
+    assert api.delete(NOTE, headers=OP).status_code == 503
+    assert api.get(NOTE, headers=OP).json()["nota"]["texto"] == OK["texto"]
+
+
+@pytest.mark.parametrize("url", ["http://example.com", "https://user:secret@example.com", "https://example.com?key=x", "file:///tmp/memory"])
+def test_invalid_provider_url_disables_optional_memory(monkeypatch, url):
+    monkeypatch.setenv("ATOMICMEMORY_API_URL", url)
+    monkeypatch.setenv("ATOMICMEMORY_SUBJECT", "flota-a")
+    assert NotesMemory.from_env() is None
+    assert TestClient(create_app()).get(NOTE).json() == {"habilitada": False, "nota": None}
+
+
+def test_redirect_never_reaches_another_server(memory):
+    other = FakeAtomicMemory().start()
+    try:
+        memory.redirect_to = other.url + "/redirected"
+        api = api_for(memory)
+        assert api.get(NOTE, headers=OP).status_code == 503
+        assert other.requests == []
+    finally:
+        other.stop()

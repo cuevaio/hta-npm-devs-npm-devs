@@ -20,6 +20,9 @@ class FakeAtomicMemory:
         self.fail_status: int | None = None
         self.raw_body: bytes | None = None  # responde 200 con este cuerpo tal cual (respuesta malformada)
         self.delay_s = 0.0
+        self.ingest_status = 200
+        self.delete_body: dict | None = None
+        self.redirect_to: str | None = None
         self.requests: list[tuple[str, str, dict | None]] = []
         self.server = ThreadingHTTPServer(("127.0.0.1", port), self._handler())
         self.url = f"http://127.0.0.1:{self.server.server_address[1]}"
@@ -56,6 +59,12 @@ class FakeAtomicMemory:
                 length = int(self.headers.get("Content-Length") or 0)
                 body = json.loads(self.rfile.read(length)) if length else None
                 fake.requests.append((method, url.path, body or qs))
+                if fake.redirect_to:
+                    self.send_response(302)
+                    self.send_header("Location", fake.redirect_to)
+                    self.send_header("Content-Length", "0")
+                    self.end_headers()
+                    return
                 if fake.delay_s:
                     time.sleep(fake.delay_s)
                 if fake.fail_status:
@@ -73,14 +82,16 @@ class FakeAtomicMemory:
                     found = fake._by_external(user, external)
                     if found:
                         found.update(content=body["conversation"], updated_at=now)
-                        return self._send(200, {"stored_memory_ids": [], "updated_memory_ids": [found["id"]]})
+                        return self._send(fake.ingest_status, {"stored_memory_ids": [], "updated_memory_ids": [found["id"]]})
                     mem = {"id": str(uuid.uuid4()), "content": body["conversation"], "created_at": now,
                            "metadata": body["metadata"]}
                     fake.memories.setdefault(user, {})[mem["id"]] = mem
-                    return self._send(200, {"stored_memory_ids": [mem["id"]], "updated_memory_ids": []})
+                    return self._send(fake.ingest_status, {"stored_memory_ids": [mem["id"]], "updated_memory_ids": []})
                 if method == "GET" and url.path.startswith("/v1/memories/by-external-id/"):
                     found = fake._by_external(qs.get("user_id", ""), unquote(parts[-1]))
                     return self._send(200, found) if found else self._send(404, {"error": "Memory not found"})
+                if method == "DELETE" and fake.delete_body is not None:
+                    return self._send(200, fake.delete_body)
                 if method == "DELETE" and len(parts) == 4 and parts[2] == "memories":
                     if fake.memories.get(qs.get("user_id", ""), {}).pop(unquote(parts[3]), None):
                         return self._send(200, {"success": True})
